@@ -4,3 +4,4 @@ node_modules/
 .sent-agent/
 *.log
 playwright-report/
+.claude/
