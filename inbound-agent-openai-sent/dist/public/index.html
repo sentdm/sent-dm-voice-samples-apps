@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <title>Sent inbound</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="console" aria-labelledby="page-title">
+      <header class="masthead">
+        <a class="brand" href="/" aria-label="Sent inbound home">
+          <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+          <span><strong>Sent</strong><small>/ inbound</small></span>
+        </a>
+        <div class="local-badge">LOCAL OPERATOR CONSOLE</div>
+      </header>
+
+      <section class="shell">
+        <aside class="rail" aria-label="Agent configuration">
+          <div class="section-heading">
+            <p class="eyebrow">01 / Credentials</p>
+            <h1 id="page-title">Answer inbound calls</h1>
+          </div>
+
+          <details id="credentials-panel" class="disclosure" open>
+            <summary>API keys <span id="credentials-status" class="disclosure-status">Not connected</span></summary>
+            <p class="subtle">Two keys stay in this local process. They are never saved in this browser.</p>
+            <form id="credentials-form" class="stack" autocomplete="off">
+              <label for="sent-key">Sent API key</label>
+              <input id="sent-key" name="sentKey" type="password" spellcheck="false" autocomplete="off" placeholder="sent_…" required />
+              <label for="openai-key">OpenAI API key</label>
+              <input id="openai-key" name="openaiKey" type="password" spellcheck="false" autocomplete="off" placeholder="sk-…" required />
+              <button id="connect-button" class="button secondary" type="submit">Connect keys</button>
+              <p id="credentials-note" class="field-note">Keys stay in server memory. You can also set SENT_DM_API_KEY and OPENAI_API_KEY before starting the app.</p>
+            </form>
+          </details>
+
+          <div class="divider"></div>
+
+          <form id="settings-form" class="stack" autocomplete="off">
+            <p class="eyebrow">02 / Inbound behavior</p>
+            <label for="number-select">Existing voice number</label>
+            <select id="number-select" name="number" disabled>
+              <option value="">Connect keys to discover numbers</option>
+            </select>
+            <p id="number-note" class="field-note">Only existing, active Sent voice numbers are available.</p>
+
+            <label for="model-select">Voice model</label>
+            <select id="model-select" name="model">
+              <option value="gpt-realtime-2.1">GPT-Realtime-2.1 · best tool use (recommended)</option>
+              <option value="gpt-realtime-2.1-mini">GPT-Realtime-2.1 Mini · ~3× cheaper audio, weaker tool use</option>
+              <option value="gpt-live-1">GPT-Live-1 · full-duplex, per-minute, no message/hang-up tools</option>
+            </select>
+
+            <label for="transcription-model-select">Caller transcription (Realtime)</label>
+            <select id="transcription-model-select" name="transcriptionModel">
+              <option value="gpt-live-transcribe">GPT-Live Transcribe · captions while the caller speaks (recommended)</option>
+              <option value="gpt-transcribe">GPT-Transcribe · text after each turn, ~4× cheaper</option>
+            </select>
+
+            <label for="backend-model-select">Text helper (GPT-Live)</label>
+            <select id="backend-model-select" name="backendModel">
+              <option value="gpt-6-luna">GPT-6 Luna · lowest cost (recommended)</option>
+              <option value="gpt-5.4-mini">GPT-5.4 Mini · fastest, previous generation</option>
+              <option value="gpt-6-sol">GPT-6 Sol · stronger reasoning, ~20× Luna’s price</option>
+              <option value="gpt-6-astra">GPT-6 Astra · most capable and slowest, ~100× Luna’s price</option>
+            </select>
+            <p id="model-note" class="field-note">Realtime models hear the call directly and can take messages and hang up. Caller transcription only feeds the dashboard.</p>
+
+            <label for="greeting-input">Greeting</label>
+            <input id="greeting-input" name="greeting" maxlength="600" value="Hi, thanks for calling Sent! I’m an AI assistant. What can I help you with?" />
+
+            <label for="instructions-input">Instructions</label>
+            <textarea id="instructions-input" name="instructions" rows="7" maxlength="5000">You answer the phone for Sent (sent.dm): one API for business messaging over SMS, WhatsApp, and RCS. Developers integrate once and reach customers on whichever channel works for them.
+
+Sound like a friendly person, not a script: keep most replies under 20 words, then let them talk. Plain words, one question at a time, and don’t narrate what you’re doing. You’re an AI assistant; say so if asked.
+
+You can explain what Sent does and mention docs.sent.dm when it helps. You can’t see accounts, pricing, or billing, so don’t guess or promise anything; say so briefly and offer to take a message. For a message, get their name, number, and what it’s about, in their own words.
+
+After saving a message, confirm the number and ask if there’s anything else. When they’re done, end the call.</textarea>
+          </form>
+
+          <div class="warning" role="note">
+            <strong>Before you start</strong>
+            <p>Starting temporarily replaces this number’s callback routing. Keep this browser tab open: it provides the local voice connection. Closing it stops answering.</p>
+          </div>
+
+          <div class="actions">
+            <button id="start-button" class="button primary" type="button" disabled>Start answering</button>
+            <button id="stop-button" class="button danger" type="button" disabled>Stop &amp; restore routing</button>
+            <button id="forget-backup-button" class="button secondary" type="button" hidden>Forget routing backup</button>
+          </div>
+        </aside>
+
+        <section class="stage" aria-label="Call monitor">
+          <div class="readiness-card">
+            <div class="status-dot" id="status-dot" aria-hidden="true"></div>
+            <div>
+              <p class="eyebrow">Readiness</p>
+              <p id="status-text" class="status-text" role="status">Checking local service…</p>
+            </div>
+            <dl class="facts">
+              <div><dt>Identity</dt><dd id="identity-value">—</dd></div>
+              <div><dt>Number</dt><dd id="active-number-value">—</dd></div>
+              <div class="callback-fact"><dt>Callback (set automatically)</dt><dd id="callback-value">—</dd></div>
+            </dl>
+          </div>
+
+          <div class="call-header">
+            <div>
+              <p class="eyebrow">Live call</p>
+              <h2 id="call-title">Waiting for a call</h2>
+              <p id="call-detail" class="subtle">Inbound calls will appear here after routing is active.</p>
+            </div>
+            <button id="hangup-button" class="button hangup" type="button" disabled>Hang up</button>
+          </div>
+
+          <section class="transcript-panel" aria-labelledby="transcript-title">
+            <div class="panel-title">
+              <h2 id="transcript-title">Transcript</h2>
+              <span id="transcript-state" class="mono">NO ACTIVE CALL</span>
+            </div>
+            <ol id="transcript-log" class="transcript-log" aria-live="polite">
+              <li class="empty-state">Conversation events and transcripts will be shown here.</li>
+            </ol>
+          </section>
+
+          <section class="event-panel" aria-labelledby="event-title">
+            <div class="panel-title">
+              <h2 id="event-title">Local event log</h2>
+              <span class="mono">LOCAL ONLY</span>
+            </div>
+            <ol id="event-log" class="event-log" aria-live="polite"></ol>
+          </section>
+        </section>
+      </section>
+    </main>
+    <audio id="remote-audio" muted aria-hidden="true"></audio>
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>

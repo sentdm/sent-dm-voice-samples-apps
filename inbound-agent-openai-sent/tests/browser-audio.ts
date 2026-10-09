@@ -1,0 +1,87 @@
+import assert from 'node:assert/strict';
+import { chromium } from 'playwright';
+import express from 'express';
+import http from 'node:http';
+import path from 'node:path';
+
+const app = express();
+app.get('/api/state', (_req, res) => res.json({ csrfToken: 'test-token', configured: false, numbers: [], phase: 'offline', identity: 'test-agent', model: 'gpt-realtime-2.1', greeting: 'Hi', instructions: '', events: [] }));
+app.use(express.static(path.resolve('dist/public')));
+const server = http.createServer(app);
+await new Promise<void>(resolve => server.listen(0, '127.0.0.1', resolve));
+const port = (server.address() as import('node:net').AddressInfo).port;
+const browser = await chromium.launch({ headless: true });
+const page = await browser.newPage();
+const errors: string[] = [];
+page.on('pageerror', e => errors.push(e.message));
+// tsx preserves function names with an injected helper; browser evaluation needs it too.
+await page.addInitScript('window.__name = (fn, name) => fn;');
+try {
+  await page.goto(`http://127.0.0.1:${port}/?audio-test=1`);
+  await page.waitForFunction(() => !!(window as any).__audioTest);
+  await page.evaluate(() => {
+    const button = document.createElement('button'); button.id = 'audio-start-test';
+    button.textContent = 'Initialize software microphone';
+    button.onclick = () => { (window as any).__audioReady = (window as any).__audioTest.initAudio().then(() => true); };
+    document.body.prepend(button);
+  });
+  await page.click('#audio-start-test');
+  await page.evaluate(async () => { await (window as any).__audioReady; });
+  const result = await page.evaluate(async () => {
+    const test = (window as any).__audioTest;
+    const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+    (window as any).__capturedFrames = [];
+    await test.initAudio();
+    await wait(140);
+    const silentFrames = ((window as any).__capturedFrames ?? []).slice();
+    const silent = silentFrames.every((frame: ArrayBuffer) => Array.from(new Int16Array(frame)).every(x => Math.abs(x) < 4));
+    const stream = test.softwareStream() as MediaStream;
+    const probeContext = new AudioContext({ sampleRate: 24000 });
+    await probeContext.resume();
+    const analyser = probeContext.createAnalyser(); analyser.fftSize = 2048;
+    const input = probeContext.createMediaStreamSource(stream); input.connect(analyser);
+    const silenceSink = probeContext.createGain(); silenceSink.gain.value = 0;
+    analyser.connect(silenceSink); silenceSink.connect(probeContext.destination);
+    const pcm = new Int16Array(24000 / 2);
+    for (let i = 0; i < pcm.length; i++) pcm[i] = Math.round(Math.sin(2 * Math.PI * 440 * i / 24000) * 12000);
+    test.enqueueAudio(pcm.buffer);
+    await wait(180);
+    const output = new Float32Array(analyser.fftSize); analyser.getFloatTimeDomainData(output);
+    const rms = Math.sqrt(output.reduce((sum, x) => sum + x * x, 0) / output.length);
+    const whileOutput = ((window as any).__capturedFrames ?? []).slice(-5);
+    const noEcho = whileOutput.every((frame: ArrayBuffer) => Array.from(new Int16Array(frame)).every(x => Math.abs(x) < 4));
+    test.clearAudio();
+    await wait(120); analyser.getFloatTimeDomainData(output);
+    const clearedRms = Math.sqrt(output.reduce((sum, x) => sum + x * x, 0) / output.length);
+    const remoteContext = new AudioContext({ sampleRate: 24000 }); await remoteContext.resume();
+    const remote = remoteContext.createMediaStreamDestination();
+    const oscillator = remoteContext.createOscillator(); oscillator.frequency.value = 660;
+    const gain = remoteContext.createGain(); gain.gain.value = 0.25;
+    oscillator.connect(gain); gain.connect(remote); oscillator.start();
+    test.attachRemoteStream(remote.stream);
+    await wait(220);
+    const captured = ((window as any).__capturedFrames ?? []).slice(-5);
+    const capturePeak = Math.max(0, ...captured.flatMap((frame: ArrayBuffer) => Array.from(new Int16Array(frame)).map(x => Math.abs(x))));
+    const frameBytes = captured.map((frame: ArrayBuffer) => frame.byteLength);
+    const clonedMic = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+    const cloneIsAudio = clonedMic.getAudioTracks().length === 1;
+    clonedMic.getTracks().forEach(t => t.stop());
+    const masterStillLive = stream.getAudioTracks()[0]?.readyState === 'live';
+    oscillator.stop(); await remoteContext.close(); await probeContext.close();
+    await test.shutdownAudio();
+    return { silent, silenceFrames: silentFrames.length, rms, noEcho, clearedRms, capturePeak, frameBytes, cloneIsAudio, masterStillLive };
+  });
+  assert.ok(result.silenceFrames >= 2, 'Silence must be paced continuously at the sample clock.');
+  assert.ok(result.silent, 'Before remote input, caller audio is silence.');
+  assert.ok(result.rms > 0.12, 'Generated model PCM must appear on the software microphone.');
+  assert.ok(result.noEcho, 'Generated model audio must not leak into caller capture.');
+  assert.ok(result.clearedRms < 0.01, 'Playback clear must remove queued audio.');
+  assert.ok(result.capturePeak > 1000, 'Remote media stream must produce captured caller PCM.');
+  assert.ok(result.frameBytes.every(n => n === 960), 'Caller frames must be mono PCM16 20ms at 24kHz (960 bytes).');
+  assert.ok(result.cloneIsAudio && result.masterStillLive, 'SDK microphone clones may stop without ending the master software source.');
+  assert.equal(errors.length, 0, `Browser errors: ${errors.join('; ')}`);
+  console.log('Browser audio integration passed:', JSON.stringify(result));
+} finally {
+  await browser.close();
+  await new Promise<void>(resolve => server.close(() => resolve()));
+}

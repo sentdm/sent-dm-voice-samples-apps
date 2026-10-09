@@ -1,0 +1,5 @@
+node_modules/
+.sent-agent/
+.env
+*.log
+playwright-report/

@@ -1,0 +1,995 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<title>How it works · Sent inbound agent</title>
+<style>
+:root {
+  --paper: #f5f4ef; --panel: #fffefa; --ink: #1a1c20; --muted: #63666d;
+  --line: #d7d6d0; --line-dark: #b8b7b0;
+  --cobalt: #2256bf; --cobalt-dark: #163b83; --cobalt-bg: #e9effb;
+  --amber: #b26a00; --amber-bg: #fff4d6;
+  --red: #a32920; --red-bg: #fff0ed;
+  --green: #16734c; --green-bg: #e7f3ec;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+* { box-sizing: border-box; }
+html { background: var(--paper); }
+body {
+  margin: 0; color: var(--ink); font: 15px/1.5 var(--sans);
+  background: linear-gradient(90deg, rgba(26, 28, 32, .025) 1px, transparent 1px) 0 0 / 40px 40px, var(--paper);
+}
+button, select { font: inherit; color: inherit; }
+.wrap { max-width: 1720px; margin: 0 auto; padding: 0 24px 24px; }
+
+/* Masthead — mirrors public/styles.css */
+.mast { min-height: 64px; border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+.brand { display: inline-flex; align-items: center; gap: 10px; letter-spacing: -.04em; font-size: 19px; }
+.brand small { color: var(--muted); font-size: 15px; letter-spacing: -.03em; margin-left: 4px; }
+.brand-mark { position: relative; display: inline-flex; width: 24px; height: 18px; align-items: center; justify-content: space-between; }
+.brand-mark::before, .brand-mark::after { content: ""; position: absolute; top: 8px; width: 21px; height: 1px; background: var(--ink); }
+.brand-mark::before { transform: rotate(32deg); }
+.brand-mark::after { transform: rotate(-32deg); }
+.brand-mark i { z-index: 1; width: 5px; height: 5px; display: block; background: var(--paper); border: 1px solid var(--ink); border-radius: 50%; }
+.badge { font: 11px/1.1 var(--mono); letter-spacing: .06em; color: var(--muted); border: 1px solid var(--line); padding: 7px 8px; }
+
+/* Chapters */
+.chapters { display: flex; overflow-x: auto; border-bottom: 1px solid var(--line); margin-bottom: 14px; scrollbar-width: none; }
+.chapters button { background: none; border: 0; border-bottom: 2px solid transparent; padding: 12px 13px 10px; font: 12px/1.2 var(--mono); letter-spacing: .03em; color: var(--muted); white-space: nowrap; cursor: pointer; }
+.chapters button b { color: var(--line-dark); font-weight: 600; margin-right: 6px; }
+.chapters button:hover { color: var(--ink); }
+.chapters button[aria-current="true"] { color: var(--ink); border-bottom-color: var(--cobalt); }
+.chapters button[aria-current="true"] b { color: var(--cobalt); }
+
+/* Layout */
+.layout { display: grid; grid-template-columns: minmax(0, 1fr) 440px; gap: 16px; align-items: start; }
+@media (max-width: 1180px) { .layout { grid-template-columns: 1fr; } .narr { position: static !important; max-height: none !important; } }
+.stage { background: var(--panel); border: 1px solid var(--line); }
+#diagram { display: block; width: 100%; height: auto; }
+.stage-foot { display: flex; flex-wrap: wrap; gap: 10px 22px; align-items: center; justify-content: space-between; border-top: 1px solid var(--line); padding: 10px 14px; }
+.phases { display: flex; align-items: center; gap: 5px; font: 11px/1 var(--mono); flex-wrap: wrap; }
+.phases .lbl { color: var(--muted); margin-right: 4px; letter-spacing: .08em; }
+.phases .ph { padding: 5px 7px; border: 1px solid var(--line); color: var(--muted); transition: background .25s, color .25s; }
+.phases .ph.on { background: var(--ink); color: var(--panel); border-color: var(--ink); }
+.phases i { width: 8px; height: 1px; background: var(--line-dark); }
+.legend { display: flex; gap: 14px; font: 11px/1 var(--mono); color: var(--muted); flex-wrap: wrap; }
+.legend span::before { content: ""; display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 6px; vertical-align: -1px; background: var(--c); }
+
+/* Narration */
+.narr { background: var(--panel); border: 1px solid var(--line); padding: 20px 22px 18px; position: sticky; top: 14px; max-height: calc(100vh - 28px); overflow: auto; }
+.kicker { display: flex; justify-content: space-between; gap: 10px; font: 11px/1.2 var(--mono); text-transform: uppercase; letter-spacing: .09em; color: var(--muted); }
+.kicker #chap { color: var(--cobalt); }
+.narr h2 { font-size: 22px; line-height: 1.22; letter-spacing: -.02em; margin: 12px 0 12px; }
+.narr .body p { margin: 0 0 10px; }
+.narr .body ul { margin: 0 0 10px; padding-left: 18px; }
+.narr .body li { margin-bottom: 5px; }
+.narr code { font: 12.5px var(--mono); background: #efeee8; padding: 1px 4px; }
+pre.payload { font: 11px/1.55 var(--mono); background: var(--ink); color: #e9e7df; padding: 12px 14px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; margin: 14px 0 12px; border-left: 3px solid var(--amber); }
+pre.payload:empty { display: none; }
+.refs { display: flex; flex-wrap: wrap; gap: 6px; }
+.refs a { font: 11px/1 var(--mono); color: var(--cobalt-dark); border: 1px solid var(--line); padding: 6px 7px; text-decoration: none; background: #fff; }
+.refs a:hover { border-color: var(--cobalt); }
+.dwell { height: 2px; background: var(--line); margin: 16px 0 0; overflow: hidden; }
+.dwell i { display: block; height: 100%; width: 0; background: var(--cobalt); }
+
+/* Controls */
+.controls { display: flex; align-items: center; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+.btn { border: 1px solid var(--line-dark); background: var(--panel); padding: 7px 11px; cursor: pointer; min-width: 40px; }
+.btn:hover { border-color: var(--ink); }
+.btn.primary { background: var(--ink); color: var(--panel); border-color: var(--ink); min-width: 92px; }
+.speed { border: 1px solid var(--line-dark); background: var(--panel); padding: 7px 6px; }
+.timeline { display: flex; gap: 3px; align-items: center; margin-top: 14px; }
+.timeline button { flex: 1; height: 8px; border: 0; padding: 0; background: var(--line); cursor: pointer; }
+.timeline button.done { background: var(--line-dark); }
+.timeline button.cur { background: var(--cobalt); }
+.timeline .gap { flex: 0 0 6px; }
+.hint { font: 11px/1.4 var(--mono); color: var(--muted); margin-top: 10px; }
+
+/* ---------- SVG ---------- */
+svg text { font-family: var(--sans); fill: var(--ink); }
+.region-label { font: 600 11px var(--mono); letter-spacing: .12em; fill: var(--muted); }
+.edge-label { font: 10px var(--mono); fill: var(--muted); letter-spacing: .02em; }
+.frame { fill: rgba(255, 254, 250, .72); stroke: var(--line-dark); }
+.frame-bar { fill: #ecebe5; }
+.frame-t { font: 11px var(--mono) !important; fill: var(--muted) !important; letter-spacing: .06em; }
+.node .box { fill: var(--panel); stroke: var(--line-dark); stroke-width: 1.2; transition: stroke .3s, stroke-width .3s; }
+.node .t { font-weight: 650; font-size: 15px; letter-spacing: -.01em; }
+.node .l { font: 11.5px var(--mono); fill: var(--muted); }
+.node .l.warm { fill: var(--amber); font-weight: 600; }
+.node .l.live { fill: var(--green); font-weight: 600; }
+.node .l.cob { fill: var(--cobalt); font-weight: 600; }
+.node { transition: opacity .35s; }
+.node.dim { opacity: .42; }
+.node.dim .box { stroke-dasharray: 4 4; }
+.node.lit .box { stroke: var(--cobalt); stroke-width: 2.2; filter: url(#glow); }
+.node.flash .box { stroke: var(--ink); stroke-width: 2.4; }
+.node.ringing .box { animation: ring .5s ease-in-out infinite alternate; }
+@keyframes ring { from { stroke: var(--line-dark); } to { stroke: var(--cobalt); stroke-width: 3; } }
+.pill rect { fill: #efeee8; }
+.pill text { font: 11px var(--mono); fill: var(--ink); }
+.pill.on rect { fill: var(--ink); }
+.pill.on text { fill: var(--panel); }
+.hb circle { fill: var(--line-dark); }
+.hb.on circle { fill: var(--green); animation: beat 1s ease-out infinite; transform-box: fill-box; transform-origin: center; }
+@keyframes beat { 0% { transform: scale(1); } 15% { transform: scale(1.6); } 30% { transform: scale(1); } }
+.edge { fill: none; stroke: var(--line-dark); stroke-width: 1.3; stroke-dasharray: 2 5; stroke-linecap: round; }
+.edge.hot { stroke-dasharray: none; stroke-width: 2.2; }
+.edge.dotted { stroke-dasharray: 1 4; }
+.pkt-t { font: 11px var(--mono) !important; fill: #fff !important; }
+.stamp, .bubble { transform-box: fill-box; transform-origin: center bottom; animation: pop .28s cubic-bezier(.2, 1.4, .4, 1); }
+.stamp text { font: 600 11px var(--mono) !important; fill: #fff !important; }
+.bubble text { font-size: 13.5px; }
+.bubble .who { font: 600 10px var(--mono); letter-spacing: .1em; }
+@keyframes pop { from { transform: scale(.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.q-bg { fill: #efeee8; }
+.q-cap { stroke: var(--red); stroke-width: 1.5; stroke-dasharray: 2 2; }
+@media (prefers-reduced-motion: reduce) {
+  .stamp, .bubble, .hb.on circle, .node.ringing .box { animation: none !important; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="mast">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span><strong>Sent</strong><small>/ inbound — how it works</small></span>
+    </div>
+    <div class="badge">ANIMATED WALKTHROUGH · v1.1.0</div>
+  </header>
+
+  <nav class="chapters" id="chapters" aria-label="Chapters"></nav>
+
+  <div class="layout">
+    <section class="stage" aria-label="Architecture diagram">
+      <svg id="diagram" viewBox="0 0 1280 720" role="img" aria-label="Animated architecture diagram of the Sent inbound agent">
+        <defs>
+          <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="#2256bf" flood-opacity=".35" />
+          </filter>
+        </defs>
+      </svg>
+      <div class="stage-foot">
+        <div class="phases" id="phases"><span class="lbl">SERVER PHASE</span></div>
+        <div class="legend">
+          <span style="--c: var(--cobalt)">caller audio</span>
+          <span style="--c: var(--amber)">agent audio / secrets</span>
+          <span style="--c: var(--ink)">control / HTTP</span>
+          <span style="--c: var(--green)">ok</span>
+          <span style="--c: var(--red)">blocked / cleared</span>
+        </div>
+      </div>
+    </section>
+
+    <aside class="narr" aria-live="polite">
+      <div class="kicker"><span id="chap"></span><span id="count"></span></div>
+      <h2 id="title"></h2>
+      <div class="body" id="body"></div>
+      <pre class="payload" id="payload"></pre>
+      <div class="refs" id="refs"></div>
+      <div class="dwell"><i id="dwell"></i></div>
+      <div class="controls">
+        <button class="btn" id="prev" title="Previous step (←)">◀</button>
+        <button class="btn primary" id="play" title="Play / pause (space)">❚❚ Pause</button>
+        <button class="btn" id="next" title="Next step (→)">▶</button>
+        <select class="speed" id="speed" aria-label="Speed">
+          <option value="0.5">0.5×</option><option value="0.75">0.75×</option>
+          <option value="1" selected>1×</option><option value="1.5">1.5×</option><option value="2">2×</option>
+        </select>
+      </div>
+      <div class="timeline" id="timeline"></div>
+      <p class="hint">← → step · space pause · 1–9 jump to chapter</p>
+    </aside>
+  </div>
+</div>
+
+<script>
+'use strict';
+/* =========================================================================
+   Sent inbound agent — animated walkthrough
+   Everything here is derived from src/, client/ and public/ in this repo.
+   ========================================================================= */
+
+// ─── Pacing ───────────────────────────────────────────────────────────────
+// How long a finished step lingers before autoplay moves on. Called once per
+// step after its animation completes; return milliseconds at 1× speed.
+// `step` has: title, body (HTML string), payload (string), beats, streams.
+function dwellTime(step) {
+  return 6000;
+}
+
+// ─── Tiny clock-driven animation runtime (pause + speed for free) ────────
+let clock = 0, lastT = performance.now(), frozen = false, speed = 1;
+const tickers = new Set();
+function loop(now) {
+  const dt = Math.min(50, now - lastT); lastT = now;
+  if (!frozen) clock += dt * speed;
+  for (const fn of Array.from(tickers)) if (tickers.has(fn) && fn(clock) === false) tickers.delete(fn);
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+const wait = (ms) => new Promise((res) => { const end = clock + ms; tickers.add((c) => (c >= end ? (res(), false) : true)); });
+const animate = (ms, fn) => new Promise((res) => {
+  const start = clock;
+  tickers.add((c) => { const t = Math.min(1, (c - start) / ms); fn(t); if (t >= 1) { res(); return false; } return true; });
+});
+const ease = (t) => (t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+
+// ─── SVG helpers ──────────────────────────────────────────────────────────
+const NS = 'http://www.w3.org/2000/svg';
+const svg = document.getElementById('diagram');
+function el(tag, attrs = {}, parent, text) {
+  const e = document.createElementNS(NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (text !== undefined) e.textContent = text;
+  if (parent) parent.appendChild(e);
+  return e;
+}
+function roundedPath(pts, r = 10) {
+  let d = `M${pts[0][0]},${pts[0][1]}`;
+  for (let i = 1; i < pts.length - 1; i++) {
+    const [x0, y0] = pts[i - 1], [x1, y1] = pts[i], [x2, y2] = pts[i + 1];
+    const d1 = Math.hypot(x1 - x0, y1 - y0), d2 = Math.hypot(x2 - x1, y2 - y1);
+    const rr = Math.min(r, d1 / 2, d2 / 2);
+    d += ` L${x1 + (x0 - x1) * rr / d1},${y1 + (y0 - y1) * rr / d1} Q${x1},${y1} ${x1 + (x2 - x1) * rr / d2},${y1 + (y2 - y1) * rr / d2}`;
+  }
+  const last = pts[pts.length - 1];
+  return d + ` L${last[0]},${last[1]}`;
+}
+const L = {};
+for (const k of ['bg', 'edges', 'nodes', 'fx', 'pkts']) L[k] = el('g', { class: 'layer-' + k }, svg);
+const COLORS = { ctrl: '#1a1c20', caller: '#2256bf', agent: '#b26a00', ok: '#16734c', bad: '#a32920' };
+
+// ─── Regions & containers ────────────────────────────────────────────────
+el('rect', { x: 12, y: 282, width: 1256, height: 430, rx: 4, fill: 'rgba(34,86,191,.035)', stroke: 'rgba(34,86,191,.28)', 'stroke-dasharray': '6 6' }, L.bg);
+el('text', { class: 'region-label', x: 1255, y: 270, 'text-anchor': 'end' }, L.bg, '▲ THE INTERNET');
+el('text', { class: 'region-label', x: 1255, y: 304, 'text-anchor': 'end' }, L.bg, '▼ YOUR COMPUTER');
+el('text', { class: 'edge-label', x: 1255, y: 320, 'text-anchor': 'end' }, L.bg, 'servers bind 127.0.0.1');
+function container(x, y, w, h, title) {
+  el('rect', { class: 'frame', x, y, width: w, height: h, rx: 6 }, L.bg);
+  el('path', { class: 'frame-bar', d: `M${x + .5},${y + 28} V${y + 6} Q${x + .5},${y + .5} ${x + 6},${y + .5} H${x + w - 6} Q${x + w - .5},${y + .5} ${x + w - .5},${y + 6} V${y + 28} Z` }, L.bg);
+  for (let i = 0; i < 3; i++) el('circle', { cx: x + 16 + i * 13, cy: y + 14, r: 4, fill: '#d7d6d0' }, L.bg);
+  el('text', { class: 'frame-t', x: x + 60, y: y + 18 }, L.bg, title);
+}
+container(30, 300, 560, 400, 'BROWSER TAB · http://localhost:3000 · client/app.ts');
+container(630, 300, 450, 400, 'NODE.JS PROCESS · pnpm start · src/server.ts');
+
+// ─── Nodes ────────────────────────────────────────────────────────────────
+const NODE = {}, T = {}, PILL = {};
+function node(id, x, y, w, h, title, lines = [], opts = {}) {
+  const g = el('g', { class: 'node', id: 'n-' + id }, L.nodes);
+  el('rect', { class: 'box', x, y, width: w, height: h, rx: opts.rx ?? 5 }, g);
+  el('text', { class: 't', x: x + 14, y: y + 26, style: opts.titleSize ? `font-size:${opts.titleSize}px` : '' }, g, title);
+  lines.forEach((ln, i) => {
+    const spec = typeof ln === 'string' ? { text: ln } : ln;
+    const t = el('text', { class: 'l', x: x + 14, y: y + 46 + i * (opts.lh ?? 17), style: opts.lineSize ? `font-size:${opts.lineSize}px` : '' }, g, spec.text ?? '');
+    if (spec.id) T[spec.id] = t;
+  });
+  NODE[id] = { g, x, y, w, h, cx: x + w / 2, cy: y + h / 2 };
+  return g;
+}
+function pill(id, x, y, parent) {
+  const g = el('g', { class: 'pill' }, parent);
+  const r = el('rect', { x, y, width: 40, height: 20, rx: 3 }, g);
+  const t = el('text', { x: x + 7, y: y + 14 }, g, '');
+  PILL[id] = { g, r, t };
+}
+function setPill(id, text, on) {
+  const p = PILL[id]; p.t.textContent = text;
+  p.r.setAttribute('width', p.t.getComputedTextLength() + 14);
+  p.g.classList.toggle('on', !!on);
+}
+
+// Internet
+node('phone', 30, 70, 120, 150, 'Caller', ['PSTN / mobile', { id: 'phone-st', text: 'idle' }], { rx: 18 });
+el('rect', { x: 75, y: 196, width: 30, height: 4, rx: 2, fill: '#d7d6d0' }, NODE.phone.g);
+node('sent', 250, 70, 260, 150, 'Sent cloud', ['+1 628 555 0199 · ACTIVE', { id: 'sent-cb', text: '' }, 'REST /v3 · push · WebRTC', 'identity routing'], { lh: 18 });
+node('cf', 640, 85, 240, 120, 'Cloudflare edge', ['quick tunnel · no account', { id: 'cf-url', text: '' }], { lh: 20 });
+node('openai', 1000, 70, 250, 150, 'OpenAI', ['wss  /v1/realtime · /v1/live', 'https /v1/models · /v1/responses', { id: 'oa-model', text: '' }], { lh: 18 });
+
+// Browser tab internals
+node('sdk', 55, 360, 140, 240, '@sentdm/voice', ['Sent browser SDK', 'WebRTC (Sinch)', '', { id: 'sdk-st', text: '' }, { id: 'sdk-id', text: '' }], { titleSize: 14 });
+node('remote', 225, 360, 160, 70, '<audio> muted', ['caller stream only'], { titleSize: 14 });
+node('mic', 225, 530, 160, 70, 'Software mic', ['Web Audio output', 'via getUserMedia()'], { titleSize: 14, lh: 15 });
+node('wk', 415, 360, 160, 130, 'AudioWorklet', ['24 kHz · 20 ms', 'Float32 ⇄ PCM16'], { titleSize: 14 });
+node('bridge', 415, 520, 160, 80, 'ModelBridge', ['WS → /bridge', 'binary PCM + JSON'], { titleSize: 14 });
+node('ui', 55, 625, 520, 55, 'Dashboard', [{ id: 'ui-st', text: '' }], { titleSize: 14 });
+T['ui-st'].setAttribute('y', 625 + 44);
+
+// Worklet playback queue meter
+const Q = { x: 429, y: 460, w: 132 };
+el('text', { class: 'l', x: Q.x, y: Q.y - 6, style: 'font-size:10px' }, NODE.wk.g, 'playback queue');
+el('rect', { class: 'q-bg', x: Q.x, y: Q.y, width: Q.w, height: 10, rx: 2 }, NODE.wk.g);
+const qFill = el('rect', { x: Q.x, y: Q.y, width: 0, height: 10, rx: 2, fill: COLORS.agent }, NODE.wk.g);
+el('line', { class: 'q-cap', x1: Q.x + Q.w * .9, x2: Q.x + Q.w * .9, y1: Q.y - 3, y2: Q.y + 13 }, NODE.wk.g);
+
+// Heartbeat indicator in the dashboard
+const hb = el('g', { class: 'hb' }, NODE.ui.g);
+el('text', { class: 'l', x: 488, y: 646, style: 'font-size:10px' }, hb, 'heartbeat');
+el('circle', { cx: 556, cy: 642, r: 5 }, hb);
+
+// Node.js process internals
+node('cfd', 655, 355, 150, 85, 'cloudflared', ['child process', { id: 'cfd-st', text: '' }], { titleSize: 14 });
+node('gw', 835, 355, 220, 85, 'Gateway · :random', ['/health · /voice/<nonce>', 'HMAC → decideInbound()'], { titleSize: 14 });
+node('mgmt', 655, 475, 210, 205, 'Management · :3000', ['/api/*  Host·Origin·CSRF', '/bridge  WS + token', 'watchdog  beat < 7 s'], { titleSize: 14 });
+pill('phase', 669, 580, NODE.mgmt.g);
+pill('keys', 669, 608, NODE.mgmt.g);
+pill('calls', 669, 636, NODE.mgmt.g);
+node('oai', 895, 475, 160, 95, 'OpenAI adapter', ['src/openai.ts', '1 session per call'], { titleSize: 14 });
+node('disk', 1100, 560, 155, 130, 'Disk', ['.sent-agent/', 'routing-backup.json', { id: 'disk-1', text: '' }, { id: 'disk-2', text: '' }, { id: 'disk-3', text: '' }], { lineSize: 10.5, lh: 15 });
+
+// ─── Edges (two lanes where traffic flows both ways) ─────────────────────
+const E = {};
+function edge(id, def, cls = '') {
+  E[id] = el('path', { class: 'edge ' + cls, d: typeof def === 'string' ? def : roundedPath(def) }, L.edges);
+}
+edge('phone>sent', [[150, 132], [250, 132]]);
+edge('sent>phone', [[250, 158], [150, 158]]);
+edge('sent>cf', [[510, 128], [640, 128]]);
+edge('cf>sent', [[640, 162], [510, 162]]);
+edge('cf>cfd', [[722, 205], [722, 355]]);
+edge('cfd>cf', [[738, 355], [738, 205]]);
+edge('cfd>gw', [[805, 390], [835, 390]]);
+edge('gw>cfd', [[835, 406], [805, 406]]);
+edge('sent>sdk', 'M300,220 C300,300 117,290 117,360');
+edge('sdk>sent', 'M133,360 C133,305 316,305 316,220');
+edge('mgmt>sent', [[655, 500], [615, 500], [615, 250], [478, 250], [478, 220]]);
+edge('sent>mgmt', [[462, 220], [462, 262], [603, 262], [603, 512], [655, 512]]);
+edge('bridge>mgmt', [[575, 552], [655, 552]]);
+edge('mgmt>bridge', [[655, 568], [575, 568]]);
+edge('ui>mgmt', [[575, 645], [655, 645]]);
+edge('mgmt>ui', [[655, 662], [575, 662]]);
+edge('mgmt>oai', [[865, 505], [895, 505]]);
+edge('oai>mgmt', [[895, 521], [865, 521]]);
+edge('oai>openai', [[1055, 500], [1092, 500], [1092, 220]]);
+edge('openai>oai', [[1108, 220], [1108, 530], [1055, 530]]);
+edge('mgmt>disk', [[865, 640], [1100, 640]]);
+edge('mgmt>cfd', [[700, 475], [700, 440]]);
+edge('gw>mgmt', [[850, 440], [850, 475]], 'dotted');
+edge('sdk>remote', [[195, 395], [225, 395]]);
+edge('remote>wk', [[385, 395], [415, 395]]);
+edge('wk>bridge', [[487, 490], [487, 520]]);
+edge('bridge>wk', [[503, 520], [503, 490]]);
+edge('wk>mic', [[415, 470], [400, 470], [400, 565], [385, 565]]);
+edge('mic>sdk', [[225, 565], [195, 565]]);
+
+const eLabel = (x, y, t, a = 'start') => el('text', { class: 'edge-label', x, y, 'text-anchor': a }, L.bg, t);
+eLabel(488, 243, 'REST · x-api-key');
+eLabel(746, 252, 'quick tunnel');
+eLabel(36, 252, 'push · WebRTC media');
+eLabel(1118, 390, 'WSS / HTTPS');
+eLabel(975, 633, 'fs · mode 0600', 'middle');
+eLabel(856, 463, 'shared state');
+eLabel(706, 463, 'spawn');
+
+function edgeFor(a, b) {
+  if (E[a + '>' + b]) return { p: E[a + '>' + b], rev: false };
+  if (E[b + '>' + a]) return { p: E[b + '>' + a], rev: true };
+  return null;
+}
+const hotCount = new Map();
+function heat(p, color) { hotCount.set(p, (hotCount.get(p) || 0) + 1); p.classList.add('hot'); p.style.stroke = color; }
+function cool(p) {
+  const n = (hotCount.get(p) || 1) - 1;
+  if (n <= 0) { hotCount.delete(p); p.classList.remove('hot'); p.style.stroke = ''; } else hotCount.set(p, n);
+}
+function resetEdges() { hotCount.clear(); for (const p of Object.values(E)) { p.classList.remove('hot'); p.style.stroke = ''; } }
+
+// ─── Effects: packets, stamps, bubbles, queue ────────────────────────────
+function flashNode(id) {
+  const n = NODE[id]; if (!n) return;
+  n.g.classList.add('flash'); setTimeout(() => n.g.classList.remove('flash'), 450);
+}
+function travel(from, to, { label, c = 'ctrl', small = false, rate } = {}) {
+  const ed = edgeFor(from, to);
+  if (!ed) { console.warn('No edge', from, to); return Promise.resolve(); }
+  const len = ed.p.getTotalLength();
+  const dur = Math.max(small ? 240 : 560, len / (rate ?? (small ? .42 : .3)));
+  const color = COLORS[c] ?? c;
+  const g = el('g', {}, L.pkts);
+  const dot = el('circle', { r: small ? 4.2 : 6.5, fill: color, stroke: '#fffefa', 'stroke-width': 2 }, g);
+  let lab, lw = 0;
+  if (label) {
+    lab = el('g', {}, g);
+    const r = el('rect', { x: 0, y: -13, height: 19, rx: 3, fill: color }, lab);
+    const t = el('text', { class: 'pkt-t', x: 6, y: 1 }, lab, label);
+    lw = t.getComputedTextLength() + 12; r.setAttribute('width', lw);
+  }
+  heat(ed.p, color);
+  return animate(dur, (t) => {
+    const e = small ? t : ease(t);
+    const pt = ed.p.getPointAtLength((ed.rev ? 1 - e : e) * len);
+    dot.setAttribute('cx', pt.x); dot.setAttribute('cy', pt.y);
+    if (lab) {
+      const x = Math.max(6, Math.min(1274 - lw, pt.x + 11));
+      const y = Math.max(16, Math.min(706, pt.y - 12));
+      lab.setAttribute('transform', `translate(${x},${y})`);
+    }
+  }).then(() => { g.remove(); cool(ed.p); if (!small) flashNode(to); });
+}
+async function travelRoute(route, c, rate) {
+  for (let i = 0; i < route.length - 1; i++) await travel(route[i], route[i + 1], { c, small: true, rate });
+}
+const stampStack = {};
+function stamp(id, text, c = 'ok') {
+  const n = NODE[id]; if (!n) return Promise.resolve();
+  const k = (stampStack[id] = (stampStack[id] || 0) + 1) - 1;
+  const g = el('g', { class: 'stamp' }, L.fx);
+  const r = el('rect', { y: 0, height: 20, rx: 3, fill: COLORS[c] ?? c }, g);
+  const t = el('text', { x: 7, y: 14 }, g, text);
+  const w = t.getComputedTextLength() + 14; r.setAttribute('width', w);
+  const x = Math.max(6, Math.min(1274 - w, n.x + n.w - w + 8));
+  const y = Math.max(4, n.y - 11 - k * 23);
+  g.setAttribute('transform', `translate(${x},${y})`);
+  wait(2800).then(() => { g.remove(); stampStack[id] = Math.max(0, (stampStack[id] || 1) - 1); });
+  return wait(520);
+}
+const bubbles = {};
+function say(who, text) {
+  bubbles[who]?.remove();
+  const g = el('g', { class: 'bubble ' + who }, L.fx);
+  const color = who === 'caller' ? COLORS.caller : COLORS.agent;
+  const bg = who === 'caller' ? '#e9effb' : '#fff4d6';
+  const r = el('rect', { y: 12, height: 40, rx: 20, fill: bg, stroke: color, 'stroke-width': 1.3 }, g);
+  const tx = el('text', { y: 37 }, g);
+  el('tspan', { class: 'who', fill: color }, tx, who === 'caller' ? 'CALLER  ' : 'AI AGENT  ');
+  el('tspan', {}, tx, text);
+  const w = tx.getComputedTextLength() + 34;
+  const x = who === 'caller' ? 30 : 1252 - w;
+  r.setAttribute('x', x); r.setAttribute('width', w); tx.setAttribute('x', x + 17);
+  const tipX = who === 'caller' ? x + 50 : x + w - 110;
+  el('path', { d: `M${tipX},51 l8,12 l6,-12`, fill: bg, stroke: color, 'stroke-width': 1.3, 'stroke-linejoin': 'round' }, g);
+  el('rect', { x: tipX - 1, y: 49, width: 17, height: 3, fill: bg }, g);
+  bubbles[who] = g;
+  return wait(300);
+}
+function setQueue(v) { S.queue = v; qFill.setAttribute('width', Q.w * v); qFill.setAttribute('fill', v > .88 ? COLORS.bad : COLORS.agent); }
+function queueTo(target, ms) {
+  const from = S.queue;
+  return animate(ms, (t) => setQueue(from + (target - from) * ease(t)));
+}
+function startStream({ route, c, every = 420, delay = 0, rate }) {
+  let next = clock + delay;
+  tickers.add((now) => { if (now >= next) { next = now + every; travelRoute(route, c, rate); } return true; });
+}
+function burst(route, c, n, every) {
+  return (async () => { for (let i = 0; i < n; i++) { travelRoute(route, c); await wait(every); } })();
+}
+
+// ─── Persistent state (folded from steps so any step can be jumped to) ───
+const INITIAL = { phase: 'offline', keys: false, cb: 'prev', tunnel: false, reg: false, audio: false, bridge: false, hb: false, call: 'idle', ui: 'Enter a Sent key and an OpenAI key to begin', disk: null, mode: 'realtime', queue: 0 };
+const S = { ...INITIAL };
+const PHASES = ['offline', 'preparing', 'prepared', 'activating', 'answering', 'stopping'];
+const phasesEl = document.getElementById('phases');
+PHASES.forEach((p, i) => {
+  if (i) phasesEl.appendChild(document.createElement('i'));
+  const s = document.createElement('span'); s.className = 'ph'; s.dataset.ph = p; s.textContent = p; phasesEl.appendChild(s);
+});
+
+function render() {
+  phasesEl.querySelectorAll('.ph').forEach((p) => p.classList.toggle('on', p.dataset.ph === S.phase));
+  T['sent-cb'].textContent = S.cb === 'ours' ? 'callback → tunnel /voice/9c1e…' : 'callback → hooks.example.com/voice';
+  T['sent-cb'].setAttribute('class', 'l' + (S.cb === 'ours' ? ' warm' : ''));
+  T['cf-url'].textContent = S.tunnel ? 'calm-fox-17.trycloudflare.com' : '— no tunnel running —';
+  T['cf-url'].setAttribute('class', 'l' + (S.tunnel ? ' live' : ''));
+  T['cfd-st'].textContent = S.tunnel ? '● running' : 'not running';
+  T['cfd-st'].setAttribute('class', 'l' + (S.tunnel ? ' live' : ''));
+  T['sdk-st'].textContent = S.reg ? '● registered' : 'not registered';
+  T['sdk-st'].setAttribute('class', 'l' + (S.reg ? ' live' : ''));
+  T['sdk-id'].textContent = S.reg ? 'sent-ai-3fa9c1…' : '';
+  T['oa-model'].textContent = S.mode === 'live' ? 'gpt-live-1 + gpt-6-luna helper' : 'gpt-realtime-2.1 · server VAD';
+  T['oa-model'].setAttribute('class', 'l cob');
+  T['phone-st'].textContent = { idle: 'idle', ringing: 'ringing…', connected: '● on call' }[S.call];
+  T['phone-st'].setAttribute('class', 'l' + (S.call === 'connected' ? ' cob' : ''));
+  T['ui-st'].textContent = S.ui;
+  const disk = { null: ['', '', ''], pre: ['prev  hooks.example.com', 'mine  …/voice/9c1e', 'secret (pending)'], full: ['prev  hooks.example.com', 'mine  …/voice/9c1e', 'secret whsec_…'] }[S.disk];
+  ['disk-1', 'disk-2', 'disk-3'].forEach((id, i) => { T[id].textContent = disk[i]; T[id].setAttribute('class', 'l warm'); });
+  setPill('phase', 'phase: ' + S.phase, S.phase === 'answering');
+  setPill('keys', S.keys ? 'keys: in RAM only' : 'keys: —', false);
+  setPill('calls', S.bridge ? 'active call: 1 / 1' : 'active call: none', false);
+  const dim = { cf: !S.tunnel, cfd: !S.tunnel, sdk: !S.reg, remote: !S.audio, wk: !S.audio, mic: !S.audio, bridge: !S.bridge, disk: !S.disk };
+  for (const id in NODE) NODE[id].g.classList.toggle('dim', !!dim[id]);
+  NODE.phone.g.classList.toggle('ringing', S.call === 'ringing');
+  hb.classList.toggle('on', S.hb);
+  setQueue(S.queue);
+}
+
+// ─── The story ────────────────────────────────────────────────────────────
+const CALLER = ['phone', 'sent', 'sdk', 'remote', 'wk', 'bridge', 'mgmt', 'oai', 'openai'];
+const AGENT = ['openai', 'oai', 'mgmt', 'bridge', 'wk', 'mic', 'sdk', 'sent', 'phone'];
+const h = (from, to, label, c = 'ctrl') => ({ from, to, label, c });
+const LIVE_VIEW = { phase: 'answering', keys: true, cb: 'ours', tunnel: true, reg: true, audio: true, bridge: true, hb: true, call: 'connected', disk: 'full' };
+
+const CHAPTERS = ['Overview', 'Connect keys', 'Start answering', 'A call arrives', 'The audio loop', 'Barge-in', 'GPT-Live mode', 'Stop & restore', 'Security model'];
+
+const STEPS = [
+  // ── 0 · Overview ──────────────────────────────────────────────────────
+  {
+    ch: 0, title: 'A browser tab becomes the phone, and an AI answers it',
+    view: { ...LIVE_VIEW, ui: 'caller: Hi, are you open on Sundays?' },
+    lit: ['sdk', 'wk', 'mic', 'mgmt'],
+    streams: [{ route: CALLER, c: 'caller', every: 640 }, { route: AGENT, c: 'agent', every: 640, delay: 2600 }],
+    beats: [{ say: 'caller', text: 'Hi, are you open on Sundays?' }, { wait: 2600 }, { say: 'agent', text: 'Yes! We’re open 10 to 4 on Sundays.' }, { wait: 2400 }],
+    body: `<p>This is a <b>local prototype</b> that answers calls to an existing Sent number with an OpenAI voice model. There is no hosted backend: a Node server and one Chrome/Edge tab on your computer do everything.</p>
+      <p>Three ideas carry the design:</p>
+      <ul><li><b>The browser is the phone.</b> The <code>@sentdm/voice</code> SDK registers the tab as a Sent user, so calls ring there.</li>
+      <li><b>A software microphone.</b> When the SDK asks for a mic, it gets the AI's voice instead.</li>
+      <li><b>Two servers, two doors.</b> A localhost-only dashboard and a tiny public callback gateway.</li></ul>
+      <p>This is the finished loop. The rest of the tour builds it one step at a time.</p>`,
+    payload: 'caller ⇄ Sent ⇄ @sentdm/voice (browser tab)\n                   ⇅  AudioWorklet · 24 kHz PCM16\n        local server ⇄ OpenAI Realtime / Live',
+    refs: ['README.md', 'plan.md'],
+  },
+
+  // ── 1 · Connect keys ──────────────────────────────────────────────────
+  {
+    ch: 1, title: 'Two keys go to the local server and stay there',
+    lit: ['ui', 'mgmt'],
+    beats: [[h('ui', 'mgmt', 'POST /api/configure')], [{ stamp: 'mgmt', text: 'Host · Origin · CSRF ✓' }]],
+    body: `<p>You paste a Sent API key and an OpenAI API key into the dashboard. The page posts them to the local <b>management server</b>.</p>
+      <p>Every non-GET request must target <code>localhost</code>, have a matching <code>Origin</code>, and carry a per-process CSRF token the page read from <code>/api/state</code>. The keys stay in server memory only: never in <code>localStorage</code>, <code>.env</code>, or the backup file.</p>`,
+    payload: 'POST /api/configure\nHost: localhost:3000\nOrigin: http://localhost:3000\nx-csrf-token: 9f2c…e41a\n\n{ "sentKey": "sent_live_…", "openaiKey": "sk-proj-…" }',
+    refs: ['src/server.ts:106', 'src/server.ts:127'],
+  },
+  {
+    ch: 1, title: 'Discover existing voice numbers (never buy one)',
+    lit: ['mgmt', 'sent'],
+    beats: [[h('mgmt', 'sent', 'GET /v3/channels/voice')], [h('sent', 'mgmt', '200 · numbers[]', 'ok')], [{ set: { ui: 'Number +1 628 555 0199 (default) selected' } }]],
+    body: `<p>The server lists the account's voice numbers, keeps only those with status <code>ACTIVE</code>, and pre-selects the one flagged <code>default_for_app_calls</code>.</p>
+      <p>It <b>never buys or allocates</b> a number. If there are no active numbers, it stops with an error telling you to enable voice in Sent first.</p>`,
+    payload: 'GET /v3/channels/voice      x-api-key: sent_live_…\n\n[{ "number": "+16285550199",\n   "status": "ACTIVE",\n   "default_for_app_calls": true,\n   "callback_url": "https://hooks.example.com/voice" }]',
+    refs: ['src/sent.ts:15', 'src/server.ts:132'],
+  },
+  {
+    ch: 1, title: 'Check the OpenAI key, then look for a crashed session',
+    lit: ['mgmt', 'openai', 'disk'],
+    beats: [[h('mgmt', 'oai')], [h('oai', 'openai', 'GET /v1/models')], [h('openai', 'oai', '200 OK', 'ok')], [h('oai', 'mgmt')],
+      [h('mgmt', 'disk', 'read backup?')], [{ stamp: 'disk', text: 'none: clean start' }],
+      [{ set: { keys: true, ui: 'Keys validated · active voice numbers loaded' } }]],
+    body: `<p>A cheap <code>GET /v1/models</code> proves the OpenAI key works before anything else happens.</p>
+      <p>Then a crash check: if an earlier run died and left <code>.sent-agent/routing-backup.json</code>, the server restores that number's old callback <b>right away</b>, before it allows a new Start. In this example the disk is clean.</p>`,
+    payload: 'GET https://api.openai.com/v1/models\nAuthorization: Bearer sk-proj-…        → 200\n\nif (backup) await restoreBackup(candidate);',
+    refs: ['src/server.ts:135', 'src/server.ts:140', 'src/backup.ts:9'],
+  },
+
+  // ── 2 · Start answering ───────────────────────────────────────────────
+  {
+    ch: 2, title: 'Inside the click: an audio graph and a patched getUserMedia',
+    lit: ['wk', 'mic', 'remote', 'sdk'],
+    beats: [[{ set: { audio: true } }], [{ stamp: 'wk', text: 'AudioContext · 24 kHz' }], [{ stamp: 'mic', text: 'getUserMedia patched', c: 'agent' }], [{ stamp: 'ui', text: 'notification permission ✓' }], { wait: 600 }],
+    body: `<p>Browsers only start audio inside a user gesture, so clicking <b>Start answering</b> synchronously creates a 24 kHz <code>AudioContext</code>, loads the AudioWorklet, and requests notification permission (Sent delivers incoming calls by push).</p>
+      <p>Then comes the key trick: <code>navigator.mediaDevices.getUserMedia</code> is replaced. Any audio-only request now gets a clone of a Web Audio <code>MediaStreamDestination</code>. When the Sent SDK later asks for the microphone, it gets the AI's voice. Your real microphone is never opened.</p>`,
+    payload: 'mediaDevices.getUserMedia = async (constraints) => {\n  const audioOnly = !!constraints?.audio && !constraints?.video;\n  if (!audioOnly) return nativeGetUserMedia(constraints);\n  // clone, so the SDK can\'t stop the master track\n  return softwareDestination.stream.clone();\n};',
+    refs: ['client/app.ts:862', 'client/app.ts:89', 'client/app.ts:127'],
+  },
+  {
+    ch: 2, title: 'Preflight: can this key open the chosen voice model?',
+    state: { phase: 'preparing', ui: 'Checking gpt-realtime-2.1 voice-session access…' },
+    lit: ['oai', 'openai'],
+    beats: [[h('ui', 'mgmt', 'POST /api/prepare')], [h('mgmt', 'oai', 'preflight()')], [h('oai', 'openai', 'WSS /v1/realtime')], [h('oai', 'openai', 'session.update')],
+      [h('openai', 'oai', 'session.updated', 'ok')], [{ stamp: 'oai', text: 'model access ✓' }], [h('oai', 'openai', 'close')]],
+    body: `<p>Before touching any routing, the server opens a <b>real</b> voice session and immediately closes it. If your OpenAI project can't use the selected model, Start fails here and nothing has changed.</p>
+      <p>The app never silently falls back to a different model. You pick GPT-Realtime-2.1 (default), its Mini variant, or GPT-Live-1 explicitly.</p>`,
+    payload: '{ "type": "session.update", "session": {\n    "type": "realtime", "model": "gpt-realtime-2.1",\n    "output_modalities": ["audio"],\n    "audio": {\n      "input":  { "format": { "type": "audio/pcm", "rate": 24000 },\n                  "turn_detection": { "type": "server_vad", … },\n                  "transcription": { "model": "gpt-live-transcribe" } },\n      "output": { "voice": "marin" } } } }',
+    refs: ['src/server.ts:163', 'src/openai.ts:179', 'src/openai.ts:42'],
+  },
+  {
+    ch: 2, title: 'Open a callback-only Cloudflare tunnel',
+    lit: ['cfd', 'cf', 'gw'],
+    beats: [[h('mgmt', 'cfd', 'spawn')], [{ set: { tunnel: true } }, h('cfd', 'cf', 'dial out · http2')], [{ stamp: 'cf', text: 'public URL assigned' }],
+      [h('cf', 'cfd', 'GET /health')], [h('cfd', 'gw')], [h('gw', 'cfd', '200 {ok:true}', 'ok')], [h('cfd', 'cf')],
+      [{ set: { phase: 'prepared', ui: 'Tunnel ready · number routing still unchanged' } }, { stamp: 'gw', text: 'reachable ✓' }]],
+    body: `<p>The server runs <code>cloudflared</code> to create a <b>quick tunnel</b> (no account, no key) that points only at the <b>gateway</b>, a second Express app on a random localhost port.</p>
+      <p>It generates an unguessable callback path (<code>/voice/</code> + 48 hex characters) and health-checks the public URL end to end. The phone number's routing still hasn't been touched.</p>`,
+    payload: 'tunnel      = Tunnel.quick("http://127.0.0.1:<gatewayPort>")\ncallbackPath = "/voice/" + randomBytes(24).toString("hex")\ncallbackUrl  = "https://calm-fox-17.trycloudflare.com/voice/9c1e…a07f"',
+    refs: ['src/tunnel.ts:4', 'src/server.ts:165'],
+  },
+  {
+    ch: 2, title: 'Register the browser as a Sent user',
+    lit: ['sdk', 'sent'],
+    beats: [[h('ui', 'mgmt', 'POST /api/voice-token')], [h('mgmt', 'sent', 'POST /v3/channels/voice/tokens')], [h('sent', 'mgmt', '{ token } · ttl 600 s', 'ok')],
+      [h('mgmt', 'ui', 'token')], [{ flash: 'sdk' }], [h('sdk', 'sent', 'register(token)')], [{ set: { reg: true } }, { stamp: 'sdk', text: 'registered ✓' }]],
+    body: `<p>The SDK's <code>tokenProvider</code> asks the local server for a voice token. The server mints one from Sent for a <b>fresh random identity</b> created at startup (<code>sent-ai-</code> + 12 hex characters), valid for 10 minutes.</p>
+      <p>The browser only ever sees this short-lived token, never your API keys. The SDK then registers with Sent, so calls routed to that identity ring in this tab.</p>`,
+    payload: 'POST /v3/channels/voice/tokens\n{ "identity": "sent-ai-3fa9c1e07b2d",\n  "number":   "+16285550199",\n  "ttl":      600 }',
+    refs: ['client/app.ts:667', 'src/server.ts:174', 'src/sent.ts:24'],
+  },
+  {
+    ch: 2, title: 'Heartbeat: proof the tab is still alive',
+    lit: ['ui', 'mgmt'],
+    streams: [{ route: ['ui', 'mgmt'], c: 'ok', every: 1000 }],
+    beats: [[{ set: { hb: true } }], [{ stamp: 'mgmt', text: 'online: last beat < 7 s' }], { wait: 2600 }],
+    body: `<p>Every 2 seconds the page posts <code>{ registered, busy }</code>. The server treats the browser as <b>online</b> only if the last heartbeat is under 7 seconds old.</p>
+      <p>A watchdog checks every 2 seconds. If routing is live and the tab goes quiet (closed, crashed, laptop asleep), the server stops and restores routing on its own.</p>`,
+    payload: 'POST /api/heartbeat   { "registered": true, "busy": false }   // every 2 s\n\nonline = registered && Date.now() - heartbeat < 7000',
+    refs: ['client/app.ts:597', 'src/server.ts:179', 'src/server.ts:266'],
+  },
+  {
+    ch: 2, title: 'Back up first, then reroute the number',
+    state: { phase: 'activating', ui: 'Activating inbound routing…' },
+    lit: ['mgmt', 'sent', 'disk'],
+    beats: [[h('ui', 'mgmt', 'POST /api/activate')], [h('mgmt', 'sent', 'GET …/voice/+16285550199')], [h('sent', 'mgmt', 'callback: hooks.example.com', 'ok')],
+      [h('mgmt', 'disk', 'save backup', 'agent')], [{ set: { disk: 'pre' } }, { stamp: 'disk', text: 'written BEFORE any change', c: 'agent' }],
+      [h('mgmt', 'sent', 'POST /v3/channels/voice')], [{ set: { cb: 'ours' } }, { stamp: 'sent', text: 'callback → tunnel', c: 'agent' }],
+      [h('sent', 'mgmt', 'callback_secret: whsec_…', 'agent')], [h('mgmt', 'disk', 'save secret', 'agent')], [{ set: { disk: 'full', phase: 'answering' } }]],
+    body: `<p>Activation is refused unless the browser is registered, heartbeating, and the tunnel is up.</p>
+      <p>The server reads the number's current callback, <b>writes a backup to disk before changing anything</b>, then calls Sent's documented add-existing-number operation with the tunnel URL. The response includes the number's HMAC callback secret (not rotated), which is saved to the backup too.</p>`,
+    payload: '// .sent-agent/routing-backup.json  (mode 0600)\n{ "number":       "+16285550199",\n  "previousUrl":    "https://hooks.example.com/voice",\n  "installedUrl":   "https://calm-fox-17.trycloudflare.com/voice/9c1e…",\n  "callbackSecret": "whsec_…" }',
+    refs: ['src/server.ts:184', 'src/server.ts:194', 'src/sent.ts:18'],
+  },
+  {
+    ch: 2, title: 'Self-test the whole public route',
+    lit: ['gw', 'sent'],
+    beats: [[h('mgmt', 'sent', 'POST …/test')], [h('sent', 'cf', 'call.request · test')], [h('cf', 'cfd')], [h('cfd', 'gw')], [{ stamp: 'gw', text: 'HMAC ✓ · test → connect' }],
+      [h('gw', 'cfd', 'connectToUser', 'ok')], [h('cfd', 'cf')], [h('cf', 'sent')], [h('sent', 'mgmt', 'outcome: ok', 'ok')],
+      [{ set: { ui: 'Ready for inbound calls. Keep this browser tab open.' } }]],
+    body: `<p>Sent's test endpoint sends a synthetic, signed <code>call.request</code> through the entire public path: Sent → Cloudflare → cloudflared → gateway.</p>
+      <p>For <code>test: true</code> requests the gateway answers <code>connectToUser</code> so the route validates, but a test never starts a real call. The dashboard then shows: <i>“Ready for inbound calls.”</i></p>`,
+    payload: '{ "type": "call.request", "version": "1", "test": true,\n  "callId": "test_…", "number": "+16285550199" }\n\n// security.ts: synthetic tests validate the route,\n// but must never originate a call',
+    refs: ['src/server.ts:199', 'src/security.ts:30'],
+  },
+
+  // ── 3 · A call arrives ────────────────────────────────────────────────
+  {
+    ch: 3, title: 'Someone dials the number',
+    state: { call: 'ringing' },
+    lit: ['phone', 'sent'],
+    beats: [[{ say: 'caller', text: '☎ dialing +1 628 555 0199…' }], [h('phone', 'sent', 'PSTN call', 'caller')], [{ stamp: 'sent', text: 'who takes this call?' }]],
+    body: `<p>Someone calls the Sent number from an ordinary phone.</p>
+      <p>Sent decides where each inbound call goes by asking the number's <b>callback URL</b>, which now points at your tunnel.</p>`,
+    payload: '',
+    refs: ['README.md'],
+  },
+  {
+    ch: 3, title: 'Sent asks the gateway: who takes this call?',
+    lit: ['gw', 'cf'],
+    beats: [[h('sent', 'cf', 'POST /voice/9c1e…')], [h('cf', 'cfd')], [h('cfd', 'gw', 'signed call.request')], [{ stamp: 'gw', text: 'path = nonce ✓' }]],
+    body: `<p>The question arrives through Cloudflare at the gateway. The gateway has exactly <b>two routes</b>: <code>/health</code> and this one random <code>/voice/&lt;nonce&gt;</code> path, with a 64 KB body limit.</p>
+      <p>The dashboard, keys, tokens, and audio bridge live on a different server that the tunnel can't reach.</p>`,
+    payload: 'POST /voice/9c1e…a07f\nx-webhook-id:        msg_2Lk…\nx-webhook-timestamp: 1791544800\nx-webhook-signature: v1,K3x9…=\n\n{ "type": "call.request", "version": "1",\n  "callId": "call_8f2…", "direction": "inbound",\n  "number": "+16285550199",\n  "to": { "kind": "number", "number": "+16285550199" } }',
+    refs: ['src/server.ts:81'],
+  },
+  {
+    ch: 3, title: 'Verify the HMAC signature before reading the body',
+    lit: ['gw'],
+    beats: [[{ stamp: 'gw', text: 'HMAC-SHA256 ✓' }], { wait: 500 }, [{ stamp: 'gw', text: 'timestamp ±5 min ✓' }], { wait: 900 }],
+    body: `<p>The gateway recomputes <b>HMAC-SHA256</b> over <code>id.timestamp.</code> plus the raw body, keyed with the base64-decoded <code>whsec_</code> secret, and compares in constant time with <code>timingSafeEqual</code>.</p>
+      <p>Timestamps more than 5 minutes off are rejected, which blocks replays. The JSON is parsed only <i>after</i> the signature checks out.</p>`,
+    payload: 'const key = Buffer.from(secret.slice(6), "base64");   // strip "whsec_"\nconst expected = createHmac("sha256", key)\n  .update(`${id}.${stamp}.`).update(rawBody).digest();\n\n// accept any space-separated "v1,<base64>" that matches\nreturn signature.split(/\\s+/).some(part => timingSafeEqual(…));',
+    refs: ['src/security.ts:8'],
+  },
+  {
+    ch: 3, title: 'Decide: connect the call, or reject as busy',
+    lit: ['gw'],
+    beats: [[h('mgmt', 'gw', 'phase · heartbeat · busy?')], [{ stamp: 'gw', text: 'ready ✓  busy ✗' }], [h('gw', 'cfd', 'connectToUser', 'ok')], [h('cfd', 'cf')],
+      [h('cf', 'sent', '{ action: connectToUser }', 'ok')], [{ stamp: 'gw', text: 'reserved for 20 s', c: 'agent' }]],
+    body: `<p><code>decideInbound()</code> connects only if routing is live <b>and</b> the heartbeat is fresh, and no other call is active, ringing, or reserved. Otherwise it returns <code>reject: busy</code>.</p>
+      <p>A connect reserves the agent for 20 seconds so a second caller can't get in while the first is being set up. Decisions are cached for 15 seconds, so Sent's retries get the same answer.</p>`,
+    payload: 'decideInbound(q, number, identity,\n  /* ready */ phase === "answering" && online(),\n  /* busy  */ !!active || browserBusy || reservedUntil > Date.now())\n\n→ { "action": { "action": "connectToUser",\n                "identity": "sent-ai-3fa9c1e07b2d" } }',
+    refs: ['src/security.ts:27', 'src/server.ts:90'],
+  },
+  {
+    ch: 3, title: 'The browser tab rings, but doesn’t pick up yet',
+    lit: ['sdk'],
+    beats: [[h('sent', 'sdk', 'incomingCall', 'caller')], [{ flash: 'sdk' }, { set: { ui: 'Incoming call · preparing the model connection first' } }], [{ stamp: 'sdk', text: 'not answering yet', c: 'agent' }]],
+    body: `<p>Sent routes the call to the identity the gateway named, and the SDK in your tab emits <code>incomingCall</code>.</p>
+      <p>The page holds off on <code>accept()</code>. Answering before the AI is connected would leave the caller hearing silence.</p>`,
+    payload: 'client.on("incomingCall", (invite) => handleIncomingInvite(invite));\n// rejects if not answering, or if a call is already active',
+    refs: ['client/app.ts:757'],
+  },
+  {
+    ch: 3, title: 'Model first, then pick up',
+    lit: ['bridge', 'mgmt', 'oai'],
+    beats: [[{ set: { bridge: true } }, h('bridge', 'mgmt', 'WS /bridge · start')], [h('mgmt', 'oai', 'new OpenAIVoice')], [h('oai', 'openai', 'session.update')],
+      [h('openai', 'oai', 'session.updated', 'ok')], [h('oai', 'mgmt')], [h('mgmt', 'bridge', '{ type: ready }', 'ok')], [{ stamp: 'wk', text: 'capture on' }],
+      [h('sdk', 'sent', 'invite.accept()', 'ok')], [h('sent', 'phone', 'connected', 'ok')], [{ set: { call: 'connected', ui: 'Caller connected' } }]],
+    body: `<p>The page opens a WebSocket to the local server (authenticated with the same CSRF token), and the server opens a <b>dedicated OpenAI session for this call</b>.</p>
+      <p>Only after the server replies <code>ready</code> does the page enable caller capture and call <code>invite.accept()</code>. If the model isn't ready within 20 seconds, the call is rejected instead of answered.</p>`,
+    payload: 'browser → server   { "type": "start", "callId": "6f1d…" }\nserver  → OpenAI   session.update   (server VAD · transcription · voice "marin")\nOpenAI  → server   session.updated\nserver  → browser  { "type": "ready", "model": "gpt-realtime-2.1" }\nbrowser            audio.setCapturing(true); await invite.accept();',
+    refs: ['client/app.ts:817', 'client/app.ts:820', 'src/server.ts:240'],
+  },
+  {
+    ch: 3, title: 'Connected: the AI speaks first',
+    state: { call: 'connected' },
+    lit: ['bridge', 'oai'],
+    beats: [[h('bridge', 'mgmt', '{ type: greet }')], [h('mgmt', 'oai')], [h('oai', 'openai', 'response.create')],
+      [{ say: 'agent', text: 'Hi, I’m Sent’s AI assistant. How can I help you today?' }, { burst: AGENT, c: 'agent', n: 7, every: 280 }], { wait: 3200 }],
+    body: `<p>When the SDK reports <code>connected</code>, the page sends <code>greet</code> once. The server tells the model to say the configured greeting and to identify itself as an AI assistant.</p>
+      <p>The greeting audio follows the same path as every answer after it, shown in detail in the next chapter.</p>`,
+    payload: '{ "type": "response.create",\n  "response": { "instructions":\n    "Greet the caller now in English. Say: Hi, I’m Sent’s AI\n     assistant. How can I help you today? Then pause and listen.\n     Identify yourself as an AI assistant. Do not repeat the greeting." } }',
+    refs: ['client/app.ts:734', 'src/openai.ts:69'],
+  },
+
+  // ── 4 · The audio loop ────────────────────────────────────────────────
+  {
+    ch: 4, title: 'Caller → model: 20 ms PCM16 frames',
+    state: { call: 'connected', bridge: true },
+    lit: ['remote', 'wk', 'bridge'],
+    streams: [{ route: CALLER, c: 'caller', every: 330 }],
+    beats: [[{ say: 'caller', text: 'What time do you close today?' }], { wait: 4200 }, [{ set: { ui: 'caller: What time do you close today?' } }]],
+    body: `<p>The caller's voice arrives over Sent's WebRTC connection. The SDK plays it into an <code>&lt;audio&gt;</code> element that is <b>muted at volume 0</b>, so your speakers stay silent.</p>
+      <p>The page connects that element's <code>MediaStream</code> to the AudioWorklet, which cuts it into <b>480-sample frames</b> (20 ms at 24 kHz), converts Float32 to little-endian PCM16 (960 bytes), and sends each frame as a binary WebSocket message. The server base64-encodes it for OpenAI.</p>`,
+    payload: '// audio-worklet.js: every 480 samples\nview.setInt16(i * 2, s < 0 ? s * 32768 : s * 32767, true);\nthis.port.postMessage({ type: "capture", audio: buffer }, [buffer]);\n\n// server → OpenAI\n{ "type": "input_audio_buffer.append", "audio": "AAABAP7/…" }',
+    refs: ['client/app.ts:642', 'public/audio-worklet.js:61', 'src/openai.ts:61'],
+  },
+  {
+    ch: 4, title: 'Model → caller, through the software microphone',
+    state: { call: 'connected', bridge: true },
+    lit: ['wk', 'mic', 'sdk'],
+    streams: [{ route: AGENT, c: 'agent', every: 330 }],
+    beats: [[{ say: 'agent', text: 'We close at 6 pm today.' }], [{ queue: .35, ms: 900 }], { wait: 2200 }, [{ queue: .08, ms: 1400 }], [{ set: { ui: 'agent: We close at 6 pm today.' } }]],
+    body: `<p>OpenAI streams <code>response.output_audio.delta</code> events. The server decodes them to raw PCM and forwards binary frames, plus an <code>audio-meta</code> message with the item ID.</p>
+      <p>The worklet queues the samples and plays them into the <code>MediaStreamDestination</code>, the <b>software mic</b> the SDK got from the patched <code>getUserMedia</code>. The SDK sends it to Sent like any other mic input, and the caller hears the AI.</p>`,
+    payload: 'OpenAI → server   { "type": "response.output_audio.delta",\n                    "item_id": "item_7Qa…", "delta": "<base64 pcm16>" }\nserver → browser  { "type": "audio-meta", "itemId": "item_7Qa…" } + binary PCM\nworklet           playbackQueue → output → MediaStreamDestination\nSDK               "microphone" track → Sent → caller',
+    refs: ['src/openai.ts:83', 'client/app.ts:148', 'public/audio-worklet.js:72'],
+  },
+  {
+    ch: 4, title: 'Full duplex, with no echo path',
+    state: { call: 'connected', bridge: true },
+    lit: ['remote', 'mic', 'ui'],
+    streams: [{ route: CALLER, c: 'caller', every: 420 }, { route: AGENT, c: 'agent', every: 420, delay: 200 }],
+    beats: [[{ say: 'caller', text: 'Great, and is there parking?' }, { set: { ui: 'caller: Great, and is there parking?' } }], { wait: 1900 },
+      [{ say: 'agent', text: 'Yes, there’s a free lot behind the store.' }, { set: { ui: 'agent: Yes, there’s a free lot behind the store.' } }], { wait: 2600 }],
+    body: `<p>Both directions run at once. The worklet's <b>input is the remote stream only</b>, so model output never feeds back into capture and the AI never hears itself.</p>
+      <p>Transcripts come from OpenAI events (caller turns via <code>gpt-live-transcribe</code>, agent turns via the output transcript) and go to the dashboard and an in-memory event log. Nothing is recorded, and everything is discarded when the server exits.</p>`,
+    payload: 'process(inputs, outputs) {\n  const remote = inputs[0][0][i];        // caller only → capture\n  const model  = this.takeModelSample();  // queue → software mic\n  output[i] = model;                      // never mixed back into capture\n}',
+    refs: ['public/audio-worklet.js:82', 'client/app.ts:415', 'src/openai.ts:88'],
+  },
+  {
+    ch: 4, title: 'Guard rails against building latency',
+    state: { call: 'connected', bridge: true },
+    lit: ['wk'],
+    streams: [{ route: AGENT, c: 'agent', every: 200 }],
+    beats: [[{ queue: .84, ms: 2200 }], [{ stamp: 'wk', text: 'hard cap: 8 s Realtime · 1.5 s Live', c: 'bad' }], { wait: 900 }, [{ queue: .25, ms: 1200 }]],
+    body: `<p>Every buffer has a limit. The worklet's playback queue is capped at <b>8 s for Realtime</b> (its audio can arrive faster than real time) and <b>1.5 s for GPT-Live</b>. On overflow the call ends instead of silently dropping speech.</p>
+      <p>WebSockets also close if more than 128 KB backs up, frames over 24 KB are ignored, and every call is capped at 15 minutes.</p>`,
+    payload: 'if (queueSamples + pcm.length > maxQueueSamples) failOverflow(limitMs);\n// page: "…Ending the call to prevent lost speech."\n\nif (ws.bufferedAmount > 128 * 1024) ws.close(1011, "Audio congestion.");',
+    refs: ['public/audio-worklet.js:53', 'client/app.ts:793', 'src/server.ts:229', 'src/server.ts:244'],
+  },
+
+  // ── 5 · Barge-in ──────────────────────────────────────────────────────
+  {
+    ch: 5, title: 'The worklet tracks what the caller actually heard',
+    state: { call: 'connected', bridge: true, queue: .62 },
+    lit: ['wk', 'bridge'],
+    streams: [{ route: AGENT, c: 'agent', every: 340 }],
+    beats: [[{ say: 'agent', text: 'Our Market St store closes at 6, but the one on Fifth…' }], [h('wk', 'bridge', 'rendered · item_7Qa', 'agent')],
+      [h('bridge', 'mgmt', 'playback · 1840 ms', 'agent')], [h('wk', 'bridge', '', 'agent')], [h('bridge', 'mgmt', 'playback · 2140 ms', 'agent')]],
+    body: `<p>As it renders samples, the worklet reports how many milliseconds of each model item have actually gone into the software mic. The page adds them up and sends <code>playback</code> messages.</p>
+      <p>So the server knows how much of the current answer the caller has <b>actually heard</b>, not just how much the model generated.</p>`,
+    payload: 'worklet → page    { "type": "rendered", "itemId": "item_7Qa…", "audioMs": 10.67 }\npage    → server  { "type": "playback", "itemId": "item_7Qa…", "audioMs": 2140 }',
+    refs: ['public/audio-worklet.js:102', 'client/app.ts:306', 'src/openai.ts:76'],
+  },
+  {
+    ch: 5, title: 'The caller interrupts',
+    state: { call: 'connected', bridge: true, queue: .62 },
+    lit: ['openai'],
+    streams: [{ route: CALLER, c: 'caller', every: 300 }],
+    beats: [[{ say: 'caller', text: 'Oh, Market Street is perfect, thanks!' }], { wait: 1500 }, [h('openai', 'oai', 'speech_started', 'caller')], [{ stamp: 'openai', text: 'server VAD: caller talking', c: 'caller' }]],
+    body: `<p>OpenAI's server-side <b>voice activity detection</b> hears the caller start talking over the agent and emits <code>input_audio_buffer.speech_started</code>.</p>
+      <p>At this point the browser may still have seconds of unplayed agent audio queued.</p>`,
+    payload: '{ "type": "input_audio_buffer.speech_started", "audio_start_ms": 5120, … }',
+    refs: ['src/openai.ts:111'],
+  },
+  {
+    ch: 5, title: 'Clear, cancel, truncate',
+    state: { call: 'connected', bridge: true, queue: .62 },
+    lit: ['wk', 'oai', 'openai'],
+    streams: [{ route: CALLER, c: 'caller', every: 420 }],
+    beats: [[h('oai', 'mgmt')], [h('mgmt', 'bridge', '{ type: clear }', 'bad'), h('oai', 'openai', 'response.cancel', 'bad')],
+      [h('bridge', 'wk', 'clear', 'bad'), h('oai', 'openai', 'item.truncate @ 2140 ms', 'bad')], [{ queue: 0, ms: 260 }, { stamp: 'wk', text: 'unplayed audio dropped', c: 'bad' }],
+      [{ stamp: 'openai', text: 'memory = what was heard', c: 'ok' }]],
+    body: `<p>Three things happen together: the browser <b>drops all unplayed samples</b>, the in-progress response is <b>cancelled</b>, and the model's copy of its answer is <b>truncated at 2,140 ms</b>, exactly what the caller heard.</p>
+      <p>So the AI won't assume the caller heard about the Fifth Avenue store. (GPT-Live handles overlap natively and skips this step.)</p>`,
+    payload: '{ "type": "response.cancel" }\n{ "type": "conversation.item.truncate",\n  "item_id": "item_7Qa…", "content_index": 0, "audio_end_ms": 2140 }',
+    refs: ['src/openai.ts:111', 'src/openai.ts:114', 'public/audio-worklet.js:25'],
+  },
+
+  // ── 6 · GPT-Live mode ─────────────────────────────────────────────────
+  {
+    ch: 6, title: 'Alternative: GPT-Live-1 with a GPT-6 text helper',
+    state: { call: 'connected', bridge: true },
+    view: { mode: 'live' },
+    lit: ['oai', 'openai'],
+    beats: [[{ stamp: 'openai', text: '/v1/live/sessions' }], [h('openai', 'oai', 'session.delegation.created')], [h('oai', 'openai', 'POST /v1/responses · gpt-6-luna')],
+      [h('openai', 'oai', 'output_text', 'ok')], [h('oai', 'openai', 'session.commentary.append')], [{ say: 'agent', text: '(GPT-Live speaks the helper’s answer)' }], { wait: 1600 }],
+    body: `<p>If you choose <b>GPT-Live-1</b>, the adapter uses <code>/v1/live/sessions</code> and Live-specific events instead (<code>session.start</code>, <code>session.input_audio.append</code>).</p>
+      <p>Live can <b>delegate</b> a question to the client. The server combines the transcript into turns, asks a GPT-6 text model (Luna by default, <code>reasoning.effort: none</code> for speed) for at most two spoken sentences, and appends the answer as commentary. The text model never receives audio and has no tools.</p>`,
+    payload: 'POST /v1/responses\n{ "model": "gpt-6-luna",\n  "reasoning": { "effort": "none" },   // Sol / Astra use "low"\n  "max_output_tokens": 600,\n  "input": "caller: What time do you close today?\\nagent: …" }',
+    refs: ['src/openai.ts:116', 'src/openai.ts:129', 'src/models.ts:13'],
+  },
+
+  // ── 7 · Stop & restore ────────────────────────────────────────────────
+  {
+    ch: 7, title: 'Hang up: one call at a time',
+    state: { call: 'connected', bridge: true },
+    lit: ['bridge', 'oai'],
+    beats: [[h('phone', 'sent', 'hang up', 'caller')], [h('sent', 'sdk', 'disconnected')], [h('bridge', 'mgmt', '{ type: stop }')], [h('mgmt', 'oai', 'close()')], [h('oai', 'openai', 'close')],
+      [{ set: { call: 'idle', bridge: false, queue: 0, ui: 'Ready for the next inbound call' } }]],
+    body: `<p>When either side hangs up, the page stops capture, clears the queue, and closes the bridge. The server closes that call's OpenAI session and waits up to 4 s for final usage.</p>
+      <p>The tab stays registered and routing stays live for the next caller, but the app never handles more than one call at a time.</p>`,
+    payload: 'call.on("disconnected", …)\n  → audio.setCapturing(false); audio.clearAudio(); bridge.stop();\nws.on("close")\n  → session.voice.close(); active = undefined;',
+    refs: ['client/app.ts:738', 'src/server.ts:261'],
+  },
+  {
+    ch: 7, title: 'Stop & restore routing',
+    state: { phase: 'stopping', ui: 'Restoring the number’s prior callback routing…' },
+    lit: ['mgmt', 'sent', 'disk'],
+    beats: [[h('ui', 'mgmt', 'POST /api/stop')], [h('mgmt', 'sent', 'GET …/+16285550199')], [h('sent', 'mgmt', 'still our URL ✓', 'ok')],
+      [h('mgmt', 'sent', 'PATCH callback_url')], [{ set: { cb: 'prev' } }, { stamp: 'sent', text: 'callback restored', c: 'ok' }],
+      [h('mgmt', 'disk', 'delete backup')], [{ set: { disk: null } }], [h('mgmt', 'cfd', 'stop')], [{ set: { tunnel: false } }],
+      [{ set: { reg: false, audio: false, hb: false, phase: 'offline', ui: 'Stopped · real getUserMedia restored' } }]],
+    body: `<p>Stop runs while the heartbeat is still alive. The server re-reads the number and restores the previous callback <b>only if it still points at the URL this app installed</b>. It never overwrites a change made somewhere else.</p>
+      <p>Then it deletes the backup and stops the tunnel. The page unregisters, shuts down the audio graph, and restores the real <code>getUserMedia</code>.</p>`,
+    payload: 'if (current.callback_url !== saved.installedUrl) → warn, don\'t overwrite\nPATCH /v3/channels/voice/+16285550199\n{ "callback_url": "https://hooks.example.com/voice" }',
+    refs: ['client/app.ts:913', 'src/server.ts:59', 'src/server.ts:43'],
+  },
+  {
+    ch: 7, title: 'Safety nets when things go wrong',
+    view: { disk: 'full' },
+    lit: ['mgmt', 'disk'],
+    beats: [[{ stamp: 'ui', text: 'tab closed → heartbeat stops', c: 'bad' }], { wait: 700 }, [{ stamp: 'mgmt', text: 'watchdog: > 7 s → stop()', c: 'agent' }], { wait: 700 },
+      [{ stamp: 'disk', text: 'crash → backup survives', c: 'agent' }], { wait: 700 }, [{ stamp: 'sent', text: 'changed elsewhere → left alone', c: 'ok' }], { wait: 1400 }],
+    body: `<ul>
+      <li><b>Tab closed or laptop asleep:</b> no heartbeat for 7 s, so the watchdog stops and restores routing.</li>
+      <li><b>Ctrl+C / SIGTERM:</b> the same stop path runs, with a 20 s timeout.</li>
+      <li><b>Crash or power loss:</b> the backup stays on disk, and the next <i>Connect keys</i> restores routing before allowing a new Start.</li>
+      <li><b>Callback changed elsewhere:</b> left alone, with a warning.</li>
+      <li><b>No previous callback:</b> Sent can't PATCH back to null, so the backup is kept and the stopped app rejects calls.</li></ul>`,
+    payload: 'setInterval(() => {\n  if (phase === "answering" && !online()) void stop();   // restore routing\n}, 2000);',
+    refs: ['src/server.ts:266', 'src/server.ts:286', 'src/server.ts:43'],
+  },
+
+  // ── 8 · Security model ────────────────────────────────────────────────
+  {
+    ch: 8, title: 'Two servers, two doors',
+    view: { ...LIVE_VIEW, call: 'idle', bridge: false, ui: 'Ready for inbound calls (while answering)' },
+    lit: ['gw', 'mgmt'],
+    beats: [[h('cf', 'cfd', 'GET /api/state', 'bad')], [h('cfd', 'gw', '', 'bad')], [{ stamp: 'gw', text: '404: no such route', c: 'bad' }], [h('gw', 'cfd', '404', 'bad')], { wait: 300 },
+      [h('ui', 'mgmt', 'GET /api/state')], [{ stamp: 'mgmt', text: 'Host: localhost:3000 ✓' }], [h('mgmt', 'ui', '200 · state', 'ok')]],
+    body: `<p>The <b>management server</b> (dashboard, keys, tokens, audio bridge) binds to <code>127.0.0.1</code> and checks <code>Host</code>, <code>Origin</code>, and a CSRF token. Its WebSocket requires the token as well.</p>
+      <p>The <b>gateway</b>, the only server the tunnel can reach, serves <code>/health</code> and one random HMAC-verified callback path. Any other request from the internet, such as <code>/api/state</code>, gets a 404.</p>`,
+    payload: 'Management :3000    127.0.0.1 · Host + Origin + CSRF · WS token\n                    /api/* · /bridge · static dashboard\n\nGateway :random     reachable via tunnel only\n                    GET /health · POST /voice/<48 hex> (HMAC, 64 KB)\n                    everything else → 404',
+    refs: ['src/server.ts:79', 'src/server.ts:106', 'src/server.ts:216'],
+  },
+  {
+    ch: 8, title: 'Where each secret lives',
+    view: { ...LIVE_VIEW, call: 'idle', bridge: false, ui: 'Ready for inbound calls (while answering)' },
+    lit: ['mgmt', 'sdk', 'disk'],
+    beats: [[{ stamp: 'mgmt', text: 'API keys: process memory only' }], { wait: 500 }, [{ stamp: 'sdk', text: 'voice token · 10 min' }], { wait: 500 },
+      [{ stamp: 'disk', text: 'secret, no API keys · 0600', c: 'agent' }], { wait: 500 }, [{ stamp: 'cf', text: 'callback metadata only' }], { wait: 500 },
+      [{ stamp: 'openai', text: 'audio: server ⇄ OpenAI' }], { wait: 1500 }],
+    body: `<p><b>API keys</b> never leave the Node process. The <b>browser</b> holds only a 10-minute Sent voice token. The <b>backup file</b> holds routing metadata and the callback secret, never API keys, with owner-only permissions.</p>
+      <p><b>Cloudflare</b> sees only callback metadata. Call audio travels browser ⇄ Sent and server ⇄ OpenAI. Transcripts stay in memory and are discarded when the server exits.</p>`,
+    payload: 'what            where                          lifetime\n─────────────── ────────────────────────────── ────────────\nSent API key    server memory                  until exit\nOpenAI API key  server memory                  until exit\nvoice token     browser (SDK)                  600 s\nwhsec_ secret   memory + routing-backup.json   until restored\ntranscripts     server memory (last 150 evts)  until exit',
+    refs: ['src/backup.ts:13', 'src/server.ts:174', 'README.md'],
+  },
+];
+
+// ─── Engine ───────────────────────────────────────────────────────────────
+function itemsOf(beat) { return Array.isArray(beat) ? beat : [beat]; }
+function stateBefore(i) {
+  const s = { ...INITIAL };
+  for (let k = 0; k < i; k++) {
+    const st = STEPS[k];
+    Object.assign(s, st.state || {});
+    for (const beat of st.beats || []) for (const it of itemsOf(beat)) {
+      if (it.set) Object.assign(s, it.set);
+      if (it.queue !== undefined) s.queue = it.queue;
+    }
+  }
+  return Object.assign(s, STEPS[i].state || {}, STEPS[i].view || {});
+}
+function runItem(it) {
+  if (it.from) return travel(it.from, it.to, { label: it.label, c: it.c });
+  if (it.set) { Object.assign(S, it.set); render(); return Promise.resolve(); }
+  if (it.stamp) return stamp(it.stamp, it.text, it.c);
+  if (it.say) return say(it.say, it.text);
+  if (it.queue !== undefined) return queueTo(it.queue, it.ms ?? 600);
+  if (it.wait) return wait(it.wait);
+  if (it.flash) { flashNode(it.flash); return wait(250); }
+  if (it.burst) return burst(it.burst, it.c, it.n, it.every);
+  return Promise.resolve();
+}
+
+let cur = 0, token = 0, auto = true, stepDone = false;
+const $ = (id) => document.getElementById(id);
+const dwellBar = $('dwell');
+
+async function go(i) {
+  i = Math.max(0, Math.min(STEPS.length - 1, i));
+  cur = i; const my = ++token; stepDone = false;
+  tickers.clear(); L.pkts.replaceChildren(); L.fx.replaceChildren(); resetEdges();
+  for (const k in stampStack) delete stampStack[k];
+  for (const k in bubbles) delete bubbles[k];
+  dwellBar.style.width = '0';
+  const step = STEPS[i];
+  Object.assign(S, stateBefore(i)); render();
+  for (const id in NODE) NODE[id].g.classList.toggle('lit', (step.lit || []).includes(id));
+  narrate(i);
+  history.replaceState(null, '', '#step-' + (i + 1));
+  for (const st of step.streams || []) startStream(st);
+  await wait(250);
+  for (const beat of step.beats || []) {
+    if (my !== token) return;
+    await Promise.all(itemsOf(beat).map(runItem));
+    if (my !== token) return;
+    await wait(140);
+  }
+  if (my !== token) return;
+  stepDone = true;
+  if (auto) advanceAfterDwell(my);
+}
+let dwellId = 0;
+async function advanceAfterDwell(my) {
+  const d = ++dwellId;
+  const ms = Math.max(800, Number(dwellTime(STEPS[cur])) || 6000);
+  await animate(ms, (t) => { if (d === dwellId) dwellBar.style.width = (t * 100) + '%'; });
+  if (my !== token || !auto || d !== dwellId) return;
+  if (cur < STEPS.length - 1) go(cur + 1);
+  else { auto = false; syncPlay(true); }
+}
+
+// ─── Narration, chapters, timeline, controls ─────────────────────────────
+const chaptersEl = $('chapters'), timelineEl = $('timeline');
+CHAPTERS.forEach((name, c) => {
+  const b = document.createElement('button');
+  b.innerHTML = `<b>${String(c).padStart(2, '0')}</b>${name}`;
+  b.addEventListener('click', () => { frozen = false; go(STEPS.findIndex((s) => s.ch === c)); });
+  chaptersEl.appendChild(b);
+});
+STEPS.forEach((s, i) => {
+  if (i && STEPS[i - 1].ch !== s.ch) { const g = document.createElement('span'); g.className = 'gap'; timelineEl.appendChild(g); }
+  const b = document.createElement('button');
+  b.title = `${i + 1}. ${s.title}`; b.setAttribute('aria-label', b.title);
+  b.addEventListener('click', () => { frozen = false; go(i); });
+  timelineEl.appendChild(b);
+});
+function narrate(i) {
+  const s = STEPS[i];
+  $('chap').textContent = `${String(s.ch).padStart(2, '0')} · ${CHAPTERS[s.ch]}`;
+  $('count').textContent = `Step ${i + 1} / ${STEPS.length}`;
+  $('title').textContent = s.title;
+  $('body').innerHTML = s.body;
+  $('payload').textContent = s.payload || '';
+  const refs = $('refs'); refs.replaceChildren();
+  for (const r of s.refs || []) {
+    const a = document.createElement('a');
+    const [file, line] = r.split(':');
+    a.href = file; a.target = '_blank'; a.rel = 'noopener';
+    a.textContent = r; if (line) a.title = `${file}, line ${line}`;
+    refs.appendChild(a);
+  }
+  chaptersEl.querySelectorAll('button').forEach((b, c) => b.setAttribute('aria-current', String(c === s.ch)));
+  timelineEl.querySelectorAll('button').forEach((b, k) => { b.classList.toggle('cur', k === i); b.classList.toggle('done', k < i); });
+}
+const playBtn = $('play');
+function syncPlay(ended = false) {
+  const playing = auto && !frozen;
+  playBtn.textContent = playing ? '❚❚ Pause' : ended ? '↺ Replay' : '▶ Play';
+}
+playBtn.addEventListener('click', () => {
+  if (auto && !frozen) { auto = false; frozen = true; }
+  else if (!auto && cur === STEPS.length - 1 && stepDone) { auto = true; frozen = false; go(0); }
+  else { auto = true; frozen = false; if (stepDone) advanceAfterDwell(token); }
+  syncPlay();
+});
+$('next').addEventListener('click', () => { frozen = false; go(cur + 1); syncPlay(); });
+$('prev').addEventListener('click', () => { frozen = false; go(cur - 1); syncPlay(); });
+$('speed').addEventListener('change', (e) => { speed = Number(e.target.value) || 1; });
+document.addEventListener('keydown', (e) => {
+  if (e.target instanceof HTMLSelectElement) return;
+  if (e.key === 'ArrowRight') { e.preventDefault(); $('next').click(); }
+  else if (e.key === 'ArrowLeft') { e.preventDefault(); $('prev').click(); }
+  else if (e.key === ' ') { e.preventDefault(); playBtn.click(); }
+  else if (/^[1-9]$/.test(e.key)) { const c = Number(e.key) - 1; if (c < CHAPTERS.length) { frozen = false; go(STEPS.findIndex((s) => s.ch === c)); syncPlay(); } }
+});
+
+const fromHash = Number((location.hash.match(/step-(\d+)/) || [])[1]);
+go(Number.isInteger(fromHash) && fromHash > 0 ? fromHash - 1 : 0);
+syncPlay();
+</script>
+</body>
+</html>

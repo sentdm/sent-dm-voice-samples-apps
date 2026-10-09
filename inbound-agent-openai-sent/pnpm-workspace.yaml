@@ -1,0 +1,11 @@
+# Security patch for an advisory in the Sent SDK's unused Node proxy dependency chain
+# (previously npm "overrides" in package.json, which pnpm does not read).
+overrides:
+  basic-ftp: 6.2.2
+
+# pnpm only runs dependency install scripts that are allowed here.
+allowBuilds:
+  # Official platform-binary check for the dev bundler.
+  esbuild: true
+  # Not needed: the app downloads the cloudflared binary on first Start (src/tunnel.ts), as the README documents.
+  cloudflared: false
