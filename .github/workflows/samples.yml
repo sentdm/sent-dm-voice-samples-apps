@@ -1,0 +1,58 @@
+name: Samples
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    outputs:
+      samples: ${{ steps.list.outputs.samples }}
+    steps:
+      - uses: actions/checkout@v7
+      # Every top-level folder with a package.json is a sample.
+      - id: list
+        run: echo "samples=$(ls */package.json | xargs -n1 dirname | jq -Rnc '[inputs]')" >> "$GITHUB_OUTPUT"
+
+  sample:
+    needs: discover
+    name: ${{ matrix.sample }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        sample: ${{ fromJSON(needs.discover.outputs.samples) }}
+    defaults:
+      run:
+        working-directory: ${{ matrix.sample }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+        with:
+          package_json_file: ${{ matrix.sample }}/package.json
+          cache: true
+          cache_dependency_path: ${{ matrix.sample }}/pnpm-lock.yaml
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run --if-present check
+      - run: pnpm run --if-present test
+      - name: Committed build matches source
+        run: |
+          pnpm run --if-present build
+          if [ -n "$(git status --porcelain -- .)" ]; then
+            git status --short -- .
+            echo "::error::Build output is out of date. Run 'pnpm run build' and commit the result."
+            exit 1
+          fi
+      - name: Browser tests
+        run: |
+          if [ -d node_modules/playwright ]; then pnpm exec playwright install --with-deps chromium; fi
+          pnpm run --if-present test:browser
+          pnpm run --if-present test:dashboard

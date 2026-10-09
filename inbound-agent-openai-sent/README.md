@@ -188,9 +188,11 @@ The project uses the published `@sentdm/voice` package (which includes the Sinch
 
 The direct `ws` transport is patched to 8.22.0. A `basic-ftp` override to 6.2.2, in `pnpm-workspace.yaml`, patches an inherited advisory in the SDK's unused Node proxy dependency chain; it does not replace the Sent/Sinch browser transport. `pnpm-workspace.yaml` also limits install scripts to esbuild; cloudflared's binary is fetched on first Start instead. `pnpm audit --prod` reports no known vulnerabilities.
 
-- [Sent voice SDK](https://docs.sent.dm/sdks/voice.md)
-- [Sent inbound callback contract](https://docs.sent.dm/reference/api/voice-callback.md)
-- [Sent voice tokens and in-app calls](https://docs.sent.dm/start/guides/in-app-calls.md)
+The committed browser bundle includes `@sentdm/voice` and its dependencies, such as the Sinch and PubNub SDKs. Their licenses are listed in [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md), which `pnpm run build` regenerates.
+
+- [Sent voice SDK](https://docs.sent.dm/sdks/voice)
+- [Sent inbound callback contract](https://docs.sent.dm/reference/api/voice-callback)
+- [Sent voice tokens and in-app calls](https://docs.sent.dm/start/guides/in-app-calls)
 - [OpenAI Live WebSocket protocol](https://developers.openai.com/api/docs/guides/voice-websockets?api=live)
 - [OpenAI Live delegation](https://developers.openai.com/api/docs/guides/live-delegation)
 - [OpenAI Realtime conversations](https://developers.openai.com/api/docs/guides/realtime-conversations)
