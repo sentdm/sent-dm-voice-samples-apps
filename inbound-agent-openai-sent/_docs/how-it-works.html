@@ -138,7 +138,7 @@ svg text { font-family: var(--sans); fill: var(--ink); }
       <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
       <span><strong>Sent</strong><small>/ inbound — how it works</small></span>
     </div>
-    <div class="badge">ANIMATED WALKTHROUGH · v1.1.0</div>
+    <div class="badge">ANIMATED WALKTHROUGH · v1.2.0</div>
   </header>
 
   <nav class="chapters" id="chapters" aria-label="Chapters"></nav>
@@ -181,7 +181,7 @@ svg text { font-family: var(--sans); fill: var(--ink); }
         </select>
       </div>
       <div class="timeline" id="timeline"></div>
-      <p class="hint">← → step · space pause · 1–9 jump to chapter</p>
+      <p class="hint">← → step · space pause · 1–9, 0 jump to chapter</p>
     </aside>
   </div>
 </div>
@@ -291,7 +291,7 @@ node('cf', 640, 85, 240, 120, 'Cloudflare edge', ['quick tunnel · no account', 
 node('openai', 1000, 70, 250, 150, 'OpenAI', ['wss  /v1/realtime · /v1/live', 'https /v1/models · /v1/responses', { id: 'oa-model', text: '' }], { lh: 18 });
 
 // Browser tab internals
-node('sdk', 55, 360, 140, 240, '@sentdm/voice', ['Sent browser SDK', 'WebRTC (Sinch)', '', { id: 'sdk-st', text: '' }, { id: 'sdk-id', text: '' }], { titleSize: 14 });
+node('sdk', 55, 360, 140, 240, '@sentdm/voice', ['Sent browser SDK', 'push · WebRTC', '', { id: 'sdk-st', text: '' }, { id: 'sdk-id', text: '' }], { titleSize: 14 });
 node('remote', 225, 360, 160, 70, '<audio> muted', ['caller stream only'], { titleSize: 14 });
 node('mic', 225, 530, 160, 70, 'Software mic', ['Web Audio output', 'via getUserMedia()'], { titleSize: 14, lh: 15 });
 node('wk', 415, 360, 160, 130, 'AudioWorklet', ['24 kHz · 20 ms', 'Float32 ⇄ PCM16'], { titleSize: 14 });
@@ -318,8 +318,8 @@ node('mgmt', 655, 475, 210, 205, 'Management · :3000', ['/api/*  Host·Origin·
 pill('phase', 669, 580, NODE.mgmt.g);
 pill('keys', 669, 608, NODE.mgmt.g);
 pill('calls', 669, 636, NODE.mgmt.g);
-node('oai', 895, 475, 160, 95, 'OpenAI adapter', ['src/openai.ts', '1 session per call'], { titleSize: 14 });
-node('disk', 1100, 560, 155, 130, 'Disk', ['.sent-agent/', 'routing-backup.json', { id: 'disk-1', text: '' }, { id: 'disk-2', text: '' }, { id: 'disk-3', text: '' }], { lineSize: 10.5, lh: 15 });
+node('oai', 895, 475, 160, 95, 'OpenAI adapter', ['src/openai.ts', '1 session per call', { id: 'oai-st', text: '' }], { titleSize: 14 });
+node('disk', 1100, 560, 155, 130, 'Disk', ['.sent-agent/', 'routing-backup.json', { id: 'disk-1', text: '' }, { id: 'disk-2', text: '' }, { id: 'disk-3', text: '' }, { id: 'disk-4', text: '' }], { lineSize: 10.5, lh: 15 });
 
 // ─── Edges (two lanes where traffic flows both ways) ─────────────────────
 const E = {};
@@ -460,7 +460,7 @@ function burst(route, c, n, every) {
 }
 
 // ─── Persistent state (folded from steps so any step can be jumped to) ───
-const INITIAL = { phase: 'offline', keys: false, cb: 'prev', tunnel: false, reg: false, audio: false, bridge: false, hb: false, call: 'idle', ui: 'Enter a Sent key and an OpenAI key to begin', disk: null, mode: 'realtime', queue: 0 };
+const INITIAL = { phase: 'offline', keys: false, cb: 'prev', tunnel: false, reg: false, audio: false, bridge: false, hb: false, call: 'idle', ui: 'Enter a Sent key and an OpenAI key to begin', disk: null, mode: 'realtime', queue: 0, warm: false, msgs: 0 };
 const S = { ...INITIAL };
 const PHASES = ['offline', 'preparing', 'prepared', 'activating', 'answering', 'stopping'];
 const phasesEl = document.getElementById('phases');
@@ -480,17 +480,21 @@ function render() {
   T['sdk-st'].textContent = S.reg ? '● registered' : 'not registered';
   T['sdk-st'].setAttribute('class', 'l' + (S.reg ? ' live' : ''));
   T['sdk-id'].textContent = S.reg ? 'sent-ai-3fa9c1…' : '';
-  T['oa-model'].textContent = S.mode === 'live' ? 'gpt-live-1 + gpt-6-luna helper' : 'gpt-realtime-2.1 · server VAD';
+  T['oa-model'].textContent = S.mode === 'live' ? 'gpt-live-1 + gpt-6-luna helper' : 'gpt-realtime-2.1 · VAD · 2 tools';
+  T['oai-st'].textContent = S.warm ? 'pre-warmed · waiting' : S.bridge ? '● session live' : '';
+  T['oai-st'].setAttribute('class', 'l' + (S.warm ? ' warm' : S.bridge ? ' live' : ''));
   T['oa-model'].setAttribute('class', 'l cob');
   T['phone-st'].textContent = { idle: 'idle', ringing: 'ringing…', connected: '● on call' }[S.call];
   T['phone-st'].setAttribute('class', 'l' + (S.call === 'connected' ? ' cob' : ''));
   T['ui-st'].textContent = S.ui;
   const disk = { null: ['', '', ''], pre: ['prev  hooks.example.com', 'mine  …/voice/9c1e', 'secret (pending)'], full: ['prev  hooks.example.com', 'mine  …/voice/9c1e', 'secret whsec_…'] }[S.disk];
   ['disk-1', 'disk-2', 'disk-3'].forEach((id, i) => { T[id].textContent = disk[i]; T[id].setAttribute('class', 'l warm'); });
+  T['disk-4'].textContent = S.msgs ? `messages.jsonl · ${S.msgs} msg` : '';
+  T['disk-4'].setAttribute('class', 'l warm');
   setPill('phase', 'phase: ' + S.phase, S.phase === 'answering');
   setPill('keys', S.keys ? 'keys: in RAM only' : 'keys: —', false);
   setPill('calls', S.bridge ? 'active call: 1 / 1' : 'active call: none', false);
-  const dim = { cf: !S.tunnel, cfd: !S.tunnel, sdk: !S.reg, remote: !S.audio, wk: !S.audio, mic: !S.audio, bridge: !S.bridge, disk: !S.disk };
+  const dim = { cf: !S.tunnel, cfd: !S.tunnel, sdk: !S.reg, remote: !S.audio, wk: !S.audio, mic: !S.audio, bridge: !S.bridge, disk: !S.disk && !S.msgs };
   for (const id in NODE) NODE[id].g.classList.toggle('dim', !!dim[id]);
   NODE.phone.g.classList.toggle('ringing', S.call === 'ringing');
   hb.classList.toggle('on', S.hb);
@@ -503,24 +507,24 @@ const AGENT = ['openai', 'oai', 'mgmt', 'bridge', 'wk', 'mic', 'sdk', 'sent', 'p
 const h = (from, to, label, c = 'ctrl') => ({ from, to, label, c });
 const LIVE_VIEW = { phase: 'answering', keys: true, cb: 'ours', tunnel: true, reg: true, audio: true, bridge: true, hb: true, call: 'connected', disk: 'full' };
 
-const CHAPTERS = ['Overview', 'Connect keys', 'Start answering', 'A call arrives', 'The audio loop', 'Barge-in', 'GPT-Live mode', 'Stop & restore', 'Security model'];
+const CHAPTERS = ['Overview', 'Connect keys', 'Start answering', 'A call arrives', 'The audio loop', 'Barge-in', 'Messages & hang-up', 'GPT-Live mode', 'Stop & restore', 'Security model'];
 
 const STEPS = [
   // ── 0 · Overview ──────────────────────────────────────────────────────
   {
     ch: 0, title: 'A browser tab becomes the phone, and an AI answers it',
-    view: { ...LIVE_VIEW, ui: 'caller: Hi, are you open on Sundays?' },
+    view: { ...LIVE_VIEW, ui: 'caller: Hi, what does Sent do?' },
     lit: ['sdk', 'wk', 'mic', 'mgmt'],
     streams: [{ route: CALLER, c: 'caller', every: 640 }, { route: AGENT, c: 'agent', every: 640, delay: 2600 }],
-    beats: [{ say: 'caller', text: 'Hi, are you open on Sundays?' }, { wait: 2600 }, { say: 'agent', text: 'Yes! We’re open 10 to 4 on Sundays.' }, { wait: 2400 }],
-    body: `<p>This is a <b>local prototype</b> that answers calls to an existing Sent number with an OpenAI voice model. There is no hosted backend: a Node server and one Chrome/Edge tab on your computer do everything.</p>
-      <p>Three ideas carry the design:</p>
-      <ul><li><b>The browser is the phone.</b> The <code>@sentdm/voice</code> SDK registers the tab as a Sent user, so calls ring there.</li>
-      <li><b>A software microphone.</b> When the SDK asks for a mic, it gets the AI's voice instead.</li>
-      <li><b>Two servers, two doors.</b> A localhost-only dashboard and a tiny public callback gateway.</li></ul>
-      <p>This is the finished loop. The rest of the tour builds it one step at a time.</p>`,
+    beats: [{ say: 'caller', text: 'Hi, what does Sent do?' }, { wait: 2600 }, { say: 'agent', text: 'One API for SMS, WhatsApp, and RCS. Want the details?' }, { wait: 2400 }],
+    body: `<p>This sample answers calls to an existing Sent number with an OpenAI voice model. It has no hosted backend. A Node.js server and one Chrome or Edge tab on your computer do all the work.</p>
+      <p>Three ideas make it work:</p>
+      <ul><li><b>The browser is the phone.</b> The <code>@sentdm/voice</code> SDK registers the tab as a Sent app user, so Sent sends the call to the tab.</li>
+      <li><b>A software microphone.</b> When the SDK asks for a microphone, it gets the agent’s voice.</li>
+      <li><b>Two servers, two doors.</b> A dashboard server for you only, and a small callback gateway for Sent only.</li></ul>
+      <p>This is the complete loop. The next steps build it one part at a time.</p>`,
     payload: 'caller ⇄ Sent ⇄ @sentdm/voice (browser tab)\n                   ⇅  AudioWorklet · 24 kHz PCM16\n        local server ⇄ OpenAI Realtime / Live',
-    refs: ['README.md', 'plan.md'],
+    refs: ['README.md', '_docs/architecture.md'],
   },
 
   // ── 1 · Connect keys ──────────────────────────────────────────────────
@@ -528,107 +532,108 @@ const STEPS = [
     ch: 1, title: 'Two keys go to the local server and stay there',
     lit: ['ui', 'mgmt'],
     beats: [[h('ui', 'mgmt', 'POST /api/configure')], [{ stamp: 'mgmt', text: 'Host · Origin · CSRF ✓' }]],
-    body: `<p>You paste a Sent API key and an OpenAI API key into the dashboard. The page posts them to the local <b>management server</b>.</p>
-      <p>Every non-GET request must target <code>localhost</code>, have a matching <code>Origin</code>, and carry a per-process CSRF token the page read from <code>/api/state</code>. The keys stay in server memory only: never in <code>localStorage</code>, <code>.env</code>, or the backup file.</p>`,
+    body: `<p>You paste a Sent API key and an OpenAI API key in the dashboard. The page sends them to the local <b>management server</b>.</p>
+      <p>Each request that changes state must go to <code>localhost</code>, have a matching <code>Origin</code>, and carry the CSRF token from <code>/api/state</code>. The keys stay in server memory only. The browser does not keep them.</p>
+      <p>You can also set <code>SENT_DM_API_KEY</code> and <code>OPENAI_API_KEY</code> in the shell or in <code>.env</code>. The server checks them at startup with the same code, then deletes them from its environment.</p>`,
     payload: 'POST /api/configure\nHost: localhost:3000\nOrigin: http://localhost:3000\nx-csrf-token: 9f2c…e41a\n\n{ "sentKey": "sent_live_…", "openaiKey": "sk-proj-…" }',
-    refs: ['src/server.ts:106', 'src/server.ts:127'],
+    refs: ['src/server.ts:150', 'src/server.ts:172', 'src/server.ts:367'],
   },
   {
-    ch: 1, title: 'Discover existing voice numbers (never buy one)',
-    lit: ['mgmt', 'sent'],
-    beats: [[h('mgmt', 'sent', 'GET /v3/channels/voice')], [h('sent', 'mgmt', '200 · numbers[]', 'ok')], [{ set: { ui: 'Number +1 628 555 0199 (default) selected' } }]],
-    body: `<p>The server lists the account's voice numbers, keeps only those with status <code>ACTIVE</code>, and pre-selects the one flagged <code>default_for_app_calls</code>.</p>
-      <p>It <b>never buys or allocates</b> a number. If there are no active numbers, it stops with an error telling you to enable voice in Sent first.</p>`,
+    ch: 1, title: 'Check both keys at the same time',
+    lit: ['mgmt', 'sent', 'openai'],
+    beats: [[h('mgmt', 'sent', 'GET /v3/channels/voice'), h('mgmt', 'oai', 'checkKey()')], [h('oai', 'openai', 'GET /v1/models')],
+      [h('sent', 'mgmt', '200 · numbers[]', 'ok'), h('openai', 'oai', '200 OK', 'ok')], [h('oai', 'mgmt')], [{ set: { ui: 'Number +1 628 555 0199 (default) selected' } }]],
+    body: `<p>The server lists the voice numbers on the Sent account. At the same time, it calls <code>GET /v1/models</code> to check the OpenAI key. If both checks fail, you see the Sent error first.</p>
+      <p>The server keeps only the numbers with the status <code>ACTIVE</code>, and selects the one marked <code>default_for_app_calls</code>. It <b>never buys</b> a number. A number with no callback URL is <code>INACTIVE</code>, so the server tells you to set one in Sent first.</p>`,
     payload: 'GET /v3/channels/voice      x-api-key: sent_live_…\n\n[{ "number": "+16285550199",\n   "status": "ACTIVE",\n   "default_for_app_calls": true,\n   "callback_url": "https://hooks.example.com/voice" }]',
-    refs: ['src/sent.ts:15', 'src/server.ts:132'],
+    refs: ['src/server.ts:180', 'src/server.ts:185', 'src/sent.ts:16', 'src/openai.ts:9'],
   },
   {
-    ch: 1, title: 'Check the OpenAI key, then look for a crashed session',
-    lit: ['mgmt', 'openai', 'disk'],
-    beats: [[h('mgmt', 'oai')], [h('oai', 'openai', 'GET /v1/models')], [h('openai', 'oai', '200 OK', 'ok')], [h('oai', 'mgmt')],
-      [h('mgmt', 'disk', 'read backup?')], [{ stamp: 'disk', text: 'none: clean start' }],
+    ch: 1, title: 'Look for a session that crashed',
+    lit: ['mgmt', 'disk'],
+    beats: [[h('mgmt', 'disk', 'read backup?')], [{ stamp: 'disk', text: 'none: clean start' }],
       [{ set: { keys: true, ui: 'Keys validated · active voice numbers loaded' } }]],
-    body: `<p>A cheap <code>GET /v1/models</code> proves the OpenAI key works before anything else happens.</p>
-      <p>Then a crash check: if an earlier run died and left <code>.sent-agent/routing-backup.json</code>, the server restores that number's old callback <b>right away</b>, before it allows a new Start. In this example the disk is clean.</p>`,
-    payload: 'GET https://api.openai.com/v1/models\nAuthorization: Bearer sk-proj-…        → 200\n\nif (backup) await restoreBackup(candidate);',
-    refs: ['src/server.ts:135', 'src/server.ts:140', 'src/backup.ts:9'],
+    body: `<p>If an earlier run stopped without a restore, it left <code>.sent-agent/routing-backup.json</code>. The server then restores that number’s old callback URL <b>at once</b>, before it allows a new Start.</p>
+      <p>In this example, the disk is clean.</p>`,
+    payload: 'if (backup) {\n  warning = "A previous session left a routing backup…";\n  await restoreBackup(candidate);\n}',
+    refs: ['src/server.ts:192', 'src/server.ts:65'],
   },
 
   // ── 2 · Start answering ───────────────────────────────────────────────
   {
-    ch: 2, title: 'Inside the click: an audio graph and a patched getUserMedia',
+    ch: 2, title: 'Inside the click: an audio graph and a new getUserMedia',
     lit: ['wk', 'mic', 'remote', 'sdk'],
-    beats: [[{ set: { audio: true } }], [{ stamp: 'wk', text: 'AudioContext · 24 kHz' }], [{ stamp: 'mic', text: 'getUserMedia patched', c: 'agent' }], [{ stamp: 'ui', text: 'notification permission ✓' }], { wait: 600 }],
-    body: `<p>Browsers only start audio inside a user gesture, so clicking <b>Start answering</b> synchronously creates a 24 kHz <code>AudioContext</code>, loads the AudioWorklet, and requests notification permission (Sent delivers incoming calls by push).</p>
-      <p>Then comes the key trick: <code>navigator.mediaDevices.getUserMedia</code> is replaced. Any audio-only request now gets a clone of a Web Audio <code>MediaStreamDestination</code>. When the Sent SDK later asks for the microphone, it gets the AI's voice. Your real microphone is never opened.</p>`,
-    payload: 'mediaDevices.getUserMedia = async (constraints) => {\n  const audioOnly = !!constraints?.audio && !constraints?.video;\n  if (!audioOnly) return nativeGetUserMedia(constraints);\n  // clone, so the SDK can\'t stop the master track\n  return softwareDestination.stream.clone();\n};',
-    refs: ['client/app.ts:862', 'client/app.ts:89', 'client/app.ts:127'],
+    beats: [[{ set: { audio: true } }], [{ stamp: 'wk', text: 'AudioContext · 24 kHz' }], [{ stamp: 'mic', text: 'getUserMedia replaced', c: 'agent' }], [{ stamp: 'ui', text: 'notification permission ✓' }], { wait: 600 }],
+    body: `<p>Browsers start audio only during a user action. So the <b>Start answering</b> click creates a 24 kHz <code>AudioContext</code>, loads the AudioWorklet, and asks for notification permission at once. Sent sends incoming calls to the tab by browser push.</p>
+      <p>Then the page replaces <code>navigator.mediaDevices.getUserMedia</code>. An audio-only request now gets a copy of a Web Audio <code>MediaStreamDestination</code>. When the Sent SDK asks for the microphone, it gets the agent’s voice. Your real microphone stays closed.</p>`,
+    payload: 'mediaDevices.getUserMedia = async (constraints) => {\n  const audioOnly = !!constraints?.audio && !constraints?.video;\n  if (!audioOnly) return nativeGetUserMedia(constraints);\n  this.softwareMicrophoneUsed = true;   // checked when a call connects\n  // a copy, so the SDK cannot stop the main track\n  return softwareDestination.stream.clone();\n};',
+    refs: ['client/app.ts:949', 'client/app.ts:101', 'client/app.ts:130'],
   },
   {
-    ch: 2, title: 'Preflight: can this key open the chosen voice model?',
+    ch: 2, title: 'Preflight: can this key open the selected voice model?',
     state: { phase: 'preparing', ui: 'Checking gpt-realtime-2.1 voice-session access…' },
     lit: ['oai', 'openai'],
     beats: [[h('ui', 'mgmt', 'POST /api/prepare')], [h('mgmt', 'oai', 'preflight()')], [h('oai', 'openai', 'WSS /v1/realtime')], [h('oai', 'openai', 'session.update')],
       [h('openai', 'oai', 'session.updated', 'ok')], [{ stamp: 'oai', text: 'model access ✓' }], [h('oai', 'openai', 'close')]],
-    body: `<p>Before touching any routing, the server opens a <b>real</b> voice session and immediately closes it. If your OpenAI project can't use the selected model, Start fails here and nothing has changed.</p>
-      <p>The app never silently falls back to a different model. You pick GPT-Realtime-2.1 (default), its Mini variant, or GPT-Live-1 explicitly.</p>`,
-    payload: '{ "type": "session.update", "session": {\n    "type": "realtime", "model": "gpt-realtime-2.1",\n    "output_modalities": ["audio"],\n    "audio": {\n      "input":  { "format": { "type": "audio/pcm", "rate": 24000 },\n                  "turn_detection": { "type": "server_vad", … },\n                  "transcription": { "model": "gpt-live-transcribe" } },\n      "output": { "voice": "marin" } } } }',
-    refs: ['src/server.ts:163', 'src/openai.ts:179', 'src/openai.ts:42'],
+    body: `<p>Before it touches the routing, the server opens a <b>real</b> voice session with the same settings as a call, then closes it. If your OpenAI project cannot use the model, Start stops here. Nothing has changed.</p>
+      <p>The app never changes to a different model without telling you. You select GPT-Realtime-2.1 (default), its Mini version, or GPT-Live-1.</p>`,
+    payload: '{ "type": "session.update", "session": {\n    "type": "realtime", "model": "gpt-realtime-2.1",\n    "output_modalities": ["audio"],\n    "reasoning": { "effort": "low" },\n    "tools": [take_message, end_call], "tool_choice": "auto",\n    "audio": {\n      "input":  { "format": { "type": "audio/pcm", "rate": 24000 },\n                  "turn_detection": { "type": "server_vad",\n                    "silence_duration_ms": 450, "interrupt_response": true, … },\n                  "transcription": { "model": "gpt-live-transcribe" } },\n      "output": { "voice": "marin" } } } }',
+    refs: ['src/server.ts:215', 'src/openai.ts:297', 'src/openai.ts:99'],
   },
   {
     ch: 2, title: 'Open a callback-only Cloudflare tunnel',
     lit: ['cfd', 'cf', 'gw'],
     beats: [[h('mgmt', 'cfd', 'spawn')], [{ set: { tunnel: true } }, h('cfd', 'cf', 'dial out · http2')], [{ stamp: 'cf', text: 'public URL assigned' }],
-      [h('cf', 'cfd', 'GET /health')], [h('cfd', 'gw')], [h('gw', 'cfd', '200 {ok:true}', 'ok')], [h('cfd', 'cf')],
+      [{ stamp: 'cf', text: 'DNS via 1.1.1.1' }], [h('cf', 'cfd', 'GET /health')], [h('cfd', 'gw')], [h('gw', 'cfd', '200 {ok:true}', 'ok')], [h('cfd', 'cf')],
       [{ set: { phase: 'prepared', ui: 'Tunnel ready · number routing still unchanged' } }, { stamp: 'gw', text: 'reachable ✓' }]],
-    body: `<p>The server runs <code>cloudflared</code> to create a <b>quick tunnel</b> (no account, no key) that points only at the <b>gateway</b>, a second Express app on a random localhost port.</p>
-      <p>It generates an unguessable callback path (<code>/voice/</code> + 48 hex characters) and health-checks the public URL end to end. The phone number's routing still hasn't been touched.</p>`,
-    payload: 'tunnel      = Tunnel.quick("http://127.0.0.1:<gatewayPort>")\ncallbackPath = "/voice/" + randomBytes(24).toString("hex")\ncallbackUrl  = "https://calm-fox-17.trycloudflare.com/voice/9c1e…a07f"',
-    refs: ['src/tunnel.ts:4', 'src/server.ts:165'],
+    body: `<p>The server runs <code>cloudflared</code> to open a <b>quick tunnel</b>. It needs no account and no key. The tunnel points only at the <b>gateway</b>, a second Express app on a random localhost port.</p>
+      <p>A new hostname takes some seconds to appear in DNS. So the server asks Cloudflare’s resolver (<code>1.1.1.1</code>) directly and waits up to 45 s for <code>/health</code>. This keeps an early “not found” out of your system DNS cache. Then it makes a random callback path. The routing of your number is still unchanged.</p>`,
+    payload: 'tunnel       = Tunnel.quick("http://127.0.0.1:<gatewayPort>")\nresolver     = ["1.1.1.1", "1.0.0.1"]        // not the OS DNS cache\nGET https://calm-fox-17.trycloudflare.com/health   → 200\ncallbackPath = "/voice/" + randomBytes(24).toString("hex")',
+    refs: ['src/tunnel.ts:40', 'src/tunnel.ts:15', 'src/server.ts:218'],
   },
   {
     ch: 2, title: 'Register the browser as a Sent user',
     lit: ['sdk', 'sent'],
     beats: [[h('ui', 'mgmt', 'POST /api/voice-token')], [h('mgmt', 'sent', 'POST /v3/channels/voice/tokens')], [h('sent', 'mgmt', '{ token } · ttl 600 s', 'ok')],
       [h('mgmt', 'ui', 'token')], [{ flash: 'sdk' }], [h('sdk', 'sent', 'register(token)')], [{ set: { reg: true } }, { stamp: 'sdk', text: 'registered ✓' }]],
-    body: `<p>The SDK's <code>tokenProvider</code> asks the local server for a voice token. The server mints one from Sent for a <b>fresh random identity</b> created at startup (<code>sent-ai-</code> + 12 hex characters), valid for 10 minutes.</p>
-      <p>The browser only ever sees this short-lived token, never your API keys. The SDK then registers with Sent, so calls routed to that identity ring in this tab.</p>`,
-    payload: 'POST /v3/channels/voice/tokens\n{ "identity": "sent-ai-3fa9c1e07b2d",\n  "number":   "+16285550199",\n  "ttl":      600 }',
-    refs: ['client/app.ts:667', 'src/server.ts:174', 'src/sent.ts:24'],
+    body: `<p>The SDK’s <code>tokenProvider</code> asks the local server for a voice token. The server gets one from Sent for a <b>new random identity</b> (<code>sent-ai-</code> and 12 hex characters). The token lasts 10 minutes. The SDK gets a new one before it expires.</p>
+      <p>The browser sees only this short-lived token, never your API keys. The SDK registers with Sent, so calls for that identity ring in this tab. SDK warnings and errors go to the dashboard event log.</p>`,
+    payload: 'POST /v3/channels/voice/tokens\n{ "identity": "sent-ai-3fa9c1e07b2d",\n  "number":   "+16285550199",\n  "ttl":      600 }\n\nnew SentVoice({ tokenProvider, logLevel: "warn",\n  logger: { warn: → event log, error: → event log } })',
+    refs: ['client/app.ts:717', 'src/server.ts:224', 'src/sent.ts:25'],
   },
   {
-    ch: 2, title: 'Heartbeat: proof the tab is still alive',
+    ch: 2, title: 'Heartbeat: proof that the tab is alive',
     lit: ['ui', 'mgmt'],
     streams: [{ route: ['ui', 'mgmt'], c: 'ok', every: 1000 }],
-    beats: [[{ set: { hb: true } }], [{ stamp: 'mgmt', text: 'online: last beat < 7 s' }], { wait: 2600 }],
-    body: `<p>Every 2 seconds the page posts <code>{ registered, busy }</code>. The server treats the browser as <b>online</b> only if the last heartbeat is under 7 seconds old.</p>
-      <p>A watchdog checks every 2 seconds. If routing is live and the tab goes quiet (closed, crashed, laptop asleep), the server stops and restores routing on its own.</p>`,
-    payload: 'POST /api/heartbeat   { "registered": true, "busy": false }   // every 2 s\n\nonline = registered && Date.now() - heartbeat < 7000',
-    refs: ['client/app.ts:597', 'src/server.ts:179', 'src/server.ts:266'],
+    beats: [[{ set: { hb: true } }], [{ stamp: 'ui', text: 'Web Worker keeps time' }], [{ stamp: 'mgmt', text: 'alive: last beat < 7 s' }], { wait: 2600 }],
+    body: `<p>Every 2 seconds the page sends <code>{ registered, busy }</code>. A dedicated <b>Web Worker</b> keeps the time. Chrome slows normal page timers in a hidden tab to once a minute, but not worker timers. So the tab can be in the background.</p>
+      <p>The server keeps two facts apart. The tab is <b>alive</b> if the last beat is newer than 7 s. The tab is <b>online</b> if it is alive and the SDK is registered. The watchdog stops the agent only when the tab is not alive.</p>`,
+    payload: '// a worker keeps the time; the page sends the beat\nnew Worker(blob("setInterval(() => postMessage(0), 2000)"))\nPOST /api/heartbeat   { "registered": true, "busy": false }\n\nalive  = Date.now() - heartbeat < 7000     // watchdog\nonline = registered && alive                // call decision',
+    refs: ['client/app.ts:646', 'src/server.ts:60', 'src/server.ts:327'],
   },
   {
-    ch: 2, title: 'Back up first, then reroute the number',
+    ch: 2, title: 'Back up first, then change the number',
     state: { phase: 'activating', ui: 'Activating inbound routing…' },
     lit: ['mgmt', 'sent', 'disk'],
     beats: [[h('ui', 'mgmt', 'POST /api/activate')], [h('mgmt', 'sent', 'GET …/voice/+16285550199')], [h('sent', 'mgmt', 'callback: hooks.example.com', 'ok')],
       [h('mgmt', 'disk', 'save backup', 'agent')], [{ set: { disk: 'pre' } }, { stamp: 'disk', text: 'written BEFORE any change', c: 'agent' }],
       [h('mgmt', 'sent', 'POST /v3/channels/voice')], [{ set: { cb: 'ours' } }, { stamp: 'sent', text: 'callback → tunnel', c: 'agent' }],
       [h('sent', 'mgmt', 'callback_secret: whsec_…', 'agent')], [h('mgmt', 'disk', 'save secret', 'agent')], [{ set: { disk: 'full', phase: 'answering' } }]],
-    body: `<p>Activation is refused unless the browser is registered, heartbeating, and the tunnel is up.</p>
-      <p>The server reads the number's current callback, <b>writes a backup to disk before changing anything</b>, then calls Sent's documented add-existing-number operation with the tunnel URL. The response includes the number's HMAC callback secret (not rotated), which is saved to the backup too.</p>`,
-    payload: '// .sent-agent/routing-backup.json  (mode 0600)\n{ "number":       "+16285550199",\n  "previousUrl":    "https://hooks.example.com/voice",\n  "installedUrl":   "https://calm-fox-17.trycloudflare.com/voice/9c1e…",\n  "callbackSecret": "whsec_…" }',
-    refs: ['src/server.ts:184', 'src/server.ts:194', 'src/sent.ts:18'],
+    body: `<p>The server refuses to activate unless the tab is online and the tunnel is up.</p>
+      <p>It reads the number’s current callback URL and <b>writes a backup to disk before it changes anything</b>. Then it calls Sent’s add-existing-number operation with the tunnel URL. The response contains the number’s callback secret, which is not rotated. The server adds the secret to the backup.</p>`,
+    payload: '// .sent-agent/routing-backup.json  (mode 0600, no API keys)\n{ "number":       "+16285550199",\n  "previousUrl":    "https://hooks.example.com/voice",\n  "installedUrl":   "https://calm-fox-17.trycloudflare.com/voice/9c1e…",\n  "callbackSecret": "whsec_…",\n  "createdAt":      "2026-10-10T12:00:00.000Z" }',
+    refs: ['src/server.ts:234', 'src/server.ts:244', 'src/sent.ts:19'],
   },
   {
-    ch: 2, title: 'Self-test the whole public route',
+    ch: 2, title: 'Test the full public path',
     lit: ['gw', 'sent'],
     beats: [[h('mgmt', 'sent', 'POST …/test')], [h('sent', 'cf', 'call.request · test')], [h('cf', 'cfd')], [h('cfd', 'gw')], [{ stamp: 'gw', text: 'HMAC ✓ · test → connect' }],
       [h('gw', 'cfd', 'connectToUser', 'ok')], [h('cfd', 'cf')], [h('cf', 'sent')], [h('sent', 'mgmt', 'outcome: ok', 'ok')],
       [{ set: { ui: 'Ready for inbound calls. Keep this browser tab open.' } }]],
-    body: `<p>Sent's test endpoint sends a synthetic, signed <code>call.request</code> through the entire public path: Sent → Cloudflare → cloudflared → gateway.</p>
-      <p>For <code>test: true</code> requests the gateway answers <code>connectToUser</code> so the route validates, but a test never starts a real call. The dashboard then shows: <i>“Ready for inbound calls.”</i></p>`,
-    payload: '{ "type": "call.request", "version": "1", "test": true,\n  "callId": "test_…", "number": "+16285550199" }\n\n// security.ts: synthetic tests validate the route,\n// but must never originate a call',
-    refs: ['src/server.ts:199', 'src/security.ts:30'],
+    body: `<p>Sent’s test endpoint sends a signed <code>call.request</code> with <code>test: true</code> through the full public path: Sent → Cloudflare → cloudflared → gateway. Sent places no call and stores nothing.</p>
+      <p>The gateway answers a test with <code>connectToUser</code>, so the path passes. A test never starts a call: no hold, no pre-warm, no event log line. If the outcome is not <code>ok</code>, Start fails and the routing goes back.</p>`,
+    payload: '{ "type": "call.request", "version": "1", "test": true,\n  "callId": "test_…", "number": "+16285550199" }\n\n→ { "outcome": "ok", "answer": { "action": "connectToUser" }, … }\n   other outcomes: timeout · connection_failed · http_error · invalid_answer',
+    refs: ['src/server.ts:249', 'src/security.ts:30', '_docs/sent-calls-and-logs.md'],
   },
 
   // ── 3 · A call arrives ────────────────────────────────────────────────
@@ -636,70 +641,80 @@ const STEPS = [
     ch: 3, title: 'Someone dials the number',
     state: { call: 'ringing' },
     lit: ['phone', 'sent'],
-    beats: [[{ say: 'caller', text: '☎ dialing +1 628 555 0199…' }], [h('phone', 'sent', 'PSTN call', 'caller')], [{ stamp: 'sent', text: 'who takes this call?' }]],
-    body: `<p>Someone calls the Sent number from an ordinary phone.</p>
-      <p>Sent decides where each inbound call goes by asking the number's <b>callback URL</b>, which now points at your tunnel.</p>`,
+    beats: [[{ say: 'caller', text: '☎ dialing +1 628 555 0199…' }], [h('phone', 'sent', 'PSTN call', 'caller')], [{ stamp: 'sent', text: 'call record call_8f2…' }], [{ stamp: 'sent', text: 'who takes this call?' }]],
+    body: `<p>Someone calls the Sent number from a normal phone. Sent makes a call record with an ID that starts with <code>call_</code>. Later, you can read this record with <code>GET /v3/calls/{id}</code>.</p>
+      <p>To decide where the call goes, Sent asks the number’s <b>callback URL</b>. The callback URL now points at your tunnel.</p>`,
     payload: '',
-    refs: ['README.md'],
+    refs: ['_docs/sent-calls-and-logs.md'],
   },
   {
     ch: 3, title: 'Sent asks the gateway: who takes this call?',
     lit: ['gw', 'cf'],
     beats: [[h('sent', 'cf', 'POST /voice/9c1e…')], [h('cf', 'cfd')], [h('cfd', 'gw', 'signed call.request')], [{ stamp: 'gw', text: 'path = nonce ✓' }]],
-    body: `<p>The question arrives through Cloudflare at the gateway. The gateway has exactly <b>two routes</b>: <code>/health</code> and this one random <code>/voice/&lt;nonce&gt;</code> path, with a 64 KB body limit.</p>
-      <p>The dashboard, keys, tokens, and audio bridge live on a different server that the tunnel can't reach.</p>`,
-    payload: 'POST /voice/9c1e…a07f\nx-webhook-id:        msg_2Lk…\nx-webhook-timestamp: 1791544800\nx-webhook-signature: v1,K3x9…=\n\n{ "type": "call.request", "version": "1",\n  "callId": "call_8f2…", "direction": "inbound",\n  "number": "+16285550199",\n  "to": { "kind": "number", "number": "+16285550199" } }',
-    refs: ['src/server.ts:81'],
+    body: `<p>The question comes through Cloudflare to the gateway. The gateway has exactly <b>two routes</b>: <code>/health</code> and this random <code>/voice/&lt;nonce&gt;</code> path, with a 64 KB body limit.</p>
+      <p>A caller waits while the gateway decides. Sent gives each attempt 2.5 s and makes 2 attempts. So the gateway decides from memory only, with no network calls.</p>`,
+    payload: 'POST /voice/9c1e…a07f\nx-webhook-id:        <callback configuration id>\nx-webhook-timestamp: 1791544800\nx-webhook-signature: v1,K3x9…=\nx-request-id:        <Sent request id>\n\n{ "type": "call.request", "version": "1",\n  "callId": "call_8f2…", "direction": "inbound",\n  "number": "+16285550199",\n  "to": { "kind": "number", "number": "+16285550199" } }',
+    refs: ['src/server.ts:125'],
   },
   {
     ch: 3, title: 'Verify the HMAC signature before reading the body',
     lit: ['gw'],
     beats: [[{ stamp: 'gw', text: 'HMAC-SHA256 ✓' }], { wait: 500 }, [{ stamp: 'gw', text: 'timestamp ±5 min ✓' }], { wait: 900 }],
-    body: `<p>The gateway recomputes <b>HMAC-SHA256</b> over <code>id.timestamp.</code> plus the raw body, keyed with the base64-decoded <code>whsec_</code> secret, and compares in constant time with <code>timingSafeEqual</code>.</p>
-      <p>Timestamps more than 5 minutes off are rejected, which blocks replays. The JSON is parsed only <i>after</i> the signature checks out.</p>`,
-    payload: 'const key = Buffer.from(secret.slice(6), "base64");   // strip "whsec_"\nconst expected = createHmac("sha256", key)\n  .update(`${id}.${stamp}.`).update(rawBody).digest();\n\n// accept any space-separated "v1,<base64>" that matches\nreturn signature.split(/\\s+/).some(part => timingSafeEqual(…));',
+    body: `<p>The gateway calculates <b>HMAC-SHA256</b> over <code>id.timestamp.</code> plus the raw body. The key is the <code>whsec_</code> secret, decoded from base64. The gateway compares the result in constant time with <code>timingSafeEqual</code>.</p>
+      <p>It rejects timestamps more than 5 minutes off, which blocks replays. It parses the JSON only <i>after</i> the signature is correct. A bad request gets <code>401</code>. Sent does not retry a 4xx, and the call fails as <code>rejected</code>.</p>`,
+    payload: 'const key = Buffer.from(secret.slice(6), "base64");   // remove "whsec_"\nconst expected = createHmac("sha256", key)\n  .update(`${id}.${stamp}.`).update(rawBody).digest();\n\n// accept any space-separated "v1,<base64>" that matches\nreturn signature.split(/\\s+/).some(part => timingSafeEqual(…));',
     refs: ['src/security.ts:8'],
   },
   {
     ch: 3, title: 'Decide: connect the call, or reject as busy',
     lit: ['gw'],
-    beats: [[h('mgmt', 'gw', 'phase · heartbeat · busy?')], [{ stamp: 'gw', text: 'ready ✓  busy ✗' }], [h('gw', 'cfd', 'connectToUser', 'ok')], [h('cfd', 'cf')],
-      [h('cf', 'sent', '{ action: connectToUser }', 'ok')], [{ stamp: 'gw', text: 'reserved for 20 s', c: 'agent' }]],
-    body: `<p><code>decideInbound()</code> connects only if routing is live <b>and</b> the heartbeat is fresh, and no other call is active, ringing, or reserved. Otherwise it returns <code>reject: busy</code>.</p>
-      <p>A connect reserves the agent for 20 seconds so a second caller can't get in while the first is being set up. Decisions are cached for 15 seconds, so Sent's retries get the same answer.</p>`,
-    payload: 'decideInbound(q, number, identity,\n  /* ready */ phase === "answering" && online(),\n  /* busy  */ !!active || browserBusy || reservedUntil > Date.now())\n\n→ { "action": { "action": "connectToUser",\n                "identity": "sent-ai-3fa9c1e07b2d" } }',
-    refs: ['src/security.ts:27', 'src/server.ts:90'],
+    beats: [[h('mgmt', 'gw', 'phase · online · busy?')], [{ stamp: 'gw', text: 'ready ✓  busy ✗' }], [h('gw', 'cfd', 'connectToUser', 'ok')], [h('cfd', 'cf')],
+      [h('cf', 'sent', '{ action: connectToUser }', 'ok')], [{ stamp: 'gw', text: 'agent held for 20 s', c: 'agent' }]],
+    body: `<p><code>decideInbound()</code> connects only if routing is live, the tab is <b>online</b>, and no other call is active, ringing, or on hold. Otherwise it answers <code>reject: busy</code>.</p>
+      <p>A connect holds the agent for 20 s, so a second caller cannot get in during setup. The gateway keeps each answer for 15 s, so a retry from Sent gets the same answer.</p>`,
+    payload: 'decideInbound(q, number, identity,\n  /* ready */ phase === "answering" && online(),\n  /* busy  */ !!active || browserBusy || reservedUntil > Date.now())\n\n→ { "action": { "action": "connectToUser",\n                "identity": "sent-ai-3fa9c1e07b2d" } }\n\nevent log   call: Inbound call call_8f2…: connectToUser.',
+    refs: ['src/security.ts:27', 'src/server.ts:134'],
   },
   {
-    ch: 3, title: 'The browser tab rings, but doesn’t pick up yet',
+    ch: 3, title: 'Pre-warm: open the model session while Sent rings the tab',
+    lit: ['mgmt', 'oai', 'openai'],
+    beats: [[h('mgmt', 'oai', 'prewarm()', 'agent')], [h('oai', 'openai', 'WSS · session.update')], [h('openai', 'oai', 'session.updated', 'ok')],
+      [{ set: { warm: true } }, { stamp: 'oai', text: 'kept for 25 s', c: 'agent' }]],
+    body: `<p>When it answers Sent, the server also starts to open the OpenAI session for this call. It does not wait for the session. The session starts while Sent delivers the push to the browser, so the caller hears ringing for less time.</p>
+      <p>If no bridge takes the session in 25 s, the server closes it. If the pre-warm fails, the server writes a notice and opens a new session when the call is answered.</p>`,
+    payload: 'if (answer.action.action === "connectToUser") {\n  reservedUntil = Date.now() + 20_000;\n  prewarm();   // not awaited: Sent gets its answer at once\n}\n\nwarm = { voice, ready: voice.connect(),\n         timer: setTimeout(discardWarm, 25_000) }',
+    refs: ['src/server.ts:139', 'src/server.ts:83'],
+  },
+  {
+    ch: 3, title: 'The browser tab rings, but does not pick up yet',
     lit: ['sdk'],
     beats: [[h('sent', 'sdk', 'incomingCall', 'caller')], [{ flash: 'sdk' }, { set: { ui: 'Incoming call · preparing the model connection first' } }], [{ stamp: 'sdk', text: 'not answering yet', c: 'agent' }]],
-    body: `<p>Sent routes the call to the identity the gateway named, and the SDK in your tab emits <code>incomingCall</code>.</p>
-      <p>The page holds off on <code>accept()</code>. Answering before the AI is connected would leave the caller hearing silence.</p>`,
+    body: `<p>Sent sends the call to the identity that the gateway named. The SDK in your tab emits <code>incomingCall</code>.</p>
+      <p>The page does not call <code>accept()</code> yet. If it answered before the agent was connected, the caller could hear silence.</p>`,
     payload: 'client.on("incomingCall", (invite) => handleIncomingInvite(invite));\n// rejects if not answering, or if a call is already active',
-    refs: ['client/app.ts:757'],
+    refs: ['client/app.ts:832'],
   },
   {
     ch: 3, title: 'Model first, then pick up',
     lit: ['bridge', 'mgmt', 'oai'],
-    beats: [[{ set: { bridge: true } }, h('bridge', 'mgmt', 'WS /bridge · start')], [h('mgmt', 'oai', 'new OpenAIVoice')], [h('oai', 'openai', 'session.update')],
-      [h('openai', 'oai', 'session.updated', 'ok')], [h('oai', 'mgmt')], [h('mgmt', 'bridge', '{ type: ready }', 'ok')], [{ stamp: 'wk', text: 'capture on' }],
+    beats: [[{ set: { bridge: true } }, h('bridge', 'mgmt', 'WS /bridge · start')], [h('mgmt', 'oai', 'takeWarm()')], [{ set: { warm: false } }, { stamp: 'oai', text: 'pre-warmed session adopted', c: 'ok' }],
+      [h('mgmt', 'bridge', '{ type: ready }', 'ok')], [{ stamp: 'wk', text: 'capture on · queue 120 s' }],
       [h('sdk', 'sent', 'invite.accept()', 'ok')], [h('sent', 'phone', 'connected', 'ok')], [{ set: { call: 'connected', ui: 'Caller connected' } }]],
-    body: `<p>The page opens a WebSocket to the local server (authenticated with the same CSRF token), and the server opens a <b>dedicated OpenAI session for this call</b>.</p>
-      <p>Only after the server replies <code>ready</code> does the page enable caller capture and call <code>invite.accept()</code>. If the model isn't ready within 20 seconds, the call is rejected instead of answered.</p>`,
-    payload: 'browser → server   { "type": "start", "callId": "6f1d…" }\nserver  → OpenAI   session.update   (server VAD · transcription · voice "marin")\nOpenAI  → server   session.updated\nserver  → browser  { "type": "ready", "model": "gpt-realtime-2.1" }\nbrowser            audio.setCapturing(true); await invite.accept();',
-    refs: ['client/app.ts:817', 'client/app.ts:820', 'src/server.ts:240'],
+    body: `<p>The page opens a WebSocket to the local server, with the CSRF token. The server gives the <b>pre-warmed session</b> to this call and sends its events to the socket. If there is no pre-warmed session, it opens a new one.</p>
+      <p>The page turns on caller capture and calls <code>invite.accept()</code> only after the server replies <code>ready</code>. The reply names the model, so the page can set the playback limit. If the model is not ready in 20 s, the page rejects the call.</p>`,
+    payload: 'browser → server   { "type": "start", "callId": "6f1d…" }\nserver             voice = await takeWarm() ?? new OpenAIVoice(…)\nserver  → browser  { "type": "ready", "model": "gpt-realtime-2.1" }\nevent log          call: OpenAI voice pre-warmed; waiting for phone media.\nbrowser            audio.setCapturing(true); await invite.accept();',
+    refs: ['src/server.ts:311', 'client/app.ts:868', 'client/app.ts:896'],
   },
   {
-    ch: 3, title: 'Connected: the AI speaks first',
+    ch: 3, title: 'Connected: check the microphone, then greet',
     state: { call: 'connected' },
-    lit: ['bridge', 'oai'],
-    beats: [[h('bridge', 'mgmt', '{ type: greet }')], [h('mgmt', 'oai')], [h('oai', 'openai', 'response.create')],
-      [{ say: 'agent', text: 'Hi, I’m Sent’s AI assistant. How can I help you today?' }, { burst: AGENT, c: 'agent', n: 7, every: 280 }], { wait: 3200 }],
-    body: `<p>When the SDK reports <code>connected</code>, the page sends <code>greet</code> once. The server tells the model to say the configured greeting and to identify itself as an AI assistant.</p>
-      <p>The greeting audio follows the same path as every answer after it, shown in detail in the next chapter.</p>`,
-    payload: '{ "type": "response.create",\n  "response": { "instructions":\n    "Greet the caller now in English. Say: Hi, I’m Sent’s AI\n     assistant. How can I help you today? Then pause and listen.\n     Identify yourself as an AI assistant. Do not repeat the greeting." } }',
-    refs: ['client/app.ts:734', 'src/openai.ts:69'],
+    lit: ['sdk', 'bridge', 'oai'],
+    beats: [[{ stamp: 'sdk', text: 'software mic in use ✓', c: 'ok' }], [h('bridge', 'mgmt', '{ type: greet }')], [h('mgmt', 'oai')], [h('oai', 'openai', 'response.create')],
+      [{ say: 'agent', text: 'Hi, thanks for calling Sent! I’m an AI assistant. What can I help you with?' }, { burst: AGENT, c: 'agent', n: 7, every: 280 }], [{ stamp: 'oai', text: 'silence timer: 60 s', c: 'agent' }], { wait: 2600 }],
+    body: `<p>When the SDK reports <code>connected</code>, the page first checks that the SDK took the <b>software microphone</b>. If it did not, the SDK could send your room audio to the caller. So the page ends the call.</p>
+      <p>Then the page sends <code>greet</code> one time. The server tells the model to say the greeting and to say that it is an AI assistant. The 60-second silence timer starts here.</p>`,
+    payload: 'if (audio && !audio.softwareMicrophoneUsed) → end the call\n\n{ "type": "response.create",\n  "response": { "instructions":\n    "Greet the caller now in English. Say: Hi, thanks for calling Sent!\n     I’m an AI assistant. What can I help you with? Then pause and\n     listen. Identify yourself as an AI assistant. Do not repeat the\n     greeting." } }',
+    refs: ['client/app.ts:781', 'src/openai.ts:132'],
   },
 
   // ── 4 · The audio loop ────────────────────────────────────────────────
@@ -708,45 +723,45 @@ const STEPS = [
     state: { call: 'connected', bridge: true },
     lit: ['remote', 'wk', 'bridge'],
     streams: [{ route: CALLER, c: 'caller', every: 330 }],
-    beats: [[{ say: 'caller', text: 'What time do you close today?' }], { wait: 4200 }, [{ set: { ui: 'caller: What time do you close today?' } }]],
-    body: `<p>The caller's voice arrives over Sent's WebRTC connection. The SDK plays it into an <code>&lt;audio&gt;</code> element that is <b>muted at volume 0</b>, so your speakers stay silent.</p>
-      <p>The page connects that element's <code>MediaStream</code> to the AudioWorklet, which cuts it into <b>480-sample frames</b> (20 ms at 24 kHz), converts Float32 to little-endian PCM16 (960 bytes), and sends each frame as a binary WebSocket message. The server base64-encodes it for OpenAI.</p>`,
+    beats: [[{ say: 'caller', text: 'Can I send WhatsApp messages with Sent?' }], { wait: 4200 }],
+    body: `<p>The caller’s voice comes over Sent’s WebRTC connection. The SDK plays it into an <code>&lt;audio&gt;</code> element that is <b>muted at volume 0</b>, so your speakers stay silent.</p>
+      <p>The page connects the element’s <code>MediaStream</code> to the AudioWorklet. The worklet cuts it into <b>480-sample frames</b> (20 ms at 24 kHz), converts Float32 to little-endian PCM16 (960 bytes), and sends each frame as a binary WebSocket message. The server sends it to OpenAI as base64.</p>`,
     payload: '// audio-worklet.js: every 480 samples\nview.setInt16(i * 2, s < 0 ? s * 32768 : s * 32767, true);\nthis.port.postMessage({ type: "capture", audio: buffer }, [buffer]);\n\n// server → OpenAI\n{ "type": "input_audio_buffer.append", "audio": "AAABAP7/…" }',
-    refs: ['client/app.ts:642', 'public/audio-worklet.js:61', 'src/openai.ts:61'],
+    refs: ['client/app.ts:692', 'public/audio-worklet.js:65', 'src/openai.ts:124'],
   },
   {
     ch: 4, title: 'Model → caller, through the software microphone',
     state: { call: 'connected', bridge: true },
     lit: ['wk', 'mic', 'sdk'],
     streams: [{ route: AGENT, c: 'agent', every: 330 }],
-    beats: [[{ say: 'agent', text: 'We close at 6 pm today.' }], [{ queue: .35, ms: 900 }], { wait: 2200 }, [{ queue: .08, ms: 1400 }], [{ set: { ui: 'agent: We close at 6 pm today.' } }]],
-    body: `<p>OpenAI streams <code>response.output_audio.delta</code> events. The server decodes them to raw PCM and forwards binary frames, plus an <code>audio-meta</code> message with the item ID.</p>
-      <p>The worklet queues the samples and plays them into the <code>MediaStreamDestination</code>, the <b>software mic</b> the SDK got from the patched <code>getUserMedia</code>. The SDK sends it to Sent like any other mic input, and the caller hears the AI.</p>`,
+    beats: [[{ say: 'agent', text: 'Yes. WhatsApp, SMS, and RCS, all from one API.' }], [{ queue: .35, ms: 900 }], { wait: 2200 }, [{ queue: .08, ms: 1400 }]],
+    body: `<p>OpenAI streams <code>response.output_audio.delta</code> events. The server decodes them to raw PCM and sends binary frames, each after an <code>audio-meta</code> message with the item ID.</p>
+      <p>The worklet puts the samples in a queue and plays them into the <code>MediaStreamDestination</code>. This is the <b>software microphone</b> that the SDK got from the new <code>getUserMedia</code>. The SDK sends it to Sent like any microphone, and the caller hears the agent.</p>`,
     payload: 'OpenAI → server   { "type": "response.output_audio.delta",\n                    "item_id": "item_7Qa…", "delta": "<base64 pcm16>" }\nserver → browser  { "type": "audio-meta", "itemId": "item_7Qa…" } + binary PCM\nworklet           playbackQueue → output → MediaStreamDestination\nSDK               "microphone" track → Sent → caller',
-    refs: ['src/openai.ts:83', 'client/app.ts:148', 'public/audio-worklet.js:72'],
+    refs: ['src/openai.ts:157', 'client/app.ts:865', 'public/audio-worklet.js:76'],
   },
   {
     ch: 4, title: 'Full duplex, with no echo path',
     state: { call: 'connected', bridge: true },
     lit: ['remote', 'mic', 'ui'],
     streams: [{ route: CALLER, c: 'caller', every: 420 }, { route: AGENT, c: 'agent', every: 420, delay: 200 }],
-    beats: [[{ say: 'caller', text: 'Great, and is there parking?' }, { set: { ui: 'caller: Great, and is there parking?' } }], { wait: 1900 },
-      [{ say: 'agent', text: 'Yes, there’s a free lot behind the store.' }, { set: { ui: 'agent: Yes, there’s a free lot behind the store.' } }], { wait: 2600 }],
-    body: `<p>Both directions run at once. The worklet's <b>input is the remote stream only</b>, so model output never feeds back into capture and the AI never hears itself.</p>
-      <p>Transcripts come from OpenAI events (caller turns via <code>gpt-live-transcribe</code>, agent turns via the output transcript) and go to the dashboard and an in-memory event log. Nothing is recorded, and everything is discarded when the server exits.</p>`,
+    beats: [[{ say: 'caller', text: 'Great. And how much does it cost?' }, { set: { ui: 'caller: Great. And how much does it cost?' } }], { wait: 1900 },
+      [{ say: 'agent', text: 'I can’t see pricing, but I can take a message.' }, { set: { ui: 'agent: I can’t see pricing, but I can take a message.' } }], { wait: 2600 }],
+    body: `<p>Both directions run at the same time. The worklet’s <b>input is the caller stream only</b>. The agent output never goes back into the capture, so the agent never hears itself.</p>
+      <p>Captions come from OpenAI events: <code>gpt-live-transcribe</code> for the caller, and the output transcript for the agent. They go to the <b>Transcript</b> panel only. The event log keeps call events, not words. The app records no audio.</p>`,
     payload: 'process(inputs, outputs) {\n  const remote = inputs[0][0][i];        // caller only → capture\n  const model  = this.takeModelSample();  // queue → software mic\n  output[i] = model;                      // never mixed back into capture\n}',
-    refs: ['public/audio-worklet.js:82', 'client/app.ts:415', 'src/openai.ts:88'],
+    refs: ['public/audio-worklet.js:86', 'src/openai.ts:165'],
   },
   {
-    ch: 4, title: 'Guard rails against building latency',
+    ch: 4, title: 'Limits that stop latency from building up',
     state: { call: 'connected', bridge: true },
     lit: ['wk'],
     streams: [{ route: AGENT, c: 'agent', every: 200 }],
-    beats: [[{ queue: .84, ms: 2200 }], [{ stamp: 'wk', text: 'hard cap: 8 s Realtime · 1.5 s Live', c: 'bad' }], { wait: 900 }, [{ queue: .25, ms: 1200 }]],
-    body: `<p>Every buffer has a limit. The worklet's playback queue is capped at <b>8 s for Realtime</b> (its audio can arrive faster than real time) and <b>1.5 s for GPT-Live</b>. On overflow the call ends instead of silently dropping speech.</p>
-      <p>WebSockets also close if more than 128 KB backs up, frames over 24 KB are ignored, and every call is capped at 15 minutes.</p>`,
-    payload: 'if (queueSamples + pcm.length > maxQueueSamples) failOverflow(limitMs);\n// page: "…Ending the call to prevent lost speech."\n\nif (ws.bufferedAmount > 128 * 1024) ws.close(1011, "Audio congestion.");',
-    refs: ['public/audio-worklet.js:53', 'client/app.ts:793', 'src/server.ts:229', 'src/server.ts:244'],
+    beats: [[{ queue: .84, ms: 2200 }], [{ stamp: 'wk', text: 'hard cap: 120 s Realtime · 5 s Live', c: 'bad' }], { wait: 900 }, [{ queue: .25, ms: 1200 }]],
+    body: `<p>Each buffer has a limit. The playback queue holds up to <b>120 s for Realtime</b>, because Realtime sends audio about 6 times faster than real time. It holds <b>5 s for GPT-Live</b>, which sends audio in real time. If the queue becomes full, the call ends. Speech is never dropped without a message.</p>
+      <p>A WebSocket closes if more than 128 KB waits to be sent. The server ignores frames over 24 KB. Each call stops after 15 minutes.</p>`,
+    payload: 'const PLAYBACK_LIMIT_MS = { realtime: 120_000, live: 5_000 };\nif (queueSamples + pcm.length > maxQueueSamples) failOverflow(limitMs);\n// page: "…Ending the call to prevent lost speech."\n\nif (ws.bufferedAmount > 128 * 1024) ws.close(1011, "Audio congestion.");',
+    refs: ['client/app.ts:43', 'public/audio-worklet.js:47', 'src/server.ts:287', 'src/server.ts:302'],
   },
 
   // ── 5 · Barge-in ──────────────────────────────────────────────────────
@@ -755,116 +770,164 @@ const STEPS = [
     state: { call: 'connected', bridge: true, queue: .62 },
     lit: ['wk', 'bridge'],
     streams: [{ route: AGENT, c: 'agent', every: 340 }],
-    beats: [[{ say: 'agent', text: 'Our Market St store closes at 6, but the one on Fifth…' }], [h('wk', 'bridge', 'rendered · item_7Qa', 'agent')],
+    beats: [[{ say: 'agent', text: 'Sent works with SMS, WhatsApp, RCS, and you can also…' }], [h('wk', 'bridge', 'rendered · item_7Qa', 'agent')],
       [h('bridge', 'mgmt', 'playback · 1840 ms', 'agent')], [h('wk', 'bridge', '', 'agent')], [h('bridge', 'mgmt', 'playback · 2140 ms', 'agent')]],
-    body: `<p>As it renders samples, the worklet reports how many milliseconds of each model item have actually gone into the software mic. The page adds them up and sends <code>playback</code> messages.</p>
-      <p>So the server knows how much of the current answer the caller has <b>actually heard</b>, not just how much the model generated.</p>`,
+    body: `<p>While it plays samples, the worklet reports how many milliseconds of each model item went into the software microphone. The page adds them up and sends <code>playback</code> messages.</p>
+      <p>So the server knows how much of the answer the caller <b>actually heard</b>, not only how much the model made. Each report also counts as activity for the silence timer.</p>`,
     payload: 'worklet → page    { "type": "rendered", "itemId": "item_7Qa…", "audioMs": 10.67 }\npage    → server  { "type": "playback", "itemId": "item_7Qa…", "audioMs": 2140 }',
-    refs: ['public/audio-worklet.js:102', 'client/app.ts:306', 'src/openai.ts:76'],
+    refs: ['public/audio-worklet.js:107', 'client/app.ts:322', 'src/openai.ts:147'],
   },
   {
-    ch: 5, title: 'The caller interrupts',
+    ch: 5, title: 'The caller interrupts, and OpenAI cancels the answer',
     state: { call: 'connected', bridge: true, queue: .62 },
     lit: ['openai'],
     streams: [{ route: CALLER, c: 'caller', every: 300 }],
-    beats: [[{ say: 'caller', text: 'Oh, Market Street is perfect, thanks!' }], { wait: 1500 }, [h('openai', 'oai', 'speech_started', 'caller')], [{ stamp: 'openai', text: 'server VAD: caller talking', c: 'caller' }]],
-    body: `<p>OpenAI's server-side <b>voice activity detection</b> hears the caller start talking over the agent and emits <code>input_audio_buffer.speech_started</code>.</p>
-      <p>At this point the browser may still have seconds of unplayed agent audio queued.</p>`,
-    payload: '{ "type": "input_audio_buffer.speech_started", "audio_start_ms": 5120, … }',
-    refs: ['src/openai.ts:111'],
+    beats: [[{ say: 'caller', text: 'Sorry, one quick question first.' }], { wait: 1500 }, [{ stamp: 'openai', text: 'server VAD: caller talking', c: 'caller' }],
+      [{ stamp: 'openai', text: 'interrupt_response → answer cancelled', c: 'bad' }], [h('openai', 'oai', 'speech_started', 'caller')]],
+    body: `<p>OpenAI’s server-side <b>voice activity detection</b> hears the caller speak over the agent. The session has <code>interrupt_response: true</code>, so OpenAI <b>cancels the answer itself</b>. Then it sends <code>input_audio_buffer.speech_started</code>.</p>
+      <p>The browser can still have seconds of agent audio in its queue. The caller must not hear it.</p>`,
+    payload: '// session: turn_detection.interrupt_response = true\n// → OpenAI cancels the response; the app sends no response.cancel\n\n{ "type": "input_audio_buffer.speech_started", "audio_start_ms": 5120, … }',
+    refs: ['src/openai.ts:105', 'src/openai.ts:183'],
   },
   {
-    ch: 5, title: 'Clear, cancel, truncate',
+    ch: 5, title: 'Clear the queue, truncate the memory',
     state: { call: 'connected', bridge: true, queue: .62 },
     lit: ['wk', 'oai', 'openai'],
     streams: [{ route: CALLER, c: 'caller', every: 420 }],
-    beats: [[h('oai', 'mgmt')], [h('mgmt', 'bridge', '{ type: clear }', 'bad'), h('oai', 'openai', 'response.cancel', 'bad')],
-      [h('bridge', 'wk', 'clear', 'bad'), h('oai', 'openai', 'item.truncate @ 2140 ms', 'bad')], [{ queue: 0, ms: 260 }, { stamp: 'wk', text: 'unplayed audio dropped', c: 'bad' }],
+    beats: [[h('oai', 'mgmt')], [h('mgmt', 'bridge', '{ type: clear }', 'bad'), h('oai', 'openai', 'item.truncate @ 2140 ms', 'bad')],
+      [h('bridge', 'wk', 'clear', 'bad')], [{ queue: 0, ms: 260 }, { stamp: 'wk', text: 'unplayed audio dropped', c: 'bad' }],
       [{ stamp: 'openai', text: 'memory = what was heard', c: 'ok' }]],
-    body: `<p>Three things happen together: the browser <b>drops all unplayed samples</b>, the in-progress response is <b>cancelled</b>, and the model's copy of its answer is <b>truncated at 2,140 ms</b>, exactly what the caller heard.</p>
-      <p>So the AI won't assume the caller heard about the Fifth Avenue store. (GPT-Live handles overlap natively and skips this step.)</p>`,
-    payload: '{ "type": "response.cancel" }\n{ "type": "conversation.item.truncate",\n  "item_id": "item_7Qa…", "content_index": 0, "audio_end_ms": 2140 }',
-    refs: ['src/openai.ts:111', 'src/openai.ts:114', 'public/audio-worklet.js:25'],
+    body: `<p>The app does two things together. The browser <b>deletes all unplayed samples</b>. The server <b>truncates</b> the model’s copy of its answer at 2,140 ms, which is exactly what the caller heard.</p>
+      <p>So the agent does not think that the caller heard the rest of the sentence. GPT-Live manages overlap itself and skips this step.</p>`,
+    payload: 'server → browser  { "type": "clear" }\nserver → OpenAI   { "type": "conversation.item.truncate",\n                    "item_id": "item_7Qa…", "content_index": 0,\n                    "audio_end_ms": 2140 }',
+    refs: ['src/openai.ts:183', 'public/audio-worklet.js:26'],
   },
 
-  // ── 6 · GPT-Live mode ─────────────────────────────────────────────────
+  // ── 6 · Messages & hang-up ────────────────────────────────────────────
   {
-    ch: 6, title: 'Alternative: GPT-Live-1 with a GPT-6 text helper',
+    ch: 6, title: 'The agent takes a message',
+    state: { call: 'connected', bridge: true },
+    lit: ['oai', 'disk'],
+    beats: [[{ say: 'caller', text: 'I’m Ana, 415 555 0123. Please call me about pricing.' }], { wait: 1200 },
+      [h('openai', 'oai', 'function_call · take_message', 'agent')], [h('oai', 'mgmt', 'saveMessage()')], [h('mgmt', 'disk', 'append messages.jsonl', 'agent')],
+      [{ set: { msgs: 1 } }, { stamp: 'disk', text: 'saved · mode 0600', c: 'ok' }], [h('oai', 'openai', 'function_call_output { saved: true }', 'ok')],
+      [h('oai', 'openai', 'response.create')], [{ say: 'agent', text: 'Got it, Ana. I’ll pass that on. Anything else?' }, { burst: AGENT, c: 'agent', n: 5, every: 280 }], { wait: 1800 }],
+    body: `<p>Realtime models have two tools. When the agent cannot help, it calls <code>take_message</code> with the caller’s name, number, and message in their own words.</p>
+      <p>The server adds the message to <code>.sent-agent/messages.jsonl</code> and writes a <code>message</code> line in the event log. Then it tells the model <code>saved: true</code> or <code>saved: false</code>. So the agent cannot say that it took a message when the save failed.</p>
+      <p>A new answer can start only after the current one ends. So the server waits for <code>response.done</code> and for the save, then sends <code>response.create</code>.</p>`,
+    payload: '// .sent-agent/messages.jsonl  (one JSON object per line, mode 0600)\n{"time":"2026-10-10T12:01:12.004Z","number":"+16285550199",\n "callerName":"Ana","callbackNumber":"415 555 0123",\n "message":"Please call me about pricing."}\n\nevent log   message: Ana (415 555 0123): Please call me about pricing.',
+    refs: ['src/openai.ts:33', 'src/openai.ts:223', 'src/server.ts:53', 'src/backup.ts:10'],
+  },
+  {
+    ch: 6, title: 'The agent ends the call after the goodbye plays',
+    state: { call: 'connected', bridge: true },
+    lit: ['oai', 'wk', 'sdk'],
+    beats: [[{ say: 'caller', text: 'No, that’s all. Thanks!' }], { wait: 1000 }, [h('openai', 'oai', 'function_call · end_call', 'agent')], [h('oai', 'openai', 'function_call_output { ending: true }')],
+      [h('oai', 'openai', 'response.create · goodbye · tools off')], [{ say: 'agent', text: 'Thanks for calling, bye!' }, { burst: AGENT, c: 'agent', n: 4, every: 280 }, { queue: .3, ms: 600 }],
+      [h('openai', 'oai', 'response.done', 'ok')], [h('mgmt', 'bridge', '{ type: end-call }', 'agent')], [{ queue: 0, ms: 1200 }, { stamp: 'wk', text: 'queue drained', c: 'ok' }],
+      [h('sdk', 'sent', 'disconnect()')], [{ set: { call: 'idle', bridge: false, ui: 'Ready for the next inbound call' } }]],
+    body: `<p>When the caller is done, the agent calls <code>end_call</code>. The server does not hang up at once. It asks the model for a short goodbye, with tools off. In live tests, the model skipped or described its own goodbye in 4 of 5 calls.</p>
+      <p>When the goodbye response is done, the server sends <code>end-call</code>. The page waits until the queue is empty, then hangs up. If the caller speaks during the goodbye, OpenAI cancels it and the call continues.</p>`,
+    payload: '{ "type": "response.create",\n  "response": { "instructions": "Say a short, warm goodbye, like\n                “Thanks for calling, bye!”. Nothing else.",\n                "tool_choice": "none" } }\n\nresponse.done (not cancelled) → { "type": "end-call", "reason": "agent" }\npage: audio.whenDrained(() => call.disconnect())',
+    refs: ['src/openai.ts:51', 'src/openai.ts:190', 'client/app.ts:820'],
+  },
+  {
+    ch: 6, title: 'Silence, errors, and the Hang up button',
+    state: { call: 'connected', bridge: true },
+    lit: ['oai', 'ui'],
+    beats: [[{ stamp: 'oai', text: '60 s: no speech, no audio', c: 'agent' }], [h('mgmt', 'bridge', '{ type: end-call, reason: silence }', 'agent')], { wait: 600 },
+      [{ stamp: 'openai', text: 'request error → notice, call continues', c: 'ok' }], { wait: 600 }, [{ stamp: 'openai', text: 'insufficient_quota → call ends', c: 'bad' }], { wait: 600 },
+      [{ stamp: 'ui', text: 'Hang up → ends now' }], { wait: 1200 }],
+    body: `<ul><li><b>Silence.</b> If there is no caller speech and no agent audio for 60 s, the server ends the call. This applies to all voice models.</li>
+      <li><b>Request errors.</b> Most OpenAI <code>error</code> events do not stop the session, for example a truncate after the answer ended. The app writes a notice and the call continues.</li>
+      <li><b>Fatal errors.</b> Errors such as <code>invalid_api_key</code>, <code>insufficient_quota</code>, or <code>session_expired</code> end the call. A closed model socket also ends it.</li>
+      <li><b>Hang up.</b> The dashboard button ends the call at once.</li></ul>
+      <p>GPT-Live-1 does not get the two tools in this app.</p>`,
+    payload: 'const FATAL_ERROR_CODES = new Set(["session_expired", "invalid_api_key",\n  "insufficient_quota", "credit_balance_exhausted", …spend and usage limits]);\nemit({ type: isFatal(error) ? "error" : "notice", message });\n\nevent log   call: Ending the call after a long silence.',
+    refs: ['src/openai.ts:29', 'src/openai.ts:141', 'client/app.ts:1104'],
+  },
+
+  // ── 7 · GPT-Live mode ─────────────────────────────────────────────────
+  {
+    ch: 7, title: 'Alternative: GPT-Live-1 with a text helper',
     state: { call: 'connected', bridge: true },
     view: { mode: 'live' },
     lit: ['oai', 'openai'],
     beats: [[{ stamp: 'openai', text: '/v1/live/sessions' }], [h('openai', 'oai', 'session.delegation.created')], [h('oai', 'openai', 'POST /v1/responses · gpt-6-luna')],
       [h('openai', 'oai', 'output_text', 'ok')], [h('oai', 'openai', 'session.commentary.append')], [{ say: 'agent', text: '(GPT-Live speaks the helper’s answer)' }], { wait: 1600 }],
-    body: `<p>If you choose <b>GPT-Live-1</b>, the adapter uses <code>/v1/live/sessions</code> and Live-specific events instead (<code>session.start</code>, <code>session.input_audio.append</code>).</p>
-      <p>Live can <b>delegate</b> a question to the client. The server combines the transcript into turns, asks a GPT-6 text model (Luna by default, <code>reasoning.effort: none</code> for speed) for at most two spoken sentences, and appends the answer as commentary. The text model never receives audio and has no tools.</p>`,
-    payload: 'POST /v1/responses\n{ "model": "gpt-6-luna",\n  "reasoning": { "effort": "none" },   // Sol / Astra use "low"\n  "max_output_tokens": 600,\n  "input": "caller: What time do you close today?\\nagent: …" }',
-    refs: ['src/openai.ts:116', 'src/openai.ts:129', 'src/models.ts:13'],
+    body: `<p>If you select <b>GPT-Live-1</b>, the adapter uses <code>/v1/live/sessions</code> and Live events, such as <code>session.start</code> and <code>session.input_audio.append</code>. GPT-Live listens while it speaks.</p>
+      <p>GPT-Live can <b>give a question to the app</b> (client delegation). The adapter joins the transcript into turns and asks a text helper for at most two spoken sentences. GPT-6 Luna is the default. The answer goes back as commentary, and GPT-Live speaks it.</p>
+      <p>The helper never hears audio and has no tools. If it fails or takes more than 15 s, GPT-Live says that it cannot check, and offers a message.</p>`,
+    payload: 'POST /v1/responses\n{ "model": "gpt-6-luna",\n  "reasoning": { "effort": "none" },   // only gpt-6-astra uses "low"\n  "max_output_tokens": 600,             // 2000 at "low"\n  "input": "caller: Can I send WhatsApp messages?\\nagent: …" }',
+    refs: ['src/openai.ts:94', 'src/openai.ts:244', 'src/models.ts:16', '_docs/models.md'],
   },
 
-  // ── 7 · Stop & restore ────────────────────────────────────────────────
+  // ── 8 · Stop & restore ────────────────────────────────────────────────
   {
-    ch: 7, title: 'Hang up: one call at a time',
+    ch: 8, title: 'Hang up: one call at a time',
     state: { call: 'connected', bridge: true },
     lit: ['bridge', 'oai'],
     beats: [[h('phone', 'sent', 'hang up', 'caller')], [h('sent', 'sdk', 'disconnected')], [h('bridge', 'mgmt', '{ type: stop }')], [h('mgmt', 'oai', 'close()')], [h('oai', 'openai', 'close')],
       [{ set: { call: 'idle', bridge: false, queue: 0, ui: 'Ready for the next inbound call' } }]],
-    body: `<p>When either side hangs up, the page stops capture, clears the queue, and closes the bridge. The server closes that call's OpenAI session and waits up to 4 s for final usage.</p>
-      <p>The tab stays registered and routing stays live for the next caller, but the app never handles more than one call at a time.</p>`,
-    payload: 'call.on("disconnected", …)\n  → audio.setCapturing(false); audio.clearAudio(); bridge.stop();\nws.on("close")\n  → session.voice.close(); active = undefined;',
-    refs: ['client/app.ts:738', 'src/server.ts:261'],
+    body: `<p>A call ends when the caller hangs up, when the agent calls <code>end_call</code>, after 60 s of silence, or when you click <b>Hang up</b>. The page stops capture, clears the queue, and closes the bridge. The server closes the OpenAI session and waits up to 4 s for the final usage.</p>
+      <p>The tab stays registered and routing stays live for the next caller. The app never handles more than one call at a time.</p>`,
+    payload: 'call.on("disconnected", …)\n  → audio.setCapturing(false); audio.clearAudio(); bridge.stop();\nws.on("close")\n  → session.voice.close(); active = undefined;\n\nevent log   call: Call ended (completed).\n            call: Call media disconnected.',
+    refs: ['client/app.ts:800', 'src/server.ts:322'],
   },
   {
-    ch: 7, title: 'Stop & restore routing',
+    ch: 8, title: 'Stop & restore routing',
     state: { phase: 'stopping', ui: 'Restoring the number’s prior callback routing…' },
     lit: ['mgmt', 'sent', 'disk'],
     beats: [[h('ui', 'mgmt', 'POST /api/stop')], [h('mgmt', 'sent', 'GET …/+16285550199')], [h('sent', 'mgmt', 'still our URL ✓', 'ok')],
       [h('mgmt', 'sent', 'PATCH callback_url')], [{ set: { cb: 'prev' } }, { stamp: 'sent', text: 'callback restored', c: 'ok' }],
       [h('mgmt', 'disk', 'delete backup')], [{ set: { disk: null } }], [h('mgmt', 'cfd', 'stop')], [{ set: { tunnel: false } }],
       [{ set: { reg: false, audio: false, hb: false, phase: 'offline', ui: 'Stopped · real getUserMedia restored' } }]],
-    body: `<p>Stop runs while the heartbeat is still alive. The server re-reads the number and restores the previous callback <b>only if it still points at the URL this app installed</b>. It never overwrites a change made somewhere else.</p>
-      <p>Then it deletes the backup and stops the tunnel. The page unregisters, shuts down the audio graph, and restores the real <code>getUserMedia</code>.</p>`,
-    payload: 'if (current.callback_url !== saved.installedUrl) → warn, don\'t overwrite\nPATCH /v3/channels/voice/+16285550199\n{ "callback_url": "https://hooks.example.com/voice" }',
-    refs: ['client/app.ts:913', 'src/server.ts:59', 'src/server.ts:43'],
+    body: `<p>Stop runs while the heartbeat is still alive. The server reads the number again. It restores the old callback URL <b>only if the number still points at the URL that this app installed</b>. It never overwrites a change made somewhere else.</p>
+      <p>Then it deletes the backup and stops the tunnel. The page unregisters, shuts down the audio graph, and puts back the real <code>getUserMedia</code>. The messages file stays.</p>`,
+    payload: 'if (current.callback_url !== saved.installedUrl) → warn, do not overwrite\nPATCH /v3/channels/voice/+16285550199\n{ "callback_url": "https://hooks.example.com/voice" }\n\nevent log   routing: Previous callback URL restored.',
+    refs: ['client/app.ts:989', 'src/server.ts:102', 'src/server.ts:65'],
   },
   {
-    ch: 7, title: 'Safety nets when things go wrong',
+    ch: 8, title: 'Safety nets when things go wrong',
     view: { disk: 'full' },
-    lit: ['mgmt', 'disk'],
+    lit: ['mgmt', 'disk', 'sdk'],
     beats: [[{ stamp: 'ui', text: 'tab closed → heartbeat stops', c: 'bad' }], { wait: 700 }, [{ stamp: 'mgmt', text: 'watchdog: > 7 s → stop()', c: 'agent' }], { wait: 700 },
+      [{ stamp: 'sdk', text: 'SDK offline → new calls busy', c: 'agent' }], { wait: 700 },
       [{ stamp: 'disk', text: 'crash → backup survives', c: 'agent' }], { wait: 700 }, [{ stamp: 'sent', text: 'changed elsewhere → left alone', c: 'ok' }], { wait: 1400 }],
     body: `<ul>
-      <li><b>Tab closed or laptop asleep:</b> no heartbeat for 7 s, so the watchdog stops and restores routing.</li>
-      <li><b>Ctrl+C / SIGTERM:</b> the same stop path runs, with a 20 s timeout.</li>
-      <li><b>Crash or power loss:</b> the backup stays on disk, and the next <i>Connect keys</i> restores routing before allowing a new Start.</li>
+      <li><b>Tab closed or computer asleep:</b> no heartbeat for 7 s, so the watchdog stops the agent and restores routing. A background tab is fine, because a Web Worker keeps the heartbeat time.</li>
+      <li><b>SDK registration offline:</b> routing stays. The SDK tries again about every 30 s. A call in progress continues, and new calls get “busy”.</li>
+      <li><b>Ctrl+C or SIGTERM:</b> the same stop steps run, with a 20 s limit.</li>
+      <li><b>Crash or power loss:</b> the backup stays on disk. The next <i>Connect keys</i> restores routing before a new Start.</li>
       <li><b>Callback changed elsewhere:</b> left alone, with a warning.</li>
-      <li><b>No previous callback:</b> Sent can't PATCH back to null, so the backup is kept and the stopped app rejects calls.</li></ul>`,
-    payload: 'setInterval(() => {\n  if (phase === "answering" && !online()) void stop();   // restore routing\n}, 2000);',
-    refs: ['src/server.ts:266', 'src/server.ts:286', 'src/server.ts:43'],
+      <li><b>No old callback:</b> Sent cannot set a callback back to empty. The backup stays. Set a callback in Sent, then click <i>Forget routing backup</i>.</li></ul>`,
+    payload: 'setInterval(() => {\n  if (phase === "answering" && !alive()) void stop();   // restore routing\n}, 2000);\n\nclient.on("offline", …)   // registered = false → new calls get "busy"\nPOST /api/forget-backup    // you confirm; the event log keeps the old URL',
+    refs: ['src/server.ts:327', 'client/app.ts:734', 'src/server.ts:262'],
   },
 
-  // ── 8 · Security model ────────────────────────────────────────────────
+  // ── 9 · Security model ────────────────────────────────────────────────
   {
-    ch: 8, title: 'Two servers, two doors',
+    ch: 9, title: 'Two servers, two doors',
     view: { ...LIVE_VIEW, call: 'idle', bridge: false, ui: 'Ready for inbound calls (while answering)' },
     lit: ['gw', 'mgmt'],
     beats: [[h('cf', 'cfd', 'GET /api/state', 'bad')], [h('cfd', 'gw', '', 'bad')], [{ stamp: 'gw', text: '404: no such route', c: 'bad' }], [h('gw', 'cfd', '404', 'bad')], { wait: 300 },
       [h('ui', 'mgmt', 'GET /api/state')], [{ stamp: 'mgmt', text: 'Host: localhost:3000 ✓' }], [h('mgmt', 'ui', '200 · state', 'ok')]],
-    body: `<p>The <b>management server</b> (dashboard, keys, tokens, audio bridge) binds to <code>127.0.0.1</code> and checks <code>Host</code>, <code>Origin</code>, and a CSRF token. Its WebSocket requires the token as well.</p>
-      <p>The <b>gateway</b>, the only server the tunnel can reach, serves <code>/health</code> and one random HMAC-verified callback path. Any other request from the internet, such as <code>/api/state</code>, gets a 404.</p>`,
-    payload: 'Management :3000    127.0.0.1 · Host + Origin + CSRF · WS token\n                    /api/* · /bridge · static dashboard\n\nGateway :random     reachable via tunnel only\n                    GET /health · POST /voice/<48 hex> (HMAC, 64 KB)\n                    everything else → 404',
-    refs: ['src/server.ts:79', 'src/server.ts:106', 'src/server.ts:216'],
+    body: `<p>The <b>management server</b> (dashboard, keys, tokens, audio bridge) listens on <code>127.0.0.1</code> and checks <code>Host</code>, <code>Origin</code>, and a CSRF token. Its WebSocket needs the token too.</p>
+      <p>The <b>gateway</b> is the only server that the tunnel can reach. It serves <code>/health</code> and one random, HMAC-checked callback path. Any other request from the internet, such as <code>/api/state</code>, gets a 404.</p>`,
+    payload: 'Management :3000    127.0.0.1 · Host + Origin + CSRF · WS token\n                    /api/* · /bridge · static dashboard\n\nGateway :random     reachable through the tunnel only\n                    GET /health · POST /voice/<48 hex> (HMAC, 64 KB)\n                    everything else → 404',
+    refs: ['src/server.ts:125', 'src/server.ts:150', 'src/server.ts:274'],
   },
   {
-    ch: 8, title: 'Where each secret lives',
+    ch: 9, title: 'Where each secret lives',
     view: { ...LIVE_VIEW, call: 'idle', bridge: false, ui: 'Ready for inbound calls (while answering)' },
     lit: ['mgmt', 'sdk', 'disk'],
     beats: [[{ stamp: 'mgmt', text: 'API keys: process memory only' }], { wait: 500 }, [{ stamp: 'sdk', text: 'voice token · 10 min' }], { wait: 500 },
-      [{ stamp: 'disk', text: 'secret, no API keys · 0600', c: 'agent' }], { wait: 500 }, [{ stamp: 'cf', text: 'callback metadata only' }], { wait: 500 },
+      [{ stamp: 'disk', text: 'backup + messages · 0600', c: 'agent' }], { wait: 500 }, [{ stamp: 'cf', text: 'callback questions only' }], { wait: 500 },
       [{ stamp: 'openai', text: 'audio: server ⇄ OpenAI' }], { wait: 1500 }],
-    body: `<p><b>API keys</b> never leave the Node process. The <b>browser</b> holds only a 10-minute Sent voice token. The <b>backup file</b> holds routing metadata and the callback secret, never API keys, with owner-only permissions.</p>
-      <p><b>Cloudflare</b> sees only callback metadata. Call audio travels browser ⇄ Sent and server ⇄ OpenAI. Transcripts stay in memory and are discarded when the server exits.</p>`,
-    payload: 'what            where                          lifetime\n─────────────── ────────────────────────────── ────────────\nSent API key    server memory                  until exit\nOpenAI API key  server memory                  until exit\nvoice token     browser (SDK)                  600 s\nwhsec_ secret   memory + routing-backup.json   until restored\ntranscripts     server memory (last 150 evts)  until exit',
-    refs: ['src/backup.ts:13', 'src/server.ts:174', 'README.md'],
+    body: `<p><b>API keys</b> never leave the Node process. The server deletes the environment keys after it reads them, so <code>cloudflared</code> never gets them. The <b>browser</b> holds only a 10-minute voice token.</p>
+      <p>The <b>disk</b> holds the routing backup and the caller messages, with owner-only permissions. The messages contain personal data. <b>Cloudflare</b> sees only callback questions. Call audio goes browser ⇄ Sent and server ⇄ OpenAI.</p>`,
+    payload: 'what            where                              lifetime\n─────────────── ────────────────────────────────── ───────────────\nSent API key    server memory (env deleted)        until exit\nOpenAI API key  server memory (env deleted)        until exit\nvoice token     browser (SDK)                      600 s\nwhsec_ secret   memory + routing-backup.json       until restored\nmessages        .sent-agent/messages.jsonl         until you delete\ntranscripts     server (adapter) + dashboard page  call / page\nevent log       server memory (last 150 events)    until exit',
+    refs: ['src/server.ts:367', 'src/backup.ts:10', '_docs/architecture.md'],
   },
 ];
 
@@ -958,7 +1021,8 @@ function narrate(i) {
   for (const r of s.refs || []) {
     const a = document.createElement('a');
     const [file, line] = r.split(':');
-    a.href = file; a.target = '_blank'; a.rel = 'noopener';
+    // Refs are relative to the sample folder; this page lives in _docs/.
+    a.href = '../' + file; a.target = '_blank'; a.rel = 'noopener';
     a.textContent = r; if (line) a.title = `${file}, line ${line}`;
     refs.appendChild(a);
   }
@@ -984,7 +1048,7 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'ArrowRight') { e.preventDefault(); $('next').click(); }
   else if (e.key === 'ArrowLeft') { e.preventDefault(); $('prev').click(); }
   else if (e.key === ' ') { e.preventDefault(); playBtn.click(); }
-  else if (/^[1-9]$/.test(e.key)) { const c = Number(e.key) - 1; if (c < CHAPTERS.length) { frozen = false; go(STEPS.findIndex((s) => s.ch === c)); syncPlay(); } }
+  else if (/^[0-9]$/.test(e.key)) { const c = e.key === '0' ? 9 : Number(e.key) - 1; if (c < CHAPTERS.length) { frozen = false; go(STEPS.findIndex((s) => s.ch === c)); syncPlay(); } }
 });
 
 const fromHash = Number((location.hash.match(/step-(\d+)/) || [])[1]);

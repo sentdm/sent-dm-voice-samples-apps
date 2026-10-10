@@ -2,9 +2,19 @@
 
 A **downloadable local TypeScript app** that answers incoming calls on an existing Sent voice number with OpenAI. External credentials: **one Sent API key and one OpenAI API key**.
 
-Default voice model: **GPT-Realtime-2.1**, with **GPT-Realtime-2.1 Mini** and **GPT-Live-1** options. Realtime input transcription defaults to **GPT-Live-Transcribe**. The optional GPT-Live text helper defaults to **GPT-6 Luna**, with **GPT-5.4 Mini**, **GPT-6 Sol**, and **GPT-6 Astra** options. No SIP trunk or extra Sinch key is needed. The app uses the published Sent browser voice SDK, a software microphone, and OpenAI's server-side WebSocket API.
+Default voice model: **GPT-Realtime-2.1**, with **GPT-Realtime-2.1 Mini** and **GPT-Live-1** options. Realtime input transcription defaults to **GPT-Live-Transcribe**. The optional GPT-Live text helper defaults to **GPT-6 Luna**, with **GPT-5.4 Mini**, **GPT-6 Sol**, and **GPT-6 Astra** options. No SIP trunk or extra provider key is needed. The app uses the published Sent browser voice SDK, a software microphone, and OpenAI's server-side WebSocket API.
 
 > This is a single-call local prototype. Keep the browser tab open and the computer awake. It is not an always-on telephony service. Real phone-call behavior requires validation with your own accounts.
+
+## Documentation
+
+The guides for this sample are in [`_docs/`](./_docs/README.md):
+
+- [Setup](./_docs/setup.md): install the app, connect your keys, and make a test call.
+- [Architecture](./_docs/architecture.md): the parts of the app and how a call moves through them.
+- [Models](./_docs/models.md): the model choices, the defaults, and the costs.
+- [Sent calls and logs](./_docs/sent-calls-and-logs.md): how Sent routes a call to the app, and how to find the call in each log.
+- [How it works](./_docs/how-it-works.html): an animated walkthrough. Open the file in a browser.
 
 ## Run it
 
@@ -184,11 +194,11 @@ Server tests use local fake Sent/OpenAI services and test actual request/event s
 
 ## Dependencies and integration references
 
-The project uses the published `@sentdm/voice` package (which includes the Sinch browser transport), Express, `ws`, and `cloudflared`. They are version-pinned in `pnpm-lock.yaml`; review third-party advisories before production use.
+The project uses the published `@sentdm/voice` package (Sent's browser voice SDK), Express, `ws`, and `cloudflared`. They are version-pinned in `pnpm-lock.yaml`; review third-party advisories before production use.
 
-The direct `ws` transport is patched to 8.22.0. A `basic-ftp` override to 6.2.2, in `pnpm-workspace.yaml`, patches an inherited advisory in the SDK's unused Node proxy dependency chain; it does not replace the Sent/Sinch browser transport. `pnpm-workspace.yaml` also limits install scripts to esbuild; cloudflared's binary is fetched on first Start instead. `pnpm audit --prod` reports no known vulnerabilities.
+The direct `ws` transport is patched to 8.22.0. A `basic-ftp` override to 6.2.2, in `pnpm-workspace.yaml`, patches an inherited advisory in the SDK's unused Node proxy dependency chain; it does not change the Sent browser voice SDK. `pnpm-workspace.yaml` also limits install scripts to esbuild; cloudflared's binary is fetched on first Start instead. `pnpm audit --prod` reports no known vulnerabilities.
 
-The committed browser bundle includes `@sentdm/voice` and its dependencies, such as the Sinch and PubNub SDKs. Their licenses are listed in [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md), which `pnpm run build` regenerates.
+The committed browser bundle includes `@sentdm/voice` and its dependencies. Their licenses are listed in [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md), which `pnpm run build` regenerates.
 
 - [Sent voice SDK](https://docs.sent.dm/sdks/voice)
 - [Sent inbound callback contract](https://docs.sent.dm/reference/api/voice-callback)
