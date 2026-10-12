@@ -1,0 +1,138 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-sans: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  --font-heading: var(--font-sans);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* Console roles: who is acting, and what needs attention. */
+  --color-paper: var(--paper);
+  --color-panel: var(--panel);
+  --color-ink: var(--ink);
+  --color-line-strong: var(--line-strong);
+  --color-agent: var(--agent);
+  --color-agent-soft: var(--agent-soft);
+  --color-warn: var(--warn);
+  --color-warn-ink: var(--warn-ink);
+  --color-warn-soft: var(--warn-soft);
+  --color-live: var(--live);
+  --color-live-soft: var(--live-soft);
+  --color-ok: var(--ok);
+  --color-ok-soft: var(--ok-soft);
+
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+/* Same palette as the inbound and outbound samples. */
+:root {
+  color-scheme: light;
+
+  --paper: #f5f4ef;
+  --panel: #fffefa;
+  --ink: #1a1c20;
+  --line-strong: #b8b7b0;
+  --agent: #2256bf;
+  --agent-soft: #e9eef9;
+  --warn: #b26a00;
+  --warn-ink: #7a4a00;
+  --warn-soft: #fff4d6;
+  --live: #a32920;
+  --live-soft: #fff0ed;
+  --ok: #16734c;
+  --ok-soft: #e7f2ec;
+
+  --background: var(--paper);
+  --foreground: var(--ink);
+  --card: var(--panel);
+  --card-foreground: var(--ink);
+  --popover: var(--panel);
+  --popover-foreground: var(--ink);
+  --primary: var(--agent);
+  --primary-foreground: var(--panel);
+  --secondary: #ebeae4;
+  --secondary-foreground: var(--ink);
+  --muted: #ebeae4;
+  --muted-foreground: #63666d;
+  --accent: #ebeae4;
+  --accent-foreground: var(--ink);
+  --destructive: var(--live);
+  --border: #d7d6d0;
+  --input: var(--line-strong);
+  --ring: var(--agent);
+  --radius: 0.1875rem;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+  html {
+    @apply font-sans;
+  }
+}
+
+@layer components {
+  /* The thread sits on paper with the faint 40px grid from the other samples. */
+  .paper-grid {
+    background:
+      linear-gradient(90deg, rgb(26 28 32 / 0.025) 1px, transparent 1px) 0 0 / 40px 40px,
+      var(--paper);
+  }
+
+  .wave-bar {
+    transform-origin: center;
+    animation: wave 1.1s ease-in-out infinite;
+  }
+}
+
+@keyframes wave {
+  0%,
+  100% {
+    transform: scaleY(0.3);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wave-bar {
+    animation: none;
+  }
+}

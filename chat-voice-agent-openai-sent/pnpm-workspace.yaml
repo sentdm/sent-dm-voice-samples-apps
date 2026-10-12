@@ -1,0 +1,9 @@
+# pnpm only runs dependency install scripts that are allowed here.
+allowBuilds:
+  # Official platform-binary check for tsx's bundler.
+  esbuild: true
+  # Not needed: the app downloads the cloudflared binary on first Start (server/tunnel.ts).
+  cloudflared: false
+  # Not needed: Next.js image optimization is unused, and the resolver works without its native build.
+  sharp: false
+  unrs-resolver: false
