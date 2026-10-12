@@ -1,0 +1,13 @@
+package.json
+pnpm-lock.yaml
+.env*
+node_modules/
+.next/
+out/
+.data/
+public/sw.js
+*.config.js
+*.config.cjs
+*.config.mjs
+*.config.ts
+*.md

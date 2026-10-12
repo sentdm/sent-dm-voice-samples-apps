@@ -9,7 +9,7 @@ Runnable sample apps for building voice experiences with [Sent](https://sent.dm)
 | [Inbound agent](./inbound-agent-openai-sent) | An AI agent that answers calls to your Sent number using OpenAI voice models. It shows live transcripts, takes messages and ends calls. | Available |
 | [Outbound agent](./outbound-agent-openai-sent) | An AI agent that calls a phone number from your Sent number using OpenAI voice models. It waits for the person to answer and greet it, shows live transcripts, records the call outcome and ends calls. | Available |
 | [Chat + voice agent](./chat-voice-agent-openai-sent) | An AI agent that runs each customer conversation across SMS, WhatsApp, RCS, and calls on your Sent number. It replies to texts, answers and places calls, hands over to a person, and runs template campaigns. | Available |
-| Voice feature tour | A reference app covering each Sent voice capability | Coming soon |
+| [Voice feature tour](./voice-feature-tour-sent) | A reference app that covers each Sent voice capability. It has a browser phone on the Sent voice SDK and the backend that mints tokens, answers call questions with routing rules, receives call webhooks, and lets you try every voice API call from a console. | Available |
 
 ## Prerequisites
 
