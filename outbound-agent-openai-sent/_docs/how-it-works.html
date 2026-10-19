@@ -287,7 +287,7 @@ function setPill(id, text, on) {
 node('phone', 30, 70, 120, 150, 'Contact', ['PSTN / mobile', { id: 'phone-st', text: 'idle' }], { rx: 18 });
 el('rect', { x: 75, y: 196, width: 30, height: 4, rx: 2, fill: '#d7d6d0' }, NODE.phone.g);
 node('sent', 250, 70, 260, 150, 'Sent cloud', ['+1 628 555 0199 · ACTIVE', { id: 'sent-cb', text: '' }, 'REST /v3 · WebRTC', 'callback decides'], { lh: 18 });
-node('cf', 640, 85, 240, 120, 'Cloudflare edge', ['quick tunnel · no account', { id: 'cf-url', text: '' }], { lh: 20 });
+node('cf', 640, 85, 240, 120, 'ngrok edge', ['tunnel · free account', { id: 'cf-url', text: '' }], { lh: 20 });
 node('openai', 1000, 70, 250, 150, 'OpenAI', ['wss  /v1/realtime · /v1/live', 'https /v1/models · /v1/responses', { id: 'oa-model', text: '' }], { lh: 18 });
 
 // Browser tab internals
@@ -312,7 +312,7 @@ el('text', { class: 'l', x: 488, y: 646, style: 'font-size:10px' }, hb, 'heartbe
 el('circle', { cx: 556, cy: 642, r: 5 }, hb);
 
 // Node.js process internals
-node('cfd', 655, 355, 150, 85, 'cloudflared', ['child process', { id: 'cfd-st', text: '' }], { titleSize: 14 });
+node('cfd', 655, 355, 150, 85, 'ngrok agent', ['in this process', { id: 'cfd-st', text: '' }], { titleSize: 14 });
 node('gw', 835, 355, 220, 85, 'Gateway · :random', ['/health · /voice/<nonce>', 'HMAC → decideOutbound()'], { titleSize: 14 });
 node('mgmt', 655, 475, 210, 205, 'Management · :3000', ['/api/*  Host·Origin·CSRF', '/bridge  WS + token', 'watchdog  beat < 7 s'], { titleSize: 14 });
 pill('phase', 669, 580, NODE.mgmt.g);
@@ -358,7 +358,7 @@ edge('mic>sdk', [[225, 565], [195, 565]]);
 
 const eLabel = (x, y, t, a = 'start') => el('text', { class: 'edge-label', x, y, 'text-anchor': a }, L.bg, t);
 eLabel(488, 243, 'REST · x-api-key');
-eLabel(746, 252, 'quick tunnel');
+eLabel(746, 252, 'tunnel');
 eLabel(36, 252, 'connect() · WebRTC media');
 eLabel(1118, 390, 'WSS / HTTPS');
 eLabel(975, 633, 'fs · mode 0600', 'middle');
@@ -473,7 +473,7 @@ function render() {
   phasesEl.querySelectorAll('.ph').forEach((p) => p.classList.toggle('on', p.dataset.ph === S.phase));
   T['sent-cb'].textContent = S.cb === 'ours' ? 'callback → tunnel /voice/9c1e…' : 'callback → hooks.example.com/voice';
   T['sent-cb'].setAttribute('class', 'l' + (S.cb === 'ours' ? ' warm' : ''));
-  T['cf-url'].textContent = S.tunnel ? 'calm-fox-17.trycloudflare.com' : '— no tunnel running —';
+  T['cf-url'].textContent = S.tunnel ? 'calm-fox-17.ngrok-free.app' : '— no tunnel running —';
   T['cf-url'].setAttribute('class', 'l' + (S.tunnel ? ' live' : ''));
   T['cfd-st'].textContent = S.tunnel ? '● running' : 'not running';
   T['cfd-st'].setAttribute('class', 'l' + (S.tunnel ? ' live' : ''));
@@ -537,7 +537,7 @@ const STEPS = [
       <p>Each request that changes state must go to <code>localhost</code>, have a matching <code>Origin</code>, and carry the CSRF token from <code>/api/state</code>. The keys stay in server memory only. The browser does not keep them.</p>
       <p>You can also set <code>SENT_DM_API_KEY</code> and <code>OPENAI_API_KEY</code> in the shell or in <code>.env</code>. The server checks them at startup with the same code, then deletes them from its environment.</p>`,
     payload: 'POST /api/configure\nHost: localhost:3000\nOrigin: http://localhost:3000\nx-csrf-token: 9f2c…e41a\n\n{ "sentKey": "sent_live_…", "openaiKey": "sk-proj-…" }',
-    refs: ['src/server.ts:141', 'src/server.ts:163', 'src/server.ts:374'],
+    refs: ['src/server.ts:144', 'src/server.ts:166', 'src/server.ts:378'],
   },
   {
     ch: 1, title: 'Check both keys at the same time',
@@ -547,7 +547,7 @@ const STEPS = [
     body: `<p>The server lists the voice numbers on the Sent account. At the same time, it calls <code>GET /v1/models</code> to check the OpenAI key. If both checks fail, you see the Sent error first.</p>
       <p>The server keeps only the numbers with the status <code>ACTIVE</code>, and selects the one marked <code>default_for_app_calls</code>. The contact sees this number as the <b>caller ID</b>. The app <b>never buys</b> a number.</p>`,
     payload: 'GET /v3/channels/voice      x-api-key: sent_live_…\n\n[{ "number": "+16285550199",\n   "status": "ACTIVE",\n   "default_for_app_calls": true,\n   "callback_url": "https://hooks.example.com/voice" }]',
-    refs: ['src/server.ts:173', 'src/sent.ts:16', 'src/openai.ts:9'],
+    refs: ['src/server.ts:176', 'src/sent.ts:16', 'src/openai.ts:9'],
   },
   {
     ch: 1, title: 'Look for a session that crashed',
@@ -557,7 +557,7 @@ const STEPS = [
     body: `<p>If an earlier run stopped without a restore, it left <code>.sent-agent/routing-backup.json</code>. The server then restores that number’s old callback URL <b>at once</b>, before it allows a new Start.</p>
       <p>In this example, the disk is clean.</p>`,
     payload: 'if (backup) {\n  warning = "A previous session left a routing backup…";\n  await restoreBackup(candidate);\n}',
-    refs: ['src/server.ts:183', 'src/server.ts:76'],
+    refs: ['src/server.ts:186', 'src/server.ts:79'],
   },
 
   // ── 2 · Start agent ───────────────────────────────────────────────────
@@ -579,18 +579,19 @@ const STEPS = [
     body: `<p>Before it touches the routing, the server opens a <b>real</b> voice session with the same settings as a call, then closes it. If your OpenAI project cannot use the model, Start stops here. Nothing has changed.</p>
       <p>The session instructions end with the opening line. So the model knows what to say first, also when the contact speaks before the agent.</p>`,
     payload: '{ "type": "session.update", "session": {\n    "type": "realtime", "model": "gpt-realtime-2.1",\n    "instructions": "…\\n\\nWhen the contact answers, open with: “Hi, this is…”",\n    "reasoning": { "effort": "low" },\n    "tools": [record_outcome, end_call], "tool_choice": "auto",\n    "audio": {\n      "input":  { "format": { "type": "audio/pcm", "rate": 24000 },\n                  "turn_detection": { "type": "server_vad",\n                    "silence_duration_ms": 900, "interrupt_response": true, … },   // 450 after the opening\n                  "transcription": { "model": "gpt-live-transcribe" } },\n      "output": { "voice": "marin" } } } }',
-    refs: ['src/server.ts:206', 'src/openai.ts:126', 'src/openai.ts:95'],
+    refs: ['src/server.ts:209', 'src/openai.ts:126', 'src/openai.ts:95'],
   },
   {
-    ch: 2, title: 'Open a callback-only Cloudflare tunnel',
+    ch: 2, title: 'Open a callback-only public tunnel',
     lit: ['cfd', 'cf', 'gw'],
-    beats: [[h('mgmt', 'cfd', 'spawn')], [{ set: { tunnel: true } }, h('cfd', 'cf', 'dial out · http2')], [{ stamp: 'cf', text: 'public URL assigned' }],
-      [{ stamp: 'cf', text: 'DNS via 1.1.1.1' }], [h('cf', 'cfd', 'GET /health')], [h('cfd', 'gw')], [h('gw', 'cfd', '200 {ok:true}', 'ok')], [h('cfd', 'cf')],
+    beats: [[h('mgmt', 'cfd', 'connect session')], [{ set: { tunnel: true } }, h('cfd', 'cf', 'dial out · TLS')], [{ stamp: 'cf', text: 'public URL assigned' }],
+      [{ stamp: 'cf', text: '404 for a moment' }], [h('cf', 'cfd', 'GET /health')], [h('cfd', 'gw')], [h('gw', 'cfd', '200 {ok:true}', 'ok')], [h('cfd', 'cf')],
       [{ set: { phase: 'prepared', ui: 'Tunnel ready · number routing still unchanged' } }, { stamp: 'gw', text: 'reachable ✓' }]],
-    body: `<p>The server runs <code>cloudflared</code> to open a <b>quick tunnel</b>. It needs no account and no key. The tunnel points only at the <b>gateway</b>, a second Express app on a random localhost port.</p>
-      <p>An outbound call needs this public address too. Sent asks your number’s callback URL what to ring, also when the call comes from your own tab. A new hostname takes some seconds to appear in DNS. So the server asks Cloudflare’s resolver (<code>1.1.1.1</code>) directly and waits up to 45 s for <code>/health</code>.</p>`,
-    payload: 'tunnel       = Tunnel.quick("http://127.0.0.1:<gatewayPort>")\nresolver     = ["1.1.1.1", "1.0.0.1"]        // not the OS DNS cache\nGET https://calm-fox-17.trycloudflare.com/health   → 200\ncallbackPath = "/voice/" + randomBytes(24).toString("hex")',
-    refs: ['src/tunnel.ts:40', 'src/tunnel.ts:15', 'src/server.ts:209'],
+    body: `<p>The server uses the ngrok SDK to open a <b>tunnel</b> from inside its own process. ngrok needs a free account and its authtoken. The tunnel points only at the <b>gateway</b>, a second Express app on a random localhost port.</p>
+      <p>An outbound call needs this public address too. Sent asks your number’s callback URL what to ring, also when the call comes from your own tab. The server keeps one ngrok session for all Starts, because a free account can have only 3 agent sessions at the same time. A new endpoint answers 404 for a moment, so the server waits up to 45 s for <code>/health</code>.</p>
+      <p>With <code>TUNNEL_PROVIDER=cloudflare</code>, the server runs <code>cloudflared</code> to open a Cloudflare quick tunnel instead. It needs no account. It asks Cloudflare’s resolver (<code>1.1.1.1</code>) for the new hostname, so an early “not found” stays out of your system DNS cache.</p>`,
+    payload: 'session      = await new SessionBuilder().authtoken(token).connect()   // one for each process\nlistener     = await session.httpEndpoint().listenAndForward("http://127.0.0.1:<gatewayPort>")\nGET https://calm-fox-17.ngrok-free.app/health   → 200\ncallbackPath = "/voice/" + randomBytes(24).toString("hex")',
+    refs: ['src/tunnel.ts:96', 'src/tunnel.ts:110', 'src/tunnel.ts:68', 'src/server.ts:212'],
   },
   {
     ch: 2, title: 'Register the browser as a Sent user',
@@ -600,7 +601,7 @@ const STEPS = [
     body: `<p>The SDK’s <code>tokenProvider</code> asks the local server for a voice token. The server gets one from Sent for a <b>new random identity</b> (<code>sent-ai-</code> and 12 hex characters). The token lasts 10 minutes. The SDK gets a new one before it expires.</p>
       <p>The token also binds the identity to the selected number. Calls that this identity places go out from that number. The browser sees only this short-lived token, never your API keys.</p>`,
     payload: 'POST /v3/channels/voice/tokens\n{ "identity": "sent-ai-3fa9c1e07b2d",\n  "number":   "+16285550199",       // caller ID for this identity\n  "ttl":      600 }\n\nnew SentVoice({ tokenProvider, logLevel: "warn",\n  logger: { warn: → event log, error: → event log } })',
-    refs: ['client/app.ts:747', 'src/server.ts:215', 'src/sent.ts:25'],
+    refs: ['client/app.ts:747', 'src/server.ts:218', 'src/sent.ts:25'],
   },
   {
     ch: 2, title: 'Heartbeat: proof that the tab is alive',
@@ -610,7 +611,7 @@ const STEPS = [
     body: `<p>Every 2 seconds the page sends <code>{ registered }</code>. A dedicated <b>Web Worker</b> keeps the time. Chrome slows normal page timers in a hidden tab to once a minute, but not worker timers. So the tab can be in the background.</p>
       <p>The server keeps two facts apart. The tab is <b>alive</b> if the last beat is newer than 7 s. The tab is <b>online</b> if it is alive and the SDK is registered. The gateway dials only while the tab is online. The watchdog stops the agent only when the tab is not alive.</p>`,
     payload: '// a worker keeps the time; the page sends the beat\nnew Worker(blob("setInterval(() => postMessage(0), 2000)"))\nPOST /api/heartbeat   { "registered": true }\n\nalive  = Date.now() - heartbeat < 7000     // watchdog\nonline = registered && alive                // dial decision',
-    refs: ['client/app.ts:675', 'src/server.ts:71', 'src/server.ts:334'],
+    refs: ['client/app.ts:675', 'src/server.ts:74', 'src/server.ts:337'],
   },
   {
     ch: 2, title: 'Back up first, then change the number',
@@ -623,8 +624,8 @@ const STEPS = [
     body: `<p>The server refuses to activate unless the tab is online and the tunnel is up.</p>
       <p>It reads the number’s current callback URL and <b>writes a backup to disk before it changes anything</b>. Then it calls Sent’s add-existing-number operation with the tunnel URL. The response contains the number’s callback secret, which is not rotated. The server adds the secret to the backup.</p>
       <p>From now on, Sent asks the app about every call on the number. Inbound callers get <code>reject</code> until you stop.</p>`,
-    payload: '// .sent-agent/routing-backup.json  (mode 0600, no API keys)\n{ "number":       "+16285550199",\n  "previousUrl":    "https://hooks.example.com/voice",\n  "installedUrl":   "https://calm-fox-17.trycloudflare.com/voice/9c1e…",\n  "callbackSecret": "whsec_…",\n  "createdAt":      "2026-10-10T12:00:00.000Z" }',
-    refs: ['src/server.ts:224', 'src/server.ts:235', 'src/sent.ts:19'],
+    payload: '// .sent-agent/routing-backup.json  (mode 0600, no API keys)\n{ "number":       "+16285550199",\n  "previousUrl":    "https://hooks.example.com/voice",\n  "installedUrl":   "https://calm-fox-17.ngrok-free.app/voice/9c1e…",\n  "callbackSecret": "whsec_…",\n  "createdAt":      "2026-10-10T12:00:00.000Z" }',
+    refs: ['src/server.ts:227', 'src/server.ts:238', 'src/sent.ts:19'],
   },
   {
     ch: 2, title: 'Test the full public path',
@@ -632,10 +633,10 @@ const STEPS = [
     beats: [[h('mgmt', 'sent', 'POST …/test')], [h('sent', 'cf', 'call.request · test')], [h('cf', 'cfd')], [h('cfd', 'gw')], [{ stamp: 'gw', text: 'HMAC ✓ · test → dial answer' }],
       [h('gw', 'cfd', 'connectToNumber', 'ok')], [h('cfd', 'cf')], [h('cf', 'sent')], [h('sent', 'mgmt', 'outcome: ok', 'ok')],
       [{ set: { ui: 'Ready to place calls. Keep this browser tab open.' } }]],
-    body: `<p>Sent’s test endpoint sends a signed <code>call.request</code> through the full public path: Sent → Cloudflare → cloudflared → gateway. It looks like an app user calling a phone number, with <code>test: true</code>. Sent places no call, charges nothing, and stores nothing.</p>
+    body: `<p>Sent’s test endpoint sends a signed <code>call.request</code> through the full public path: Sent → ngrok edge → ngrok agent → gateway. It looks like an app user calling a phone number, with <code>test: true</code>. Sent places no call, charges nothing, and stores nothing.</p>
       <p>The gateway answers a test with <code>connectToNumber</code> to the test’s number. So Sent checks the complete answer, caller ID included. A test never uses the pending dial. If the outcome is not <code>ok</code>, Start fails and the routing goes back.</p>`,
     payload: '{ "type": "call.request", "version": "1", "test": true,\n  "direction": "outbound", "number": "+16285550199",\n  "from": { "kind": "user", … }, "to": { "kind": "number", … } }\n\n→ { "outcome": "ok",\n    "answer": { "action": "connectToNumber", "callerId": "+16285550199", … } }',
-    refs: ['src/server.ts:239', 'src/security.ts:43', '_docs/sent-calls-and-logs.md'],
+    refs: ['src/server.ts:242', 'src/security.ts:43', '_docs/sent-calls-and-logs.md'],
   },
 
   // ── 3 · Place a call ──────────────────────────────────────────────────
@@ -657,7 +658,7 @@ const STEPS = [
     body: `<p>The page opens a WebSocket to the local server, with the CSRF token, and sends <code>start</code> with the number. The server checks the number and the permission again, then opens an OpenAI session for this call.</p>
       <p>Only when the model is ready does the server set the <b>pending dial</b>: this number, for 20 seconds, for one call. If Sent dialed first, the contact could answer and hear silence.</p>`,
     payload: 'browser → server   { "type": "start", "to": "+14155550123", "consent": true }\nserver             checkNumberToCall(to, ownNumber, consent)\nserver             await new OpenAIVoice(…).connect()\nserver             session.dialUntil = now + 20 s   // the pending dial\nserver  → browser  { "type": "ready", "model": "gpt-realtime-2.1" }\nevent log          call: OpenAI voice connected; dialing +14155550123.',
-    refs: ['src/server.ts:292', 'src/server.ts:310', 'client/app.ts:257'],
+    refs: ['src/server.ts:295', 'src/server.ts:313', 'client/app.ts:257'],
   },
   {
     ch: 3, title: 'The tab asks Sent to call',
@@ -672,10 +673,10 @@ const STEPS = [
     ch: 3, title: 'Sent asks the gateway, signed',
     lit: ['gw', 'cf'],
     beats: [[h('sent', 'cf', 'POST /voice/9c1e…')], [h('cf', 'cfd')], [h('cfd', 'gw', 'signed call.request')], [{ stamp: 'gw', text: 'path = nonce ✓' }], [{ stamp: 'gw', text: 'HMAC-SHA256 ✓' }], [{ stamp: 'gw', text: 'timestamp ±5 min ✓' }]],
-    body: `<p>The question comes through Cloudflare to the gateway. It has <code>direction: "outbound"</code>, your tab’s identity in <code>from</code>, and the number in <code>to</code>.</p>
+    body: `<p>The question comes through the tunnel to the gateway. It has <code>direction: "outbound"</code>, your tab’s identity in <code>from</code>, and the number in <code>to</code>.</p>
       <p>The gateway calculates <b>HMAC-SHA256</b> over <code>id.timestamp.</code> plus the raw body, with the number’s <code>whsec_</code> secret. It compares in constant time, rejects timestamps more than 5 minutes off, and parses the JSON only <i>after</i> the signature is correct. Sent gives each attempt 2.5 s and makes 2 attempts, so the gateway decides from memory only.</p>`,
     payload: 'POST /voice/9c1e…a07f\nx-webhook-timestamp: 1791544800\nx-webhook-signature: v1,K3x9…=\n\n{ "type": "call.request", "version": "1",\n  "callId": "call_8f2…", "direction": "outbound",\n  "number": "+16285550199",\n  "from": { "kind": "user", "identity": "sent-ai-3fa9c1e07b2d" },\n  "to":   { "kind": "number", "number": "+14155550123" } }',
-    refs: ['src/server.ts:114', 'src/security.ts:9'],
+    refs: ['src/server.ts:117', 'src/security.ts:9'],
   },
   {
     ch: 3, title: 'Decide: dial only what you asked for',
@@ -686,7 +687,7 @@ const STEPS = [
     body: `<p><code>decideOutbound()</code> answers <code>connectToNumber</code> only for an outbound call from this tab’s identity, to exactly the pending number, within 20 s. Then the server clears the pending dial, so one click places one call.</p>
       <p>Every other question gets <code>reject</code>: inbound callers, other app users of your account, other numbers, and old requests. The gateway keeps each answer for 15 s, so a retry from Sent gets the same answer.</p>`,
     payload: '→ { "action": { "action": "connectToNumber",\n                "number": "+14155550123",\n                "callerId": "+16285550199",\n                "dialTimeoutSeconds": 30 } }\n\nevent log   call: Outbound call call_8f2…: connectToNumber.',
-    refs: ['src/security.ts:43', 'src/server.ts:124', 'src/server.ts:129'],
+    refs: ['src/security.ts:43', 'src/server.ts:127', 'src/server.ts:132'],
   },
   {
     ch: 3, title: 'The phone rings, and nothing reaches the model yet',
@@ -697,7 +698,7 @@ const STEPS = [
     body: `<p>Sent dials the number. The contact’s phone shows your Sent number. It rings for up to 30 s (<code>dialTimeoutSeconds</code>). The dashboard shows <b>Ringing</b>.</p>
       <p>Before the answer, the line can carry ringback tones and carrier messages. The model must not answer them. So the worklet captures nothing yet, and the server also drops frames that come before <code>answered</code>. With the Realtime models, a ringing phone costs nothing at OpenAI.</p>`,
     payload: 'call.on("ringing")  → "RINGING"\nworklet             capture: off\nOpenAIVoice.audio() drops frames until answered()\nno answer in 30 s   → Call ended (noAnswer)',
-    refs: ['src/server.ts:285', 'client/app.ts:782'],
+    refs: ['src/server.ts:288', 'client/app.ts:782'],
   },
   {
     ch: 3, title: 'The contact answers: check the microphone, start listening',
@@ -708,7 +709,7 @@ const STEPS = [
     body: `<p>When the SDK reports <code>connected</code>, the page first checks that the SDK took the <b>software microphone</b>. If it did not, the SDK could send your room audio to the contact. So the page ends the call.</p>
       <p>Then the page turns on the capture and sends <code>answered</code> one time. The server starts the <b>5-minute call limit</b> and the 60-second silence timer here, not when you clicked Call.</p>`,
     payload: 'if (audio && !audio.softwareMicrophoneUsed) → end the call\naudio.setCapturing(true);\nbridge.answered();            // { "type": "answered" }\n\nevent log   call: +14155550123 answered.',
-    refs: ['client/app.ts:816', 'client/app.ts:833', 'src/server.ts:312'],
+    refs: ['client/app.ts:816', 'client/app.ts:833', 'src/server.ts:315'],
   },
   {
     ch: 3, title: 'The first words: let the contact finish, or open into silence',
@@ -769,7 +770,7 @@ const STEPS = [
     body: `<p>Each buffer has a limit. The playback queue holds up to <b>120 s for Realtime</b>, because Realtime sends audio about 6 times faster than real time. It holds <b>5 s for GPT-Live</b>, which sends audio in real time. If the queue becomes full, the call ends. Speech is never dropped without a message.</p>
       <p>A WebSocket closes if more than 128 KB waits to be sent. The server ignores frames over 24 KB. Each call stops <b>5 minutes after the answer</b>.</p>`,
     payload: 'const PLAYBACK_LIMIT_MS = { realtime: 120_000, live: 5_000 };\nif (queueSamples + pcm.length > maxQueueSamples) failOverflow(limitMs);\n\nif (ws.bufferedAmount > 128 * 1024) ws.close(1011, "Audio congestion.");\nconst MAX_CALL_MS = 5 * 60_000;   // counted from the answer',
-    refs: ['client/app.ts:44', 'public/audio-worklet.js:47', 'src/server.ts:277', 'src/server.ts:22'],
+    refs: ['client/app.ts:44', 'public/audio-worklet.js:47', 'src/server.ts:280', 'src/server.ts:24'],
   },
 
   // ── 5 · Barge-in ──────────────────────────────────────────────────────
@@ -824,7 +825,7 @@ const STEPS = [
       <p>The server adds the record to <code>.sent-agent/call-outcomes.jsonl</code> and writes an <code>outcome</code> line in the event log. Then it tells the model <code>saved: true</code> or <code>saved: false</code>. An unknown outcome is refused, and the model is told why.</p>
       <p>A new answer can start only after the current one ends. So the server waits for <code>response.done</code> and for the save, then sends <code>response.create</code>.</p>`,
     payload: 'outcomes: interested · callback_requested · not_interested\n          do_not_call · wrong_number · voicemail\n\n// .sent-agent/call-outcomes.jsonl  (one JSON object per line, mode 0600)\n{"time":"…","from":"+16285550199","to":"+14155550123",\n "outcome":"callback_requested","summary":"Driving; asked for a call tomorrow.",\n "callbackTime":"tomorrow at 10"}',
-    refs: ['src/openai.ts:15', 'src/openai.ts:264', 'src/server.ts:64', 'src/backup.ts:10'],
+    refs: ['src/openai.ts:15', 'src/openai.ts:264', 'src/server.ts:67', 'src/backup.ts:10'],
   },
   {
     ch: 6, title: 'The agent ends the call after the goodbye plays',
@@ -853,7 +854,7 @@ const STEPS = [
       <li><b>Fatal errors.</b> Errors such as <code>invalid_api_key</code>, <code>insufficient_quota</code>, or <code>session_expired</code> end the call. A closed model socket also ends it.</li>
       <li><b>Hang up.</b> The dashboard button ends the call at once. Before the model is ready, it cancels the call, and Sent never dials.</li></ul>`,
     payload: 'const MAX_CALL_MS   = 5 * 60_000;   // from the answer\nconst DIAL_SETUP_MS = 75_000;       // from Call to the answer\n\nevent log   call: Ending the call after a long silence.\n            call: The call reached the 5-minute limit.\n            call: Nobody answered in time; ending the call attempt.',
-    refs: ['src/openai.ts:35', 'src/server.ts:22', 'src/server.ts:24', 'client/app.ts:940'],
+    refs: ['src/openai.ts:35', 'src/server.ts:24', 'src/server.ts:26', 'client/app.ts:940'],
   },
 
   // ── 7 · GPT-Live mode ─────────────────────────────────────────────────
@@ -881,7 +882,7 @@ const STEPS = [
     body: `<p>A call ends when the contact hangs up, when the agent calls <code>end_call</code>, after 60 s of silence, at the 5-minute limit, or when you click <b>Hang up</b>. It can also end as <code>busy</code> or <code>noAnswer</code> before anyone speaks. The page stops capture, clears the queue, and closes the bridge. The server closes the OpenAI session.</p>
       <p>The tab stays registered and routing stays live. The next call needs a new click on <b>Call</b>. The app never places more than one call at a time.</p>`,
     payload: 'call.on("disconnected", ({ state }) => …)\n  → audio.setCapturing(false); audio.clearAudio(); bridge.stop();\nws.on("close")\n  → session.voice.close(); active = undefined;   // withdraws the pending dial\n\nevent log   call: Call ended (completed).\n            call: Call media disconnected.',
-    refs: ['client/app.ts:844', 'src/server.ts:325'],
+    refs: ['client/app.ts:844', 'src/server.ts:328'],
   },
   {
     ch: 8, title: 'Stop & restore routing',
@@ -889,12 +890,12 @@ const STEPS = [
     lit: ['mgmt', 'sent', 'disk'],
     beats: [[h('ui', 'mgmt', 'POST /api/stop')], [h('mgmt', 'sent', 'GET …/+16285550199')], [h('sent', 'mgmt', 'still our URL ✓', 'ok')],
       [h('mgmt', 'sent', 'PATCH callback_url')], [{ set: { cb: 'prev' } }, { stamp: 'sent', text: 'callback restored', c: 'ok' }],
-      [h('mgmt', 'disk', 'delete backup')], [{ set: { disk: null } }], [h('mgmt', 'cfd', 'stop')], [{ set: { tunnel: false } }],
+      [h('mgmt', 'disk', 'delete backup')], [{ set: { disk: null } }], [h('mgmt', 'cfd', 'close endpoint')], [{ set: { tunnel: false } }],
       [{ set: { reg: false, audio: false, hb: false, phase: 'offline', ui: 'Stopped · real getUserMedia restored' } }]],
     body: `<p>Stop runs while the heartbeat is still alive. The server reads the number again. It restores the old callback URL <b>only if the number still points at the URL that this app installed</b>. It never overwrites a change made somewhere else.</p>
-      <p>Then it deletes the backup and stops the tunnel. Inbound calls reach your usual routing again. The page unregisters, shuts down the audio graph, and puts back the real <code>getUserMedia</code>. The outcomes file stays.</p>`,
+      <p>Then it deletes the backup and closes the tunnel endpoint. Inbound calls reach your usual routing again. The page unregisters, shuts down the audio graph, and puts back the real <code>getUserMedia</code>. The outcomes file stays.</p>`,
     payload: 'if (current.callback_url !== saved.installedUrl) → warn, do not overwrite\nPATCH /v3/channels/voice/+16285550199\n{ "callback_url": "https://hooks.example.com/voice" }\n\nevent log   routing: Previous callback URL restored.',
-    refs: ['client/app.ts:1025', 'src/server.ts:92', 'src/server.ts:76'],
+    refs: ['client/app.ts:1025', 'src/server.ts:95', 'src/server.ts:79'],
   },
   {
     ch: 8, title: 'Safety nets when things go wrong',
@@ -911,7 +912,7 @@ const STEPS = [
       <li><b>Callback changed elsewhere:</b> left alone, with a warning.</li>
       <li><b>No old callback:</b> Sent cannot set a callback back to empty. The backup stays. Set a callback in Sent, then click <i>Forget routing backup</i>.</li></ul>`,
     payload: 'setInterval(() => {\n  if (phase === "ready" && !alive()) void stop();   // restore routing\n}, 2000);\n\nclient.on("offline", …)   // registered = false → no pending dial matches\nPOST /api/forget-backup    // you confirm; the event log keeps the old URL',
-    refs: ['src/server.ts:334', 'client/app.ts:768', 'src/server.ts:252'],
+    refs: ['src/server.ts:337', 'client/app.ts:768', 'src/server.ts:255'],
   },
 
   // ── 9 · Security model ────────────────────────────────────────────────
@@ -924,7 +925,7 @@ const STEPS = [
     body: `<p>The <b>management server</b> (dashboard, keys, tokens, audio bridge) listens on <code>127.0.0.1</code> and checks <code>Host</code>, <code>Origin</code>, and a CSRF token. Its WebSocket needs the token too.</p>
       <p>The <b>gateway</b> is the only server that the tunnel can reach. It serves <code>/health</code> and one random, HMAC-checked callback path. Any other request from the internet, such as <code>/api/state</code>, gets a 404.</p>`,
     payload: 'Management :3000    127.0.0.1 · Host + Origin + CSRF · WS token\n                    /api/* · /bridge · static dashboard\n\nGateway :random     reachable through the tunnel only\n                    GET /health · POST /voice/<48 hex> (HMAC, 64 KB)\n                    everything else → 404',
-    refs: ['src/server.ts:114', 'src/server.ts:141', 'src/server.ts:264'],
+    refs: ['src/server.ts:117', 'src/server.ts:144', 'src/server.ts:267'],
   },
   {
     ch: 9, title: 'Who can make the app dial',
@@ -939,7 +940,7 @@ const STEPS = [
       <li>The gateway dials only the pending number, for this tab’s identity, once, within 20 s.</li></ul>
       <p>So a stolen voice token cannot dial an unknown number, and another app user of your account cannot use your pending dial.</p>`,
     payload: 'decideOutbound(question, number, identity, pendingDial)\n  outbound · from = this identity · to = pending · now ≤ until\n    → connectToNumber, then the dial is used up (one call)\n  anything else\n    → { "action": { "action": "reject", "reason": "declined" } }',
-    refs: ['src/security.ts:43', 'src/server.ts:292', 'src/server.ts:124'],
+    refs: ['src/security.ts:43', 'src/server.ts:295', 'src/server.ts:127'],
   },
   {
     ch: 9, title: 'Where each secret lives',
@@ -948,10 +949,10 @@ const STEPS = [
     beats: [[{ stamp: 'mgmt', text: 'API keys: process memory only' }], { wait: 500 }, [{ stamp: 'sdk', text: 'voice token · 10 min' }], { wait: 500 },
       [{ stamp: 'disk', text: 'backup + outcomes · 0600', c: 'agent' }], { wait: 500 }, [{ stamp: 'cf', text: 'callback questions only' }], { wait: 500 },
       [{ stamp: 'openai', text: 'audio: server ⇄ OpenAI' }], { wait: 1500 }],
-    body: `<p><b>API keys</b> never leave the Node process. The server deletes the environment keys after it reads them, so <code>cloudflared</code> never gets them. The <b>browser</b> holds only a 10-minute voice token.</p>
-      <p>The <b>disk</b> holds the routing backup and the call outcomes, with owner-only permissions. The outcomes contain phone numbers and what people said. <b>Cloudflare</b> sees only callback questions. Call audio goes browser ⇄ Sent and server ⇄ OpenAI.</p>`,
+    body: `<p><b>API keys</b> never leave the Node process. The server deletes the environment keys and the ngrok authtoken after it reads them, so a <code>cloudflared</code> process never gets them. The <b>browser</b> holds only a 10-minute voice token.</p>
+      <p>The <b>disk</b> holds the routing backup and the call outcomes, with owner-only permissions. The outcomes contain phone numbers and what people said. <b>The tunnel provider</b>, ngrok or Cloudflare, sees only callback questions. Call audio goes browser ⇄ Sent and server ⇄ OpenAI.</p>`,
     payload: 'what            where                              lifetime\n─────────────── ────────────────────────────────── ───────────────\nSent API key    server memory (env deleted)        until exit\nOpenAI API key  server memory (env deleted)        until exit\nvoice token     browser (SDK)                      600 s\nwhsec_ secret   memory + routing-backup.json       until restored\npending dial    server memory                      20 s, one call\noutcomes        .sent-agent/call-outcomes.jsonl    until you delete\ntranscripts     server (adapter) + dashboard page  call / page',
-    refs: ['src/server.ts:374', 'src/backup.ts:10', '_docs/architecture.md'],
+    refs: ['src/server.ts:378', 'src/backup.ts:10', '_docs/architecture.md'],
   },
 ];
 

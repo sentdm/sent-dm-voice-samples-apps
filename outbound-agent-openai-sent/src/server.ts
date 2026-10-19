@@ -10,11 +10,13 @@ import { DIAL_TIMEOUT_SECONDS, decideOutbound, equalSecret, verifySentSignature,
 import { checkNumberToCall } from './phone.js';
 import { OpenAIVoice, MODELS, checkKey, preflight, type CallOutcome, type Emit, type VoiceModel } from './openai.js';
 import { BACKEND_MODELS, TRANSCRIPTION_MODELS, DEFAULT_VOICE_MODEL, DEFAULT_BACKEND_MODEL, DEFAULT_TRANSCRIPTION_MODEL, isLiveModel, type BackendModel, type TranscriptionModel } from './models.js';
-import { openTunnel, type TunnelHandle } from './tunnel.js';
+import { describeTunnel, openTunnel, tunnelConfigFromEnv, type TunnelConfig, type TunnelHandle } from './tunnel.js';
 
 export interface AppOptions {
   port?: number; gatewayPort?: number; dataDir?: string; sentBase?: string; openaiHttpBase?: string; openaiWsBase?: string;
   tunnelFactory?: typeof openTunnel;
+  /** Which public tunnel Start opens. Defaults to the environment (TUNNEL_PROVIDER, NGROK_AUTHTOKEN, NGROK_DOMAIN). */
+  tunnel?: TunnelConfig;
 }
 export type KeySource = 'env' | 'dashboard';
 type Phase = 'offline' | 'preparing' | 'prepared' | 'activating' | 'ready' | 'stopping';
@@ -26,6 +28,7 @@ const DIAL_SETUP_MS = (45 + DIAL_TIMEOUT_SECONDS) * 1000;
 const PENDING_DIAL_MS = 20_000;
 export async function createApplication(options: AppOptions = {}) {
   const csrf = randomBytes(32).toString('hex');
+  const tunnelConfig = options.tunnel ?? tunnelConfigFromEnv();
   const identity = `sent-ai-${randomBytes(6).toString('hex')}`;
   const store = new BackupStore(options.dataDir ?? path.resolve('.sent-agent'));
   let backup = await store.read();
@@ -205,7 +208,7 @@ export async function createApplication(options: AppOptions = {}) {
       event('status', `Checking ${model} voice-session access${isLiveModel(model) ? `; ${backendModel} is the optional text helper` : ` with ${transcriptionModel} input transcription`}.`);
       await preflight(currentVoiceConfig());
       event('status', 'Opening the callback-only tunnel and waiting until it is publicly reachable. No number routing changed yet.');
-      tunnel = await (options.tunnelFactory ?? openTunnel)(gatewayPort, message => { recordError(message); void stop(); });
+      tunnel = await (options.tunnelFactory ?? openTunnel)(gatewayPort, message => { recordError(message); void stop(); }, tunnelConfig);
       callbackPath = `/voice/${randomBytes(24).toString('hex')}`;
       callbackUrl = tunnel.url + callbackPath;
       phase = 'prepared';
@@ -369,14 +372,16 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   const requestedPort = Number(process.env.PORT ?? 3000);
   if (!Number.isInteger(requestedPort) || requestedPort < 1024 || requestedPort > 65535) throw new Error('PORT must be an integer between 1024 and 65535.');
   // Read once, then scrub: cloudflared is spawned with the inherited environment and must never receive API keys.
+  // tunnelConfigFromEnv() removes NGROK_AUTHTOKEN the same way.
   const envSentKey = process.env.SENT_DM_API_KEY?.trim();
   const envOpenaiKey = process.env.OPENAI_API_KEY?.trim();
   delete process.env.SENT_DM_API_KEY; delete process.env.OPENAI_API_KEY;
-  const runtime = await createApplication({ port: requestedPort });
+  const tunnel = tunnelConfigFromEnv();
+  const runtime = await createApplication({ port: requestedPort, tunnel });
   // Before listen(), so the first dashboard load already reflects the environment-key outcome.
   await applyEnvironmentKeys(runtime, envSentKey, envOpenaiKey);
   const port = await runtime.listen();
-  console.log(`\nSent outbound agent\nOpen http://localhost:${port}\nKeys stay in this process. Keep the browser tab/computer awake.\nUse Stop & restore before closing. Ctrl+C attempts routing restoration.\n`);
+  console.log(`\nSent outbound agent\nOpen http://localhost:${port}\n${describeTunnel(tunnel)}\nKeys stay in this process. Keep the browser tab/computer awake.\nUse Stop & restore before closing. Ctrl+C attempts routing restoration.\n`);
   let exiting = false;
   const shutdown = async () => { if (exiting) return; exiting = true; console.log('Stopping and restoring routing…'); const timeout = setTimeout(() => process.exit(1), 20_000); await runtime.close(); clearTimeout(timeout); process.exit(0); };
   process.on('SIGINT', () => void shutdown()); process.on('SIGTERM', () => void shutdown());

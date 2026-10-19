@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",
+    "@ngrok/ngrok": "1.7.0",
     "@sentdm/voice": "^0.1.1",
     "class-variance-authority": "^0.7.1",
     "cloudflared": "0.7.3",

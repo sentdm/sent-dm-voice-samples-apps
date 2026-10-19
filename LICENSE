@@ -23,5 +23,5 @@ SOFTWARE.
 Third-party dependencies retain their own licenses. The generated browser
 bundle includes @sentdm/voice (Apache-2.0) and its dependencies; bundled license
 notices are retained by esbuild. Review node_modules package licenses after
-installation. This demo is not an endorsement or warranty from OpenAI,
+installation. This demo is not an endorsement or warranty from OpenAI, ngrok,
 Cloudflare, or Sent.

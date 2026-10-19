@@ -174,7 +174,7 @@ While the agent is on, the webhook's id is `webhookId` in `.sent-agent/backup.js
 | Step | Usual cause |
 | --- | --- |
 | Checking access to the voice model | Your OpenAI project can't use the model. |
-| Opening the public tunnel | A firewall or a VPN blocks Cloudflare. |
+| Opening the public tunnel | ngrok has no authtoken or rejects it, or your ngrok account has 3 agent sessions online. Or a firewall or a VPN blocks ngrok, or Cloudflare with `TUNNEL_PROVIDER=cloudflare`. See [Setup problems](./setup.md#setup-problems). |
 | Registering this tab with Sent | Notifications are blocked, or the key can't create voice tokens. |
 | Routing calls to this app | The number isn't active anymore. |
 | Subscribing to messages | The key can't create webhooks. |

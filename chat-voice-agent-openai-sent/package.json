@@ -17,6 +17,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@ngrok/ngrok": "1.7.0",
     "@sentdm/sentdm": "0.44.0",
     "@sentdm/voice": "0.1.1",
     "class-variance-authority": "0.7.1",

@@ -29,7 +29,7 @@ These documents use each term with one meaning only.
 | Phone tab | The browser tab that clicked **Start agent**. It registers with Sent as an app user. Calls ring there, and a person talks from there. |
 | Management server | The local server for the console, the API (`/api`), and the two WebSockets (`/ws`, `/bridge`). Only your computer can reach it. |
 | Gateway | The second local server. It receives Sent's voice questions and message webhooks. The tunnel makes it public. |
-| Tunnel | The Cloudflare quick tunnel. It gives the gateway a temporary public HTTPS address. |
+| Tunnel | The public tunnel: ngrok by default, or a Cloudflare quick tunnel with `TUNNEL_PROVIDER=cloudflare`. It gives the gateway a public HTTPS address while the agent is on. |
 | Callback URL | The URL that Sent asks what to do with each call on your number. Sent calls the request a "question". |
 | Webhook | The endpoint that Start registers with Sent. Sent posts message events and call failures to it. |
 | Signing secret | A `whsec_…` key. Sent signs each voice question and each webhook with one. The callback and the webhook have different secrets. |

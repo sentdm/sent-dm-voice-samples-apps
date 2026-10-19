@@ -12,6 +12,7 @@ import { createGateway } from "./gateway"
 import { createApi, isLocalHost } from "./api"
 import { equalSecret } from "./security"
 import { sentErrorMessage } from "./sent"
+import { describeTunnel, tunnelConfigFromEnv } from "./tunnel"
 
 async function main() {
   // Optional ./.env; variables already set in the shell win.
@@ -26,15 +27,17 @@ async function main() {
   if (!Number.isInteger(port) || port < 1024 || port > 65535) throw new Error("PORT must be an integer from 1024 to 65535.")
 
   // Read once, then remove: cloudflared inherits the environment and must never get the keys.
+  // tunnelConfigFromEnv() removes NGROK_AUTHTOKEN the same way.
   const envSentKey = process.env.SENT_DM_API_KEY?.trim()
   const envOpenaiKey = process.env.OPENAI_API_KEY?.trim()
   const apiToken = process.env.APP_API_TOKEN?.trim()
   delete process.env.SENT_DM_API_KEY
   delete process.env.OPENAI_API_KEY
   delete process.env.APP_API_TOKEN
+  const tunnel = tunnelConfigFromEnv()
   if (apiToken && apiToken.length < 24) throw new Error("APP_API_TOKEN must be at least 24 characters. Generate one with: openssl rand -hex 24")
 
-  const runtime = new Runtime({ dataDir: path.resolve(".sent-agent") })
+  const runtime = new Runtime({ dataDir: path.resolve(".sent-agent"), tunnel })
   await runtime.init()
   const conversations = new Conversations(runtime)
   const calls = new Calls(runtime, conversations)
@@ -110,7 +113,7 @@ async function main() {
     server.once("error", reject)
     server.listen(port, "127.0.0.1", resolve)
   })
-  console.log(`\nSent chat + voice agent\nOpen http://localhost:${port}\nKeys stay in this process. Keep the phone tab open and the computer awake while the agent is on.${apiToken ? "\nCampaign API: on, with APP_API_TOKEN." : ""}\n`)
+  console.log(`\nSent chat + voice agent\nOpen http://localhost:${port}\n${describeTunnel(tunnel)}\nKeys stay in this process. Keep the phone tab open and the computer awake while the agent is on.${apiToken ? "\nCampaign API: on, with APP_API_TOKEN." : ""}\n`)
 
   let exiting = false
   const shutdown = async () => {

@@ -7,7 +7,7 @@ import { createSentApi, sentErrorMessage, type SentApi } from "./sent"
 import { checkOpenAIKey } from "./text-agent"
 import { preflightVoice } from "./voice-agent"
 import { TEXT_MODELS, VOICE_MODELS, isTextModel, isVoiceModel } from "@/lib/models"
-import { openTunnel, type TunnelHandle } from "./tunnel"
+import { openTunnel, tunnelConfigFromEnv, type TunnelConfig, type TunnelHandle } from "./tunnel"
 
 export type RuntimeOptions = {
   dataDir: string
@@ -15,6 +15,8 @@ export type RuntimeOptions = {
   openaiHttpBase?: string
   openaiWsBase?: string
   tunnelFactory?: typeof openTunnel
+  /** Which public tunnel Start opens. Defaults to the environment (TUNNEL_PROVIDER, NGROK_AUTHTOKEN, NGROK_DOMAIN). */
+  tunnel?: TunnelConfig
 }
 
 /**
@@ -67,8 +69,10 @@ export class Runtime {
   private mutating = false
   private stopping?: Promise<void>
   private watchdog: NodeJS.Timeout
+  private tunnelConfig: TunnelConfig
 
   constructor(readonly options: RuntimeOptions) {
+    this.tunnelConfig = options.tunnel ?? tunnelConfigFromEnv()
     this.files = new JsonFiles(options.dataDir)
     this.store = new Store(this.files, () => this.broadcastSoon())
     this.watchdog = setInterval(() => {
@@ -291,7 +295,7 @@ export class Runtime {
       this.tunnel = await (this.options.tunnelFactory ?? openTunnel)(this.gatewayPort, (message) => {
         this.recordError(message)
         void this.stop()
-      })
+      }, this.tunnelConfig)
       this.voicePath = `/voice/${randomBytes(24).toString("hex")}`
       this.hookPath = `/hooks/${randomBytes(24).toString("hex")}`
       this.progress("Registering this tab with Sent")

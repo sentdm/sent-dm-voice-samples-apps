@@ -31,7 +31,11 @@ import {
 import { describeError } from "@/lib/client/format";
 import { useAppEvents } from "@/lib/client/use-app-events";
 import { usePublicConfig } from "@/lib/client/use-public-config";
-import type { PublicConfig, VoiceNumberResponse } from "@/lib/shared/types";
+import type {
+  PublicConfig,
+  TunnelInfo,
+  VoiceNumberResponse,
+} from "@/lib/shared/types";
 
 export function SetupForm() {
   // Reloaded on config.changed, which also announces the tunnel opening.
@@ -426,10 +430,7 @@ export function SetupForm() {
               this app points one at this app and fills in its signing secret.
             </li>
             <li>An API key from the dashboard&apos;s API keys page.</li>
-            <li>
-              Internet access to Cloudflare. The app opens its public URL by
-              itself.
-            </li>
+            <li>{publicUrlNeeds(config.tunnel)}</li>
             <li>A positive balance for calls that reach a phone.</li>
           </ol>
         </CardContent>
@@ -447,7 +448,11 @@ function PublicUrl({ config }: { config: PublicConfig }) {
         label={
           tunnel.state === "off"
             ? "From PUBLIC_BASE_URL"
-            : "Cloudflare quick tunnel, a new URL on every start"
+            : tunnel.provider === "cloudflare"
+              ? "Cloudflare quick tunnel, a new URL on every start"
+              : tunnel.fixedUrl
+                ? "ngrok tunnel on NGROK_DOMAIN, the same URL on every start"
+                : "ngrok tunnel, a new URL on every start"
         }
         value={publicBaseUrl}
       />
@@ -456,7 +461,11 @@ function PublicUrl({ config }: { config: PublicConfig }) {
   if (tunnel.state === "opening") {
     return (
       <p className="text-muted-foreground flex items-center gap-2 text-sm">
-        <Spinner /> Opening a Cloudflare quick tunnel to this app
+        <Spinner /> Opening{" "}
+        {tunnel.provider === "cloudflare"
+          ? "a Cloudflare quick tunnel"
+          : "an ngrok tunnel"}{" "}
+        to this app
       </p>
     );
   }
@@ -466,6 +475,16 @@ function PublicUrl({ config }: { config: PublicConfig }) {
       .env to use a URL of your own.
     </p>
   );
+}
+
+/** What the public URL needs, for the checklist. */
+function publicUrlNeeds(tunnel: TunnelInfo): string {
+  if (tunnel.state === "off")
+    return "A public HTTPS URL, from PUBLIC_BASE_URL.";
+  if (tunnel.provider === "cloudflare") {
+    return "Internet access to Cloudflare. The app opens its public URL by itself.";
+  }
+  return "A free ngrok account, with its authtoken in NGROK_AUTHTOKEN or saved by the ngrok CLI. The app opens its public URL by itself.";
 }
 
 function CopyRow({ label, value }: { label: string; value: string }) {

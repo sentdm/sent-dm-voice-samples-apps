@@ -17,14 +17,17 @@ the real response. Nothing is simulated.
 - [Node.js](https://nodejs.org/) 22 or newer and [pnpm](https://pnpm.io/installation).
 - A Sent account with Voice enabled, and an API key from the dashboard (API keys page).
 - A number on your account. The setup screen turns phone calls on for it and points it at this app.
-- Internet access to Cloudflare. Sent only calls public URLs, so the app opens a Cloudflare quick tunnel
-  to itself when it starts.
+- A free [ngrok](https://ngrok.com) account. Sent only calls public URLs, so the app opens an ngrok tunnel
+  to itself when it starts. Put the authtoken in `NGROK_AUTHTOKEN` in `.env`, or save it one time with
+  `ngrok config add-authtoken`. For a Cloudflare quick tunnel, which needs no account, set
+  `TUNNEL_PROVIDER=cloudflare`.
 - A positive balance for calls that reach a phone. App-to-app calls are free.
 
 ## Quick start
 
 ```sh
 pnpm install
+cp .env.example .env   # set NGROK_AUTHTOKEN, unless the ngrok CLI has it already
 pnpm dev
 ```
 
@@ -38,12 +41,14 @@ pnpm dev
 4. On the Phone screen pick an identity, for example `agent-1`, and press **Go online**. Allow
    notifications and the microphone.
 5. Open the public URL on a second computer or a phone, pick `agent-2`, go online, and call `agent-1`
-   from the dialer. Or dial a phone number, or call your voice number from a phone.
+   from the dialer. Or dial a phone number, or call your voice number from a phone. On a free ngrok
+   account, the browser first shows an ngrok warning page: press **Visit Site**.
 
-The quick tunnel gets a new URL each time the app starts. After a restart the header shows **Public URL
+The tunnel gets a new URL each time the app starts. After a restart the header shows **Public URL
 changed**: on the setup screen press **Route to this app** and **Save** again. Save also moves the webhook
-subscription to the new URL with `PUT /v3/webhooks/{id}`. To keep one URL, set `PUBLIC_BASE_URL` in `.env`
-to your own tunnel, for example an [ngrok](https://ngrok.com) static domain; the app then opens no tunnel.
+subscription to the new URL with `PUT /v3/webhooks/{id}`. To keep one URL, set `NGROK_DOMAIN` in `.env` to
+your free ngrok dev domain from the [ngrok dashboard](https://dashboard.ngrok.com/domains). Or set
+`PUBLIC_BASE_URL` to a tunnel of your own; the app then opens no tunnel.
 
 Before the first call, press **Send a test question** in the console's callback studio. It calls
 `POST /v3/channels/voice/{number}/test`, which makes Sent send a signed synthetic question to the app and
@@ -131,6 +136,9 @@ one. That is a rule of the platform, and the app says so where it applies.
 - `.data/config.json` holds the configuration from the setup screen, including the API key and the
   secrets. It is git-ignored. `DATA_DIR` moves it.
 - `.data/routing.json` holds the routing rules.
+- `TUNNEL_PROVIDER` selects the tunnel the app opens: `ngrok` (the default) or `cloudflare`.
+- `NGROK_AUTHTOKEN` is the ngrok authtoken. Without it, the app uses the token that
+  `ngrok config add-authtoken` saved. `NGROK_DOMAIN` keeps one ngrok URL on every start.
 - `PUBLIC_BASE_URL`, when set, is the app's fixed public URL, and the app opens no tunnel.
 - `SETUP_PASSWORD`, when set, protects the setup screen, the routing rules, the webhook subscription and
   the API explorer's changes to webhooks and numbers. The app has no login otherwise. Anyone with the
@@ -140,8 +148,12 @@ one. That is a rule of the platform, and the app says so where it applies.
 
 ## Troubleshooting
 
-- **The setup screen shows a tunnel error.** The network blocks Cloudflare. Set `PUBLIC_BASE_URL` to a
-  tunnel of your own and restart.
+- **The setup screen shows a tunnel error.** The message tells you what to do. Usually ngrok has no
+  authtoken: set `NGROK_AUTHTOKEN` and restart. A free ngrok account allows 3 agent sessions at a time,
+  so stop other ngrok agents or apps. If the network blocks one provider, set `TUNNEL_PROVIDER` to the
+  other, or set `PUBLIC_BASE_URL` to a tunnel of your own, and restart.
+- **A browser shows an ngrok warning page.** Free ngrok accounts show it to browsers on each new
+  domain. Press **Visit Site**. Sent's questions and webhooks do not get this page.
 - **The first call fails with `callback_timeout`.** The development server compiles a route on its first
   request. Press the test button in the callback studio before the first call.
 - **Questions arrive with `signature invalid`.** The secret on the setup screen is not the number's

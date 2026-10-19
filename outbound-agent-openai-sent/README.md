@@ -1,8 +1,8 @@
 # Sent outbound agent
 
-A **downloadable local TypeScript app** that places calls from an existing Sent voice number and lets an OpenAI voice agent talk to the person who answers. External credentials: **one Sent API key and one OpenAI API key**.
+A **downloadable local TypeScript app** that places calls from an existing Sent voice number and lets an OpenAI voice agent talk to the person who answers. External credentials: **one Sent API key and one OpenAI API key**. The public callback tunnel uses a free ngrok account by default.
 
-Default voice model: **GPT-Realtime-2.1**, with **GPT-Realtime-2.1 Mini** and **GPT-Live-1** options. Realtime input transcription defaults to **GPT-Live-Transcribe**. The optional GPT-Live text helper defaults to **GPT-6 Luna**, with **GPT-5.4 Mini**, **GPT-6 Sol**, and **GPT-6 Astra** options. No SIP trunk or extra provider key is needed. The app uses the published Sent browser voice SDK, a software microphone, and OpenAI's server-side WebSocket API.
+Default voice model: **GPT-Realtime-2.1**, with **GPT-Realtime-2.1 Mini** and **GPT-Live-1** options. Realtime input transcription defaults to **GPT-Live-Transcribe**. The optional GPT-Live text helper defaults to **GPT-6 Luna**, with **GPT-5.4 Mini**, **GPT-6 Sol**, and **GPT-6 Astra** options. No SIP trunk or extra voice provider key is needed. The app uses the published Sent browser voice SDK, a software microphone, and OpenAI's server-side WebSocket API.
 
 > This is a single-call local prototype. Keep the browser tab open and the computer awake. It is not a dialer or a campaign tool. Real phone-call behavior requires validation with your own accounts.
 
@@ -45,9 +45,11 @@ Enter the two keys in the local dashboard and click **Connect keys**. Keys stay 
 
 Alternatively, set `SENT_DM_API_KEY` and `OPENAI_API_KEY` in your shell, or copy `.env.example` to `.env` (git-ignored) and fill them in. Shell values take precedence over `.env`. When both are present, the server validates them at startup through the same checks as the dashboard form, and the dashboard shows that environment keys are in use. Keys entered in the dashboard override them for the running session. The server removes both variables from its own environment after reading them, so the `cloudflared` child process never inherits them. A `.env` file is plaintext on disk; prefer shell variables or a secret manager on shared machines.
 
+Sent only calls public URLs, so Start opens a public tunnel to a callback-only gateway. The default tunnel is ngrok. It needs a free [ngrok account](https://dashboard.ngrok.com/signup): set `NGROK_AUTHTOKEN` in your shell or `.env`. If you saved a token earlier with `ngrok config add-authtoken`, the app uses that token. To use a Cloudflare quick tunnel instead, which needs no account, set `TUNNEL_PROVIDER=cloudflare`. The terminal shows the tunnel in use when the server starts, for example `Callback tunnel: ngrok.` Like the API keys, `NGROK_AUTHTOKEN` is removed from the server's environment after it is read. See [Set up the public tunnel](./_docs/setup.md#set-up-the-public-tunnel).
+
 The app fetches your **existing active voice numbers** and selects the default number. The person you call sees this number as caller ID. It never buys or allocates a number. Your Sent account must already have voice enabled and enough balance for calls to phones, and your OpenAI project must have access to the selected voice model.
 
-Review the opening line and instructions, then click **Start agent**. Start checks model access, opens a callback-only Cloudflare quick tunnel, registers the browser as a Sent app user, and changes the selected number's callback URL. Your browser asks for notification permission, which the Sent SDK needs to register. The AI's software microphone is used rather than your physical microphone.
+Review the opening line and instructions, then click **Start agent**. Start checks model access, opens the callback-only public tunnel, registers the browser as a Sent app user, and changes the selected number's callback URL. Your browser asks for notification permission, which the Sent SDK needs to register. The AI's software microphone is used rather than your physical microphone.
 
 Enter the number to call in **international format**: `+`, the country code, and the number, for example `+14155551234` or `+38349123456`. Spaces, dashes, dots, and parentheses are removed. A number without `+` and a country code is refused; the app never guesses a country. Tick **I have permission to call this number with an AI voice**, then click **Call**.
 
@@ -150,9 +152,13 @@ Many countries regulate automated and AI voice calls, including consent, AI disc
 
 The dashboard/key/token/media server binds only to `127.0.0.1`. Host checks, same-origin checks, and a per-process CSRF token protect local management. The OpenAI API key stays server-side. The browser receives only a short-lived Sent voice token.
 
-A second minimal HTTP gateway exposes **only `/health` and a random signed voice callback** through Cloudflare. Callback requests require the correct number-specific HMAC signature over the raw request body and a timestamp within five minutes. Duplicate call decisions are cached briefly.
+A second minimal HTTP gateway exposes **only `/health` and a random signed voice callback** through the public tunnel. Callback requests require the correct number-specific HMAC signature over the raw request body and a timestamp within five minutes. Duplicate call decisions are cached briefly.
 
-Cloudflare quick tunnels need no account or key, but they require downloading/running `cloudflared` and outbound network access to Cloudflare. The binary is downloaded automatically on first Start. Only callback metadata passes through Cloudflare; audio is carried by the Sent browser connection and your local-server-to-OpenAI connection.
+The default tunnel is ngrok. The `@ngrok/ngrok` SDK runs the ngrok agent inside the Node process, so there is no binary to download and no child process. It needs a free ngrok account and outbound access to ngrok. Each Start gets a new random `ngrok-free.app` hostname. To keep the hostname, set `NGROK_DOMAIN`, for example to the free dev domain from your [ngrok dashboard](https://dashboard.ngrok.com/domains); the callback path still changes on every Start. The server opens one ngrok agent session and keeps it for every Start; Stop closes only the endpoint. This matters because a free account allows 3 agent sessions at once, and a closed session keeps its slot until the process exits. A new endpoint answers 404 for a moment, so Start waits until `/health` answers through the tunnel.
+
+With `TUNNEL_PROVIDER=cloudflare`, the app opens a Cloudflare quick tunnel instead. Quick tunnels need no account or key, but they require downloading/running `cloudflared` and outbound network access to Cloudflare. The binary is downloaded automatically on the first Start that uses it.
+
+Only callback metadata passes through the tunnel provider, ngrok or Cloudflare; audio is carried by the Sent browser connection and your local-server-to-OpenAI connection.
 
 Transcripts and events remain in memory and are discarded when the server exits. Call outcomes are the exception: they are appended to `.sent-agent/call-outcomes.jsonl` and contain phone numbers and what the person said. No call recordings are created. API/provider usage may incur charges; this app does not provide cost guarantees.
 
@@ -164,7 +170,12 @@ Transcripts and events remain in memory and are discarded when the server exits.
 | No active voice numbers | Enable voice on an existing number/account in Sent first; use an appropriately scoped API key |
 | OpenAI key check or session rejected | Check direct OpenAI key, project access, and chosen model |
 | Registration/notification failure | Use current Chrome/Edge on localhost and allow notifications; private browsing can block service workers/push |
-| Callback tunnel cannot start | Allow outbound Cloudflare/GitHub access; first run downloads cloudflared; quick tunnels can be unavailable |
+| "ngrok needs an authtoken" | Set `NGROK_AUTHTOKEN` in your shell or `.env` ([free account](https://dashboard.ngrok.com/signup)), or set `TUNNEL_PROVIDER=cloudflare`, then start the server again |
+| "ngrok rejected the authtoken" (`ERR_NGROK_105`/`ERR_NGROK_107`) | Copy the token again from the [ngrok dashboard](https://dashboard.ngrok.com/get-started/your-authtoken); check `NGROK_AUTHTOKEN` and any token saved with `ngrok config add-authtoken` |
+| "3 agent sessions online" (`ERR_NGROK_108`) | The free ngrok plan allows 3 agent sessions at once. Stop another ngrok agent or sample app ([agents](https://dashboard.ngrok.com/agents)), or set `TUNNEL_PROVIDER=cloudflare` |
+| "NGROK_DOMAIN is already online" (`ERR_NGROK_334`) | Another ngrok agent uses that domain. Stop it, or remove `NGROK_DOMAIN` |
+| Callback tunnel cannot start (ngrok) | Allow outbound access to ngrok |
+| Callback tunnel cannot start (`TUNNEL_PROVIDER=cloudflare`) | Allow outbound Cloudflare/GitHub access; first run downloads cloudflared; quick tunnels can be unavailable |
 | The phone never rings | Read the event log and the call record's `failure_reason`, for example `insufficient_balance` or `destination_blocked`. See [Troubleshooting](./_docs/sent-calls-and-logs.md#troubleshooting) |
 | `Call ended (noAnswer)` or `(busy)` | Nobody answered within 30 s, or the line was busy or declined |
 | "Calls can't be placed until it reconnects" | Wait; the SDK retries about every 30 s |
@@ -183,11 +194,11 @@ pnpm test:browser                     # real browser audio graph
 pnpm test:dashboard                   # dashboard call lifecycle with a fake SDK
 ```
 
-Server tests use local fake Sent/OpenAI services and test actual request/event shapes without calls or credentials. They cover the dial rules: only the requested number, only from this tab, only once, and nothing for inbound calls or other app users.
+Server tests use local fake Sent/OpenAI services and test actual request/event shapes without calls or credentials. `pnpm exec tsx tests/tunnel-smoke.ts` opens your real public tunnel two times, like Start, Stop, Start, and checks that only `/health` is public. They cover the dial rules: only the requested number, only from this tab, only once, and nothing for inbound calls or other app users.
 
 ## Dependencies and integration references
 
-The project uses the published `@sentdm/voice` package (Sent's browser voice SDK), Express, `ws`, and `cloudflared`. They are version-pinned in `pnpm-lock.yaml`; review third-party advisories before production use. A `basic-ftp` override in `pnpm-workspace.yaml` patches an inherited advisory in the SDK's unused Node proxy dependency chain, and install scripts are limited to esbuild.
+The project uses the published `@sentdm/voice` package (Sent's browser voice SDK), Express, `ws`, `@ngrok/ngrok`, and `cloudflared`. They are version-pinned in `pnpm-lock.yaml`; review third-party advisories before production use. A `basic-ftp` override in `pnpm-workspace.yaml` patches an inherited advisory in the SDK's unused Node proxy dependency chain, and install scripts are limited to esbuild. `@ngrok/ngrok` needs no install script: its native build comes as a package for each platform.
 
 The committed browser bundle includes `@sentdm/voice` and its dependencies. Their licenses are listed in [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md), which `pnpm run build` regenerates.
 
@@ -199,4 +210,5 @@ The committed browser bundle includes `@sentdm/voice` and its dependencies. Thei
 - [OpenAI Live delegation](https://developers.openai.com/api/docs/guides/live-delegation)
 - [OpenAI Realtime conversations](https://developers.openai.com/api/docs/guides/realtime-conversations)
 - [OpenAI current model catalog](https://developers.openai.com/api/docs/models)
+- [ngrok JavaScript SDK](https://github.com/ngrok/ngrok-javascript)
 - [Cloudflare quick tunnels](https://developers.cloudflare.com/tunnel/get-started/quick-tunnels/)

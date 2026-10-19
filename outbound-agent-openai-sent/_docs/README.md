@@ -39,7 +39,7 @@ These documents use each term with one meaning only.
 | Dashboard | The page at `http://localhost:3000`. You control the app from it. |
 | Management server | The local HTTP server for the dashboard, the keys, the voice tokens, and the bridge. Only your computer can reach it. |
 | Gateway | The second local HTTP server. It receives the callback from Sent. The tunnel makes it public. |
-| Tunnel | The Cloudflare quick tunnel. It gives the gateway a temporary public HTTPS address. |
+| Tunnel | The public tunnel: ngrok by default, or a Cloudflare quick tunnel with `TUNNEL_PROVIDER=cloudflare`. It gives the gateway a temporary public HTTPS address. |
 | Callback URL | The URL that Sent asks what to do with each call on your number. Sent calls the request a "question". |
 | Callback secret | The `whsec_…` key that Sent uses to sign each callback question. Each number has its own secret. |
 | Identity | The name of the Sent app user that the browser tab registers as, for example `sent-ai-3fa9c1e07b2d`. |

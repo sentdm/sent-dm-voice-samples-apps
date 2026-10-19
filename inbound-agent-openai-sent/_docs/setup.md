@@ -12,11 +12,12 @@ The app runs on your computer. A Node.js server and one browser tab do all the w
 | An active Sent voice number | The app uses an existing number. It never buys a number. Use a test number if you can. |
 | A Sent API key | The key must have access to the voice channel endpoints. |
 | An OpenAI API key | Use a direct OpenAI key. A proxy that supports only Chat Completions does not work. Your OpenAI project must have access to the voice model that you select. |
+| An ngrok account | Free. The app uses it for the public tunnel that Sent calls. See [Set up the public tunnel](#set-up-the-public-tunnel). With a Cloudflare quick tunnel, you need no account. |
 | Node.js 22 or newer | Get it from [nodejs.org](https://nodejs.org/). |
 | pnpm | Get it from [pnpm.io](https://pnpm.io/installation), or run `corepack enable pnpm`. |
 | Chrome or Edge | Use a current version. Do not use private browsing. |
 | A second phone | You call your Sent number from this phone. |
-| Network access | The app must reach `api.sent.dm`, `api.openai.com`, and Cloudflare. On the first Start, it downloads the `cloudflared` binary from GitHub. |
+| Network access | The app must reach `api.sent.dm`, `api.openai.com`, and ngrok. With `TUNNEL_PROVIDER=cloudflare`, it must reach Cloudflare instead, and on the first Start it downloads the `cloudflared` binary from GitHub. |
 
 > [!TIP]
 > Use a number that already has a callback URL. Then **Stop** can put your old routing back exactly. A number without a callback URL needs one manual step after you stop. See [If your number has no callback URL](#if-your-number-has-no-callback-url).
@@ -80,6 +81,29 @@ If only one of the two variables is set, the server ignores both. It writes a wa
 
 If no number is active, the server shows an error. A number that has no callback URL yet is `INACTIVE` in Sent. To turn it on, set any public HTTPS callback URL on it in Sent. Then connect the keys again.
 
+## Set up the public tunnel
+
+Sent sends its call questions only to a public HTTPS URL. So Start opens a public tunnel to the app. The default tunnel is ngrok.
+
+1. Make a free account on [ngrok](https://dashboard.ngrok.com/signup).
+2. Copy your authtoken from the [ngrok dashboard](https://dashboard.ngrok.com/get-started/your-authtoken).
+3. Set `NGROK_AUTHTOKEN` in `.env` or in your shell.
+
+If you saved a token before with `ngrok config add-authtoken`, you can skip step 3. The app reads that token from the ngrok config file.
+
+When the server starts, the terminal shows the tunnel, for example `Callback tunnel: ngrok.` If the app finds no authtoken, this line tells you. Start then fails until you set one.
+
+| Variable | Default | Notes |
+| --- | --- | --- |
+| `TUNNEL_PROVIDER` | `ngrok` | `ngrok` or `cloudflare`. Another value stops the server at start. |
+| `NGROK_AUTHTOKEN` | The token from `ngrok config add-authtoken` | The server reads it one time, then deletes it from its environment, like the API keys. |
+| `NGROK_DOMAIN` | None | A fixed hostname, for example your free dev domain from the [ngrok dashboard](https://dashboard.ngrok.com/domains). Without it, each Start gets a new random `ngrok-free.app` hostname. The callback path changes on each Start in both cases. |
+
+To use a Cloudflare quick tunnel instead, set `TUNNEL_PROVIDER=cloudflare`. It needs no account. On the first Start, the app downloads the `cloudflared` binary from GitHub.
+
+> [!NOTE]
+> A free ngrok account can have 3 agent sessions at the same time. The app uses one session for each server process, and keeps it for each Start. Each other ngrok agent uses a session too, for example `ngrok http` in a different terminal or a different sample app.
+
 ## Set the behavior of the agent
 
 You can change these settings only while the agent is stopped.
@@ -110,7 +134,7 @@ The app does these steps in this order. Nothing changes on your Sent number unti
 
 1. It creates the browser audio graph and the software microphone.
 2. It opens a test session with the selected OpenAI voice model, then closes it.
-3. It opens the Cloudflare tunnel and waits until the public URL answers.
+3. It opens the public tunnel (ngrok or Cloudflare) and waits until the public URL answers.
 4. It registers the browser tab as a Sent app user.
 5. It saves your number's current callback URL to `.sent-agent/routing-backup.json`.
 6. It sets the tunnel URL as your number's callback URL, then asks Sent to send a test question.
@@ -221,6 +245,8 @@ pnpm test:dashboard                   # dashboard lifecycle with a fake Sent SDK
 
 The tests use local fake services. They do not need keys and they do not make calls.
 
+To check the public tunnel with your real settings, run `pnpm exec tsx tests/tunnel-smoke.ts`. It reads `TUNNEL_PROVIDER` and the ngrok settings like the app. It opens the tunnel two times, like Start, Stop, and Start again, and checks that only `/health` is public.
+
 ## Change the port
 
 The dashboard uses port 3000. To use a different port, set `PORT` in your shell or in `.env`.
@@ -240,7 +266,12 @@ The port must be from 1024 to 65535.
 | `… is waiting for a first callback URL` | The number has no callback URL, so it is `INACTIVE`. | Set any public HTTPS callback URL on the number in Sent. Then connect the keys again. |
 | `OpenAI key check failed (401)` | The OpenAI key is not correct. | Use a direct OpenAI API key. |
 | `Notification permission is required…` | The browser blocked notifications. | Allow notifications for `localhost:3000` in the browser settings. |
-| `The public callback tunnel did not become reachable…` | Cloudflare is blocked or slow. | Allow outbound access to Cloudflare and GitHub. Try again. |
+| `ngrok needs an authtoken…` | The app found no ngrok authtoken. | Set `NGROK_AUTHTOKEN`, or set `TUNNEL_PROVIDER=cloudflare`. Start the server again. |
+| `ngrok rejected the authtoken…` (`ERR_NGROK_105` or `ERR_NGROK_107`) | The token is not correct, or it was reset. | Copy the token again from the [ngrok dashboard](https://dashboard.ngrok.com/get-started/your-authtoken). Check `NGROK_AUTHTOKEN` and the token saved with `ngrok config add-authtoken`. |
+| `Your ngrok account already has 3 agent sessions online…` (`ERR_NGROK_108`) | Other ngrok agents use all the sessions of the free plan. | Stop an agent in its terminal or on the [ngrok agents page](https://dashboard.ngrok.com/agents). Or set `TUNNEL_PROVIDER=cloudflare`. |
+| `NGROK_DOMAIN is already online…` (`ERR_NGROK_334`) | A different ngrok agent uses this domain. | Stop that agent, or remove `NGROK_DOMAIN`. |
+| `The public callback tunnel did not become reachable… Check access to ngrok.` | ngrok is blocked or slow. | Allow outbound access to ngrok. Try again. |
+| `The public callback tunnel did not become reachable… Check access to Cloudflare.` | `TUNNEL_PROVIDER=cloudflare` is set, and Cloudflare is blocked or slow. | Allow outbound access to Cloudflare and GitHub. Try again, or use ngrok. |
 | `Port in use` error at start | A different process uses port 3000. | Stop that process, or set `PORT`. |
 
 For problems during a call, see [Troubleshooting](./sent-calls-and-logs.md#troubleshooting).

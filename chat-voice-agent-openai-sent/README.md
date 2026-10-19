@@ -18,7 +18,11 @@ The guides for this sample are in [`_docs/`](./_docs/README.md):
 
 ## Run it
 
-Install **Node.js 22 or newer** and [pnpm](https://pnpm.io/installation). Then, in this folder:
+Install **Node.js 22 or newer** and [pnpm](https://pnpm.io/installation).
+
+Sent reaches the app through a public tunnel. By default the app opens it with [ngrok](https://ngrok.com), which needs a free account: set `NGROK_AUTHTOKEN` in `.env` (see `.env.example`), or run `ngrok config add-authtoken <token>` once. For a Cloudflare quick tunnel instead, which needs no account, set `TUNNEL_PROVIDER=cloudflare`. See [Set up the public tunnel](./_docs/setup.md#set-up-the-public-tunnel).
+
+Then, in this folder:
 
 ```sh
 pnpm install
@@ -37,7 +41,7 @@ For a production build: `pnpm build`, then `pnpm start`.
 
 | Start | Stop |
 | --- | --- |
-| Saves your number's callback URL to `.sent-agent/backup.json`, then points it at this app through a temporary Cloudflare tunnel. | Restores the saved callback URL. |
+| Saves your number's callback URL to `.sent-agent/backup.json`, then points it at this app through a temporary public tunnel (ngrok by default). | Restores the saved callback URL. |
 | Creates a webhook for message events, so replies and delivery reports reach the app. | Deletes the webhook. |
 
 If the app stops unexpectedly, the next **Connect** restores both before anything else. Closing the phone tab stops the agent after a few seconds.
@@ -107,6 +111,7 @@ With campaign contacts, as everywhere, the agent:
 | `server/index.ts` | Starts the app: Next.js, the local API, the WebSockets, and the gateway. |
 | `server/runtime.ts` | Keys, settings, Start and Stop, and the routing backup. |
 | `server/gateway.ts` | The only server the tunnel exposes: Sent's signed voice questions and message webhooks. |
+| `server/tunnel.ts` | The public tunnel: ngrok by default, or a Cloudflare quick tunnel with `TUNNEL_PROVIDER=cloudflare`. |
 | `server/conversations.ts` | Inbound texts, delivery reports, sending, templates, history import, and the text agent's turns. |
 | `server/calls.ts` | Placing and answering calls, the callback queue, and the audio bridge to the voice agent. |
 | `server/campaigns.ts`, `components/console/campaigns-sheet.tsx`, `lib/csv.ts` | Campaigns: checking the list, sending the template, and the counts. |
@@ -126,6 +131,6 @@ With campaign contacts, as everywhere, the agent:
 ## Tests
 
 ```sh
-pnpm test     # signatures, call rules, free-text windows, webhooks, the text agent's tool loop
+pnpm test     # signatures, call rules, free-text windows, webhooks, the text agent's tool loop, tunnel settings
 pnpm check    # types and lint
 ```

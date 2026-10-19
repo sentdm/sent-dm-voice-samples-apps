@@ -7,5 +7,6 @@ overrides:
 allowBuilds:
   # Official platform-binary check for the dev bundler.
   esbuild: true
-  # Not needed: the app downloads the cloudflared binary on first Start (src/tunnel.ts), as the README documents.
+  # Not needed: with TUNNEL_PROVIDER=cloudflare, the app downloads the cloudflared binary on first Start (src/tunnel.ts), as the README documents.
+  # @ngrok/ngrok, the default tunnel, has no install script: its native build is a per-platform package.
   cloudflared: false

@@ -54,7 +54,13 @@ const state: RuntimeState = (globalState.__sentVoiceTourState ??= {
   telemetry: [],
   listeners: new Set(),
   sequence: 0,
-  tunnel: { state: "off", url: null, error: null },
+  tunnel: {
+    state: "off",
+    provider: null,
+    fixedUrl: false,
+    url: null,
+    error: null,
+  },
 });
 
 export function publish(event: AppEvent): void {

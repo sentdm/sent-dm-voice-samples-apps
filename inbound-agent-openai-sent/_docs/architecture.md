@@ -13,8 +13,8 @@ This document describes the parts of the inbound agent and how a call moves thro
 ```text
                                   THE INTERNET
  ┌────────────┐  phone call   ┌──────────────────┐  callback question  ┌──────────────────┐
- │ Caller's   │◄─────────────►│ Sent             │────────────────────►│ Cloudflare edge  │
- │ phone      │               │ numbers · calls  │◄────────────────────│ quick tunnel     │
+ │ Caller's   │◄─────────────►│ Sent             │────────────────────►│ ngrok edge       │
+ │ phone      │               │ numbers · calls  │◄────────────────────│ public tunnel    │
  └────────────┘               └──────────────────┘   connectToUser     └────────┬─────────┘
                                 │ ▲      ▲ │ REST (x-api-key)                   │
                 push · WebRTC   │ │      │ │                                    │
@@ -24,8 +24,8 @@ This document describes the parts of the inbound agent and how a call moves thro
  ┌─────────────────────────────────┐        ┌───────────────────────────────────┼────────┐
  │ Browser tab · localhost:3000    │        │ Node.js process · pnpm start      ▼        │
  │                                 │        │  ┌──────────────┐   ┌──────────────────┐   │
- │  @sentdm/voice SDK              │        │  │ cloudflared  │──►│ Gateway          │   │
- │   ▲ software mic  │ caller audio│        │  │ child process│   │ 127.0.0.1:random │   │
+ │  @sentdm/voice SDK              │        │  │ ngrok agent  │──►│ Gateway          │   │
+ │   ▲ software mic  │ caller audio│        │  │ in process   │   │ 127.0.0.1:random │   │
  │   │               ▼             │        │  └──────────────┘   └──────────────────┘   │
  │  AudioWorklet · 24 kHz PCM16    │  /api  │  ┌────────────────────────┐                │
  │   ▲               │             │◄──────►│  │ Management server      │   ┌─────────┐  │
@@ -45,7 +45,7 @@ This document describes the parts of the inbound agent and how a call moves thro
 | Sent service worker | Browser | `dist/public/sw.js` (a copy of `@sentdm/voice/sw.js`) | Receives the push message for an incoming call and passes it to the tab. |
 | Management server | Node.js, `127.0.0.1:3000` | `src/server.ts` | Serves the dashboard and `/api/*`. Holds the keys. Mints voice tokens. Runs the bridge. |
 | Gateway | Node.js, `127.0.0.1`, random port | `src/server.ts` | Receives the callback question from Sent, checks the signature, and gives the answer. |
-| Tunnel | `cloudflared` child process | `src/tunnel.ts` | Gives the gateway a public HTTPS address. |
+| Tunnel | ngrok agent in the Node.js process (`@ngrok/ngrok`), or a `cloudflared` child process | `src/tunnel.ts` | Gives the gateway a public HTTPS address. `TUNNEL_PROVIDER` selects ngrok (the default) or a Cloudflare quick tunnel. |
 | Sent client | Node.js | `src/sent.ts` | Calls the Sent REST API. |
 | Signature check and call decision | Node.js | `src/security.ts` | Checks the HMAC signature. Decides "connect" or "reject". |
 | OpenAI adapter | Node.js | `src/openai.ts` | Opens one OpenAI voice session for each call. Runs the agent tools. |
@@ -73,7 +73,7 @@ The order of these steps is important. The app changes your Sent number only aft
 2. **Software microphone.** The page replaces `navigator.mediaDevices.getUserMedia`. An audio-only request now gets a copy of the worklet's output stream.
 3. **Settings.** The page sends the number, the models, the greeting, and the instructions to `POST /api/settings`.
 4. **Model check.** `POST /api/prepare` opens a real session with the selected voice model, then closes it. If your OpenAI project cannot use the model, Start stops here.
-5. **Tunnel.** The server starts `cloudflared` and gets a `trycloudflare.com` address. It asks Cloudflare's DNS server (`1.1.1.1`) for the address, then waits until `/health` answers through the tunnel.
+5. **Tunnel.** With ngrok, the default, the server connects one ngrok agent session in its own process, or uses the session of an earlier Start. It opens an endpoint with a new random `ngrok-free.app` address, or with `NGROK_DOMAIN`. A new endpoint answers `404` for a moment, so the server waits until `/health` answers through the tunnel. With `TUNNEL_PROVIDER=cloudflare`, the server starts `cloudflared` and gets a `trycloudflare.com` address. It asks Cloudflare's DNS server (`1.1.1.1`) for the address, then waits until `/health` answers through the tunnel.
 6. **Callback path.** The server makes a random path: `/voice/` and 48 hex characters. The callback URL is the tunnel address plus this path.
 7. **Registration.** The SDK gets a voice token from `POST /api/voice-token` and registers the tab with Sent.
 8. **Heartbeat.** The page starts a heartbeat every 2 seconds. A Web Worker keeps the time, so the heartbeat continues when the tab is in the background.
@@ -199,15 +199,16 @@ The app also ends a call after 60 seconds with no caller speech and no agent aud
 | --- | --- | --- |
 | Sent API key | Server memory | Until the server stops |
 | OpenAI API key | Server memory | Until the server stops |
+| ngrok authtoken | Server memory | Until the server stops |
 | Voice token | Browser (SDK memory) | 600 s, then the SDK gets a new one |
 | CSRF token | Server memory and the dashboard page | Until the server stops |
 | Callback secret (`whsec_…`) | Server memory and `routing-backup.json` | Until the app restores the routing |
 | Caller messages | `.sent-agent/messages.jsonl` | Until you delete the file |
 | Transcripts | Server memory (the OpenAI adapter) and the dashboard page | Server: until the call ends. Page: until you reload it. |
 
-The server reads `SENT_DM_API_KEY` and `OPENAI_API_KEY` one time. Then it deletes them from its environment. So the `cloudflared` child process never gets the keys.
+The server reads `SENT_DM_API_KEY`, `OPENAI_API_KEY`, and `NGROK_AUTHTOKEN` one time. Then it deletes them from its environment. So a `cloudflared` child process never gets them.
 
-Cloudflare sees only the callback question and answer. The call audio goes from the browser to Sent, and from the server to OpenAI.
+The tunnel provider, ngrok or Cloudflare, sees only the callback question and answer. The call audio goes from the browser to Sent, and from the server to OpenAI.
 
 ## Safety nets
 
@@ -220,7 +221,8 @@ Cloudflare sees only the callback question and answer. The call audio goes from 
 | The SDK registration goes offline | Routing stays. A call in progress continues. New calls get "busy" until the SDK registers again (it tries about every 30 s). |
 | The SDK does not use the software microphone | The tab ends the call. This prevents room audio from going to the caller. |
 | OpenAI sends a request error | The app writes a notice and the call continues. Only errors such as `invalid_api_key` or `insufficient_quota` end the call. |
-| The tunnel stops | The server stops the agent and restores the routing. |
+| The `cloudflared` process stops (Cloudflare tunnel) | The server stops the agent and restores the routing. |
+| The ngrok connection drops | The ngrok SDK connects the session again by itself. The agent continues. |
 
 ## Where to change things
 

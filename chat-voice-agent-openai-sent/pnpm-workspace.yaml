@@ -2,7 +2,8 @@
 allowBuilds:
   # Official platform-binary check for tsx's bundler.
   esbuild: true
-  # Not needed: the app downloads the cloudflared binary on first Start (server/tunnel.ts).
+  # Not needed: with TUNNEL_PROVIDER=cloudflare, the app downloads the cloudflared binary on first Start (server/tunnel.ts).
+  # @ngrok/ngrok, the default tunnel, has no install script: its native build is a per-platform package.
   cloudflared: false
   # Not needed: Next.js image optimization is unused, and the resolver works without its native build.
   sharp: false

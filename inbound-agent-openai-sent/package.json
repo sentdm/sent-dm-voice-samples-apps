@@ -19,6 +19,7 @@
     "setup": "pnpm install --frozen-lockfile && pnpm run build"
   },
   "dependencies": {
+    "@ngrok/ngrok": "1.7.0",
     "@sentdm/voice": "0.1.1",
     "cloudflared": "0.7.3",
     "express": "5.1.0",

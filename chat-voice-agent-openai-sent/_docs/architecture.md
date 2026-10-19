@@ -15,13 +15,14 @@ This document describes the parts of the chat + voice agent, and how texts, call
 ```text
 THE INTERNET
   Contact's phone ◄──── texts and calls ────► Sent
-  Sent ──── signed voice questions and message webhooks ────► Cloudflare quick tunnel ──► Gateway
+  Sent ──── signed voice questions and message webhooks ────► Public tunnel (ngrok) ──► Gateway
   Node.js process ──── REST, through the official SDK (@sentdm/sentdm) ────► Sent
   Phone tab ◄──── call media (WebRTC) and incoming-call push ────► Sent
 
 YOUR COMPUTER
   Node.js process (pnpm dev)
   ├── Gateway             127.0.0.1, random port    ◄── the tunnel only
+  ├── Tunnel              ngrok in this process, or a cloudflared child process
   ├── Management server   127.0.0.1:3000            ◄── the console: /api, /ws, /bridge
   ├── Text agent          ──► OpenAI Responses API
   ├── Voice agent         ──► OpenAI Realtime API, one session for each agent call
@@ -43,6 +44,7 @@ YOUR COMPUTER
 | Boot | Node.js | `server/index.ts` | Starts the gateway and the management server, and routes WebSocket upgrades. |
 | Runtime | Node.js | `server/runtime.ts` | Keys, settings, Start and Stop, the routing backup, the phone tab's heartbeat, and the snapshots for the console. |
 | Gateway | Node.js | `server/gateway.ts` | Checks the signature on each voice question and webhook, then passes it on. |
+| Tunnel | Node.js | `server/tunnel.ts` | Gives the gateway a public HTTPS address: ngrok by default, or a Cloudflare quick tunnel. See [The public tunnel](#the-public-tunnel). |
 | Call rules | Node.js | `server/security.ts` | Signature checks, and which calls may ring or dial. |
 | Conversations | Node.js | `server/conversations.ts` | Inbound texts, delivery reports, sending, templates, the history import, and the text agent's turns. |
 | Calls | Node.js | `server/calls.ts` | Placing and answering calls, the callback queue, and the audio bridge to the voice agent. |
@@ -63,7 +65,7 @@ The order matters: the app changes your Sent number only after every other part 
 2. **Prepare** (`POST /api/start/prepare`). The server restores any routing that an earlier run left behind, then:
    1. loads your approved templates,
    2. opens a real session with the voice model, then closes it,
-   3. opens the tunnel, and
+   3. opens the public tunnel and waits until `/health` answers through it, and
    4. makes two random paths: `/voice/` and `/hooks/`, each followed by 48 hex characters.
 3. **Registration.** The phone tab gets a voice token (`POST /api/voice-token`, valid for 600 s) and registers with Sent.
 4. **Heartbeat.** The phone tab posts a heartbeat every 2 seconds. A Web Worker keeps the time, so the heartbeat continues in a background tab.
@@ -83,6 +85,18 @@ If a step fails, the server restores what it changed and closes the tunnel.
 4. Closes the tunnel and deletes the routing backup.
 
 **Ctrl+C** runs the same steps. If the server stops without them, the backup stays on disk, and the next **Connect** runs them first.
+
+### The public tunnel
+
+`TUNNEL_PROVIDER` selects the tunnel. See [Set up the public tunnel](./setup.md#set-up-the-public-tunnel).
+
+| | ngrok (default) | Cloudflare quick tunnel |
+| --- | --- | --- |
+| Runs as | The `@ngrok/ngrok` SDK, in the server process | The `cloudflared` binary, as a child process. The app downloads it on the first Start. |
+| Account | A free ngrok account and its authtoken | None |
+| Address | `https://<random>.ngrok-free.app`, new on each Start. `NGROK_DOMAIN` keeps it fixed. | `https://<random>.trycloudflare.com`, new on each Start |
+| Before Start continues | The server waits up to 45 s for `/health`. A new endpoint answers `404` for a short time. | The server asks Cloudflare's DNS server (`1.1.1.1`) for the new name, then waits up to 45 s for `/health`. This keeps an early "not found" out of your system's DNS cache. |
+| Stop | Closes the endpoint. The ngrok session stays open for the next Start: a free account can have only 3 sessions online, and a closed session keeps its place until the server process stops. | Stops `cloudflared`. |
 
 ## A text from a contact
 
@@ -175,11 +189,12 @@ All files are in `.sent-agent/`, with owner-only permissions. Delete the folder 
 | --- | --- | --- |
 | Sent and OpenAI API keys | Server memory | Until the server stops. The server removes them from its environment, so `cloudflared` never gets them. |
 | `APP_API_TOKEN` | Server memory | Until the server stops. Removed from the environment the same way. |
+| `NGROK_AUTHTOKEN` | Server memory | Until the server stops. Removed from the environment the same way. |
 | Voice token | Phone tab (SDK memory) | 600 s, then the SDK gets a new one. |
 | CSRF token | Server memory and the console | Until the server stops. |
 | Callback and webhook secrets | Server memory and `backup.json` | Until Stop. |
 
-Cloudflare sees only the voice questions, the answers, and the webhooks. Call audio goes from the phone tab to Sent, and from the server to OpenAI.
+The tunnel provider, ngrok or Cloudflare, sees only the voice questions, the answers, and the webhooks. Call audio goes from the phone tab to Sent, and from the server to OpenAI.
 
 ## Timers and limits
 

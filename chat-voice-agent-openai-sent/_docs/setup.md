@@ -19,7 +19,8 @@ The app runs on your computer. A Node.js server and one browser tab do all the w
 | pnpm | Get it from [pnpm.io](https://pnpm.io/installation), or run `corepack enable pnpm`. |
 | Chrome or Edge | Use a current version. Do not use private browsing. Allow notifications for the page. |
 | Your own phone | For the first tests, text and call your own mobile phone. |
-| Network access | The app must reach `api.sent.dm`, `api.openai.com`, and Cloudflare. On the first Start, it downloads the `cloudflared` binary from GitHub. |
+| A free ngrok account | The app opens its public tunnel with ngrok. Sign up at [dashboard.ngrok.com](https://dashboard.ngrok.com/signup). You don't need it with `TUNNEL_PROVIDER=cloudflare`. See [Set up the public tunnel](#set-up-the-public-tunnel). |
+| Network access | The app must reach `api.sent.dm`, `api.openai.com`, and ngrok. With `TUNNEL_PROVIDER=cloudflare`, it must reach Cloudflare instead, and on the first Start it downloads the `cloudflared` binary from GitHub. |
 
 > [!IMPORTANT]
 > The webhook that Start creates gets **every** inbound text on your Sent account. If your account has real customers, put your own phone in **Only these numbers** before you start. Then the agent replies to and answers only that number.
@@ -36,18 +37,42 @@ The app runs on your computer. A Node.js server and one browser tab do all the w
    pnpm install
    ```
 
-3. Start the app:
+3. Give the app your ngrok authtoken. See [Set up the public tunnel](#set-up-the-public-tunnel).
+4. Start the app:
 
    ```sh
    pnpm dev
    ```
 
-4. Open `http://localhost:3000` in Chrome or Edge.
+   The terminal shows the tunnel provider, for example `Public tunnel: ngrok.`
+
+5. Open `http://localhost:3000` in Chrome or Edge.
 
 For a production build, run `pnpm build`, then `pnpm start`.
 
 > [!NOTE]
 > Run the app with `pnpm dev` or `pnpm start`, not with `next dev`. The console needs the app's own server: it holds the keys and talks to Sent. Without it, the page says that the server isn't answering.
+
+## Set up the public tunnel
+
+Sent sends voice questions and message webhooks only to public HTTPS URLs. So Start opens a public tunnel to the gateway. By default, the tunnel provider is ngrok.
+
+1. Sign up for a free ngrok account at [dashboard.ngrok.com](https://dashboard.ngrok.com/signup).
+2. Copy your authtoken from [Your Authtoken](https://dashboard.ngrok.com/get-started/your-authtoken).
+3. Set `NGROK_AUTHTOKEN` in `.env` or in your shell. If you ran `ngrok config add-authtoken` before, skip this step: the app reads the token that the ngrok agent saved.
+4. Start the app, or restart it. The server reads these variables only at startup.
+
+| Variable | Default | Notes |
+| --- | --- | --- |
+| `TUNNEL_PROVIDER` | `ngrok` | `ngrok` or `cloudflare`. Another value stops the server at startup. |
+| `NGROK_AUTHTOKEN` | the token from `ngrok config add-authtoken` | The server reads it one time and removes it from its environment, like the API keys. |
+| `NGROK_DOMAIN` | none | A fixed ngrok domain, for example your free dev domain from [Domains](https://dashboard.ngrok.com/domains). Without it, each Start gets a new `https://<random>.ngrok-free.app` address. |
+
+ngrok runs inside the server process. The server opens one ngrok agent session and uses it again for each Start. Stop closes only the tunnel's endpoint. A free ngrok account can have 3 agent sessions online at the same time. Each running ngrok agent or app uses one.
+
+The voice path and the webhook path are new on each Start, also with `NGROK_DOMAIN`. The app sets them in Sent for you.
+
+To use a Cloudflare quick tunnel, set `TUNNEL_PROVIDER=cloudflare`. It needs no account. On the first Start, the app downloads the `cloudflared` binary from GitHub.
 
 ## Connect your keys
 
@@ -194,7 +219,7 @@ Sent can't clear a callback URL. If your number had none before Start, it keeps 
 
 | Command | What it does |
 | --- | --- |
-| `pnpm test` | Runs the tests: signatures, call rules, free-text rules, webhooks, campaigns, and the text agent's tool loop. |
+| `pnpm test` | Runs the tests: signatures, call rules, free-text rules, webhooks, campaigns, the text agent's tool loop, and the tunnel settings. |
 | `pnpm check` | Checks the types and runs the linter. |
 | `pnpm build` | Builds the console for `pnpm start`. |
 
@@ -211,7 +236,12 @@ Set `PORT` in `.env` or in your shell, for example `PORT=3100 pnpm dev`. The val
 | **Start agent** asks for the business name. | Enter it in **Agent settings**. |
 | Start stops at "Allow notifications". | Allow notifications for `localhost:3000` in the browser's site settings, then start again. |
 | Start stops at the model check. | Your OpenAI project can't use the voice model. Choose another one, or ask OpenAI for access. |
-| Start stops at the tunnel. | Check your access to Cloudflare. A firewall or a VPN can block it. |
+| The server stops at startup with `TUNNEL_PROVIDER must be ngrok or cloudflare`. | Fix the value in `.env` or in your shell. |
+| The terminal shows `Public tunnel: ngrok, but no authtoken is set`. Start stops with `ngrok needs an authtoken`. | Set `NGROK_AUTHTOKEN`, or run `ngrok config add-authtoken`. Then restart the app. See [Set up the public tunnel](#set-up-the-public-tunnel). |
+| Start stops with `ngrok rejected the authtoken`. | The token is wrong, or someone reset it. Copy it again from the ngrok dashboard. |
+| Start stops with `ERR_NGROK_108`. | Your ngrok account has 3 agent sessions online. Stop another ngrok agent or app, or set `TUNNEL_PROVIDER=cloudflare`. |
+| Start stops with `ERR_NGROK_334`. | Another ngrok agent uses `NGROK_DOMAIN`. Stop that agent, or remove `NGROK_DOMAIN`. |
+| Start stops at the tunnel: it did not connect, or did not become reachable. | Check your access to ngrok, or to Cloudflare with `TUNNEL_PROVIDER=cloudflare`. A firewall or a VPN can block it. Try the other provider. |
 | Start stops at "Testing the call path". | Sent couldn't reach the tunnel. Try again. If it repeats, see [Start fails](./sent-api-and-logs.md#start-fails). |
 | Texts show **Not delivered**. | Read the reason under the message. See [A text is not delivered](./sent-api-and-logs.md#a-text-is-not-delivered). |
 | Another tab shows **Calls ring in the tab that started the agent**. | Only the phone tab can answer or take over a call. Use that tab. |

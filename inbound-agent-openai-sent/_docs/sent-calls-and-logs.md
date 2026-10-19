@@ -220,7 +220,7 @@ The routing backup has this content. It does not contain API keys.
 {
   "number": "+16285550199",
   "previousUrl": "https://hooks.example.com/voice",
-  "installedUrl": "https://calm-fox-17.trycloudflare.com/voice/9c1e…a07f",
+  "installedUrl": "https://calm-fox-17.ngrok-free.app/voice/9c1e…a07f",
   "callbackSecret": "whsec_…",
   "createdAt": "2026-10-10T12:00:00.000Z"
 }

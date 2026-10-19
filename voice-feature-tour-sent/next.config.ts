@@ -22,8 +22,9 @@ const nextConfig: NextConfig = {
 
   allowedDevOrigins: tunnelOrigins,
 
-  // cloudflared finds its binary next to its own files, so it runs from node_modules unbundled.
-  serverExternalPackages: ["cloudflared"],
+  // Both run from node_modules unbundled: cloudflared finds its binary next to its own files, and
+  // the ngrok agent is a native addon that loads the build for this platform.
+  serverExternalPackages: ["cloudflared", "@ngrok/ngrok"],
 };
 
 export default nextConfig;

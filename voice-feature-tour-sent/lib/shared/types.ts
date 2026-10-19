@@ -50,12 +50,19 @@ export interface SavedWebhook {
   signingSecret: string;
 }
 
+/** TUNNEL_PROVIDER: ngrok by default, or a Cloudflare quick tunnel. */
+export type TunnelProvider = "ngrok" | "cloudflare";
+
 /**
  * The public tunnel the server opens at start so Sent can reach it. `off` when PUBLIC_BASE_URL
  * names a fixed URL instead.
  */
 export interface TunnelInfo {
   state: "off" | "opening" | "open" | "failed";
+  /** Null while `off`, or when TUNNEL_PROVIDER has a value the app does not know. */
+  provider: TunnelProvider | null;
+  /** True when the URL stays the same on every start: an ngrok tunnel on NGROK_DOMAIN. */
+  fixedUrl: boolean;
   url: string | null;
   error: string | null;
 }
