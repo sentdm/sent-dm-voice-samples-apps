@@ -6,6 +6,7 @@ Each sample lives in its own top-level folder and runs on its own.
 
 - **Folder name:** `<what-it-does>[-<ai-provider>]-sent`, for example `outbound-agent-openai-sent` or `voice-feature-tour-sent`.
 - **Required files:** `README.md`, `.env.example`, `pnpm-lock.yaml`, and a `package.json` with `"engines": { "node": ">=22" }` and a pinned `packageManager` pnpm version. Never commit `.env`.
+- **Scripts:** a `dev` script that starts the sample, and the local port from `PORT`. [`run-all.mjs`](./run-all.mjs) uses both to run the sample with the others.
 - **No license file in the sample.** The root [LICENSE](./LICENSE) covers every sample.
 - **Committed build output:** if it bundles third-party code, generate a `THIRD_PARTY_NOTICES.md` as part of the build, like [the inbound sample](./inbound-agent-openai-sent/scripts/build.mjs) does.
 - **Root README:** add or update the sample's row in the table.

@@ -30,6 +30,26 @@ pnpm start
 
 Then follow that sample's README for keys, configuration and testing.
 
+## Run all samples at once
+
+From the root of the repository:
+
+```sh
+node run-all.mjs                    # all samples
+node run-all.mjs inbound outbound   # only the samples whose folder names start with these words
+```
+
+From a sample folder, run `node ../run-all.mjs`.
+
+The script runs `pnpm dev` in each sample, each on a different port, and shows all output in one terminal. At the start, it shows the address of each sample. A sample keeps the `PORT` from its own `.env`. The other samples get the next free port from 3000. If a sample has no `node_modules`, the script installs its dependencies first.
+
+Press Ctrl+C one time to stop all samples. The agents restore your Sent routing before they stop. Press Ctrl+C again to force them to stop.
+
+When you run more than one sample:
+
+- When you start a sample, it points the callback URL of your number at itself. On one number, the sample that you started last receives the calls.
+- Each sample that uses ngrok opens its own ngrok session. A free ngrok account allows 3 sessions at the same time. To run more, set `TUNNEL_PROVIDER=cloudflare` in the `.env` of one sample.
+
 > These are samples for learning and prototyping, not production services. Test with your own accounts, preferably on a dedicated test number.
 
 ## Resources
