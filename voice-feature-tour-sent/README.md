@@ -2,12 +2,13 @@
 
 A reference app that covers each Sent voice capability. It has two sides:
 
-- **A browser phone** on [`@sentdm/voice`](https://docs.sent.dm/sdks/voice), Sent's browser voice SDK: register, place and
-  receive calls, mute, DTMF, devices, call quality, conference rooms, and the API commands the SDK
-  leaves to your backend (participants, transfer, recording, hangup).
+- **A browser phone** on [`@sentdm/voice-client`](https://docs.sent.dm/sdks/voice), Sent's browser voice SDK,
+  through its React bindings in `@sentdm/voice-client-react`: register, place and receive calls, mute,
+  DTMF, devices, call quality, conference rooms, and the API commands the SDK leaves to your backend
+  (participants, transfer, recording, hangup).
 - **The customer backend**, as Next.js route handlers: it mints voice tokens, answers the questions Sent
-  asks about every call, receives call webhooks, relays SDK telemetry, and proxies every public voice
-  API call so you can try them from the console.
+  asks about every call, receives call webhooks, relays the SDK's own requests to Sent, and proxies every
+  public voice API call so you can try them from the console.
 
 Everything is real: every button places a real call or makes a real request to the Sent API and shows
 the real response. Nothing is simulated.
@@ -63,8 +64,11 @@ Phone browser (tunnel URL)  ┘   (Next.js routes)  └─< Sent asks /api/voice
 ```
 
 **Tokens.** The SDK's `tokenProvider` calls `POST /api/voice/token`. The server holds the API key, calls
-`POST /v3/channels/voice/tokens` with the identity and the configured number, and returns the token as
-text. The SDK refreshes it before it expires by calling `tokenProvider` again.
+`POST /v3/voice/tokens` with the identity and the configured number, and returns the token as text,
+unchanged. The token is an opaque `vt_` string: the SDK exchanges it at `/v3/voice/tokens/exchange`
+under its `baseURL`. The identity, number and expiry come from the minting response, which the token
+route passes on in headers. The SDK refreshes the token before it expires by calling `tokenProvider`
+again.
 
 **Questions and answers.** When a call starts, Sent POSTs a `call.request` to the number's callback URL
 and waits at most 2.5 seconds for the answer. The server verifies the signature, decides with the rules
@@ -102,20 +106,24 @@ commands.
 payload carries `account_id`, `call_id`, `channel`, `number`, `status` (upper-case) and `updated_at`,
 plus `recording_id` on `call.recording_ready`.
 
-**Telemetry.** The SDK reports usage and call quality to Sent. The phone screen's developer options can
-set the SDK's telemetry base URL to `/api/telemetry-relay` on this app. The relay records each batch for
-the Telemetry tab and forwards it unchanged, with the same bearer token, to Sent, which answers 202. The
-token route remembers which identity each token belongs to, so every batch shows its app user.
+**SDK relay.** The SDK sends its own requests to Sent under its `baseURL`: the token exchange when it
+registers, then telemetry, its usage and call quality reports. By default the phone sets that `baseURL`
+to `/api/sdk-relay` on this app, which forwards each request under `/v3/voice/` with the same body and
+bearer token to the API base URL from the setup screen. The relay records each telemetry batch for the
+Telemetry tab, never the token exchange, whose response holds a provider credential. Sent answers a batch
+with 202. The token route remembers which identity each token belongs to, so every batch shows its app
+user. The phone screen's developer options can send the SDK straight to Sent instead, with or without
+telemetry.
 
 ## What the SDK leaves to the API, and where it is here
 
 | Capability | How this example offers it |
 |---|---|
-| Add, mute, remove participants | Participants panel on a call in a room, the call log, the explorer. Uses `POST /v3/calls/{id}/participants`, `PATCH .../participants/{id}` with `muted`, `DELETE .../participants/{id}` |
+| Add, mute, remove participants | Participants panel on a call in a room, the call log, the explorer. Uses `POST /v3/voice/calls/{id}/participants`, `PATCH .../participants/{id}` with `muted`, `DELETE .../participants/{id}` |
 | Transfer | Transfer form on a call in a room: the server dials the target into the room, waits for the roster, then removes your leg (`lib/server/transfer.ts`) |
 | Hold | The `park` action: park mode in the routing panel, or a menu key |
-| Recording | `record: true` on connect answers, `startRecording` instruction, `POST /v3/calls/{id}/recordings`, the `call.recording_ready` webhook and `GET .../recordings`, which lists the call's recordings |
-| Hang up from the server | `POST /v3/calls/{id}/hangup` from the active call card and the call log |
+| Recording | `record: true` on connect answers, `startRecording` instruction, `POST /v3/voice/calls/{id}/recordings`, the `call.recording_ready` webhook and `GET .../recordings`, which lists the call's recordings |
+| Hang up from the server | `POST /v3/voice/calls/{id}/hangup` from the active call card and the call log |
 | Room per call | Routing option: every call is answered into a room named after it and the other party is dialed in, so participants and transfer work on every call, not only on room joins |
 
 A call that is a direct connection has no room, so participants and transfer answer 409 until it is in
@@ -126,7 +134,7 @@ one. That is a rule of the platform, and the app says so where it applies.
 - **Phone**: registration state and token expiry, dialer (number, identity, room), incoming call with
   ringtone, active call with mute, DTMF, live stats, quality warnings, reconnect state, the API commands,
   the participants and transfer panel, audio devices, developer options (token TTL, log level, retries,
-  telemetry) and an event log of every SDK event.
+  SDK requests) and an event log of every SDK event.
 - **Console**: API explorer for every voice and webhook endpoint, callback studio with the routing panel
   and the test button, webhooks subscription and inbox, telemetry feed, call log with the call commands.
 - **Setup**: API base URL, API key, Connect, the number and its secret, and the public URL.
@@ -143,8 +151,8 @@ one. That is a rule of the platform, and the app says so where it applies.
 - `SETUP_PASSWORD`, when set, protects the setup screen, the routing rules, the webhook subscription and
   the API explorer's changes to webhooks and numbers. The app has no login otherwise. Anyone with the
   public URL can open it, so keep the URL private and stop the app when you are done.
-- `public/sw.js` is the service worker from `@sentdm/voice`. `pnpm dev` and `pnpm build` copy it from the
-  installed SDK, so it is not committed.
+- `public/sw.js` is the service worker `@sentdm/voice-client/sw.js`. `pnpm dev` and `pnpm build` copy it
+  from the installed SDK, so it is not committed.
 
 ## Troubleshooting
 

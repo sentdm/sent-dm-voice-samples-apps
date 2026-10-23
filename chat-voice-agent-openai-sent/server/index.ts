@@ -78,7 +78,7 @@ async function main() {
 
   const api = createApi(runtime, conversations, calls, campaigns, { port: () => port, apiToken })
   // The browser voice SDK's service worker, served from the package so it always matches the SDK version.
-  const serviceWorker = createRequire(import.meta.url).resolve("@sentdm/voice/sw.js")
+  const serviceWorker = createRequire(import.meta.url).resolve("@sentdm/voice-client/sw.js")
 
   const server = http.createServer((req, res) => {
     const url = req.url ?? "/"

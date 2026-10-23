@@ -1,4 +1,4 @@
-import { SentVoice } from "@sentdm/voice"
+import { SentVoice } from "@sentdm/voice-client"
 import type { CallItem, Conversation, PhoneCommand, Snapshot } from "@/lib/types"
 import { AudioEngine, PLAYBACK_LIMIT_MS } from "./audio"
 
@@ -384,7 +384,7 @@ export class PhoneEngine {
     // The SDK must use the software microphone. If it reached the real microphone some other way,
     // room audio could go to the contact, so end the call instead.
     if (!this.audio?.softwareMicrophoneUsed) {
-      this.deps.notify("error", "The Sent SDK did not take the app's audio stream. Ending the call; check the @sentdm/voice version.")
+      this.deps.notify("error", "The Sent SDK did not take the app's audio stream. Ending the call; check the @sentdm/voice-client version.")
       void line.call.disconnect()
       return
     }

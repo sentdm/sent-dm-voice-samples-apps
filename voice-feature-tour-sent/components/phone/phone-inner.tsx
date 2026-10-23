@@ -2,13 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import type SentVoice from "@sentdm/voice";
-import type { SentVoiceError } from "@sentdm/voice";
+import type SentVoice from "@sentdm/voice-client";
+import type { SentVoiceError } from "@sentdm/voice-client";
 import {
   useActiveCall,
   useIncomingCall,
   useSentVoice,
-} from "@sentdm/voice/react";
+} from "@sentdm/voice-client-react";
 import { api } from "@/lib/client/api";
 import { formatAddress } from "@/lib/client/format";
 import { sounds } from "@/lib/client/sounds";

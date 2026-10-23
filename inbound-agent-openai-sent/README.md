@@ -94,7 +94,7 @@ If the Sent SDK's registration goes offline (for example, a failed token refresh
 ```text
 Incoming phone call
         ↕
-Sent number → connectToUser → @sentdm/voice in your browser
+Sent number → connectToUser → @sentdm/voice-client in your browser
         ↕
 Remote-only MediaStream capture / software microphone
         ↕
@@ -206,11 +206,11 @@ Server tests use local fake Sent/OpenAI services and test actual request/event s
 
 ## Dependencies and integration references
 
-The project uses the published `@sentdm/voice` package (Sent's browser voice SDK), Express, `ws`, `@ngrok/ngrok`, and `cloudflared`. They are version-pinned in `pnpm-lock.yaml`; review third-party advisories before production use.
+The project uses the published `@sentdm/voice-client` package (Sent's browser voice SDK), Express, `ws`, `@ngrok/ngrok`, and `cloudflared`. They are version-pinned in `pnpm-lock.yaml`; review third-party advisories before production use.
 
 The direct `ws` transport is patched to 8.22.0. A `basic-ftp` override to 6.2.2, in `pnpm-workspace.yaml`, patches an inherited advisory in the SDK's unused Node proxy dependency chain; it does not change the Sent browser voice SDK. `pnpm-workspace.yaml` also limits install scripts to esbuild; cloudflared's binary is fetched on the first Cloudflare Start instead. `@ngrok/ngrok` needs no install script: its native build comes as a package for each platform. `pnpm audit --prod` reports no known vulnerabilities.
 
-The committed browser bundle includes `@sentdm/voice` and its dependencies. Their licenses are listed in [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md), which `pnpm run build` regenerates.
+The committed browser bundle includes `@sentdm/voice-client` and its dependencies. Their licenses are listed in [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md), which `pnpm run build` regenerates.
 
 - [Sent voice SDK](https://docs.sent.dm/sdks/voice)
 - [Sent inbound callback contract](https://docs.sent.dm/reference/api/voice-callback)

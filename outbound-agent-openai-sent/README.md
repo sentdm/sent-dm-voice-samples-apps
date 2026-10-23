@@ -64,7 +64,7 @@ Sent has no REST endpoint that dials a phone for you. The browser asks for a cal
 ```text
 Dashboard: Call +14155551234
         ↓
-@sentdm/voice connect({ to }) → Sent
+@sentdm/voice-client connect({ to }) → Sent
         ↓
 Sent → signed call.request (direction: outbound) → this app's gateway
         ↓
@@ -116,7 +116,7 @@ The app places one call at a time. **Hang up** ends a call at any point, also wh
 ```text
 Phone of the person you call
         ↕
-Sent number → connectToNumber ← @sentdm/voice connect({ to }) in your browser
+Sent number → connectToNumber ← @sentdm/voice-client connect({ to }) in your browser
         ↕
 Remote-only MediaStream capture / software microphone
         ↕
@@ -199,9 +199,9 @@ Server tests use local fake Sent/OpenAI services and test actual request/event s
 
 ## Dependencies and integration references
 
-The project uses the published `@sentdm/voice` package (Sent's browser voice SDK), Express, `ws`, `@ngrok/ngrok`, and `cloudflared`. They are version-pinned in `pnpm-lock.yaml`; review third-party advisories before production use. A `basic-ftp` override in `pnpm-workspace.yaml` patches an inherited advisory in the SDK's unused Node proxy dependency chain, and install scripts are limited to esbuild. `@ngrok/ngrok` needs no install script: its native build comes as a package for each platform.
+The project uses the published `@sentdm/voice-client` package (Sent's browser voice SDK), Express, `ws`, `@ngrok/ngrok`, and `cloudflared`. They are version-pinned in `pnpm-lock.yaml`; review third-party advisories before production use. A `basic-ftp` override in `pnpm-workspace.yaml` patches an inherited advisory in the SDK's unused Node proxy dependency chain, and install scripts are limited to esbuild. `@ngrok/ngrok` needs no install script: its native build comes as a package for each platform.
 
-The committed browser bundle includes `@sentdm/voice` and its dependencies. Their licenses are listed in [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md), which `pnpm run build` regenerates.
+The committed browser bundle includes `@sentdm/voice-client` and its dependencies. Their licenses are listed in [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md), which `pnpm run build` regenerates.
 
 - [Sent voice SDK](https://docs.sent.dm/sdks/voice)
 - [Sent voice callback contract](https://docs.sent.dm/reference/api/voice-callback)

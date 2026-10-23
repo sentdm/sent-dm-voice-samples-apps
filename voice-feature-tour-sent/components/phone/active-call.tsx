@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import type SentVoice from "@sentdm/voice";
-import { useActiveCall } from "@sentdm/voice/react";
+import type SentVoice from "@sentdm/voice-client";
+import { useActiveCall } from "@sentdm/voice-client-react";
 import { CopyIcon, MicIcon, MicOffIcon, PhoneOffIcon } from "lucide-react";
 import { Badge, type BadgeVariants } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -107,7 +107,7 @@ export function ActiveCall({
     try {
       const response = await api.proxy({
         method: "POST",
-        path: `/v3/calls/${serverCall.legId}${path}`,
+        path: `/v3/voice/calls/${serverCall.legId}${path}`,
         body,
       });
       unwrapProxy(response);
@@ -138,7 +138,7 @@ export function ActiveCall({
       const { recordings: list = [] } = await api.sent<VoiceRecordingsResponse>(
         {
           method: "GET",
-          path: `/v3/calls/${serverCall.call.callId}/recordings`,
+          path: `/v3/voice/calls/${serverCall.call.callId}/recordings`,
         }
       );
       setRecordings(list);

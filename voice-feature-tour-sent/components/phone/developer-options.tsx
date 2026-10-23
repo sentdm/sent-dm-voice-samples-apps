@@ -17,7 +17,8 @@ import {
 } from "@/components/ui/native-select";
 
 export type SdkLogLevel = "off" | "error" | "warn" | "info" | "debug";
-export type TelemetryMode = "relay" | "direct" | "off";
+/** Where the SDK sends its own requests to Sent: the token exchange and telemetry. */
+export type SdkRequestsMode = "relay" | "direct" | "no-telemetry";
 
 /** SDK options a developer wants to change while testing. Applying them recreates the client. */
 export interface DeveloperOptions {
@@ -25,14 +26,14 @@ export interface DeveloperOptions {
   tokenTtl: number | null;
   logLevel: SdkLogLevel;
   registerRetries: number;
-  telemetry: TelemetryMode;
+  sdkRequests: SdkRequestsMode;
 }
 
 export const DEFAULT_DEVELOPER_OPTIONS: DeveloperOptions = {
   tokenTtl: null,
   logLevel: "debug",
   registerRetries: 2,
-  telemetry: "relay",
+  sdkRequests: "relay",
 };
 
 export function DeveloperOptionsCard({
@@ -115,25 +116,29 @@ export function DeveloperOptionsCard({
           />
         </div>
         <div className="grid gap-1.5">
-          <Label htmlFor="telemetry">Telemetry</Label>
+          <Label htmlFor="sdkRequests">
+            SDK requests to Sent (token exchange and telemetry)
+          </Label>
           <NativeSelect
             className="w-full"
-            id="telemetry"
-            value={draft.telemetry}
+            id="sdkRequests"
+            value={draft.sdkRequests}
             onChange={(event) =>
               setDraft({
                 ...draft,
-                telemetry: event.target.value as TelemetryMode,
+                sdkRequests: event.target.value as SdkRequestsMode,
               })
             }
           >
             <NativeSelectOption value="relay">
-              Through this app, visible in the console
+              Through this app&apos;s relay, telemetry visible in the console
             </NativeSelectOption>
             <NativeSelectOption value="direct">
               Straight to Sent
             </NativeSelectOption>
-            <NativeSelectOption value="off">Off</NativeSelectOption>
+            <NativeSelectOption value="no-telemetry">
+              Straight to Sent, telemetry off
+            </NativeSelectOption>
           </NativeSelect>
         </div>
         <Button

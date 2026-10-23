@@ -333,7 +333,7 @@ export interface VoiceRecordingResponse {
   url_expires_at: string;
 }
 
-/** `GET /v3/calls/{id}/recordings`: one item per recording, oldest first. */
+/** `GET /v3/voice/calls/{id}/recordings`: one item per recording, oldest first. */
 export interface VoiceRecordingsResponse {
   recordings: VoiceRecordingResponse[];
 }
@@ -372,7 +372,7 @@ export interface CallWebhookPayload {
   price?: number;
   /** Only on call.failed. `callback_not_configured` means the number had no callback URL. */
   reason?: string | null;
-  /** Only on call.recording_ready: the id `GET /v3/calls/{id}/recordings` lists the recording under. */
+  /** Only on call.recording_ready: the id `GET /v3/voice/calls/{id}/recordings` lists the recording under. */
   recording_id?: string;
 }
 

@@ -291,7 +291,7 @@ node('cf', 640, 85, 240, 120, 'ngrok edge', ['tunnel · free account', { id: 'cf
 node('openai', 1000, 70, 250, 150, 'OpenAI', ['wss  /v1/realtime · /v1/live', 'https /v1/models · /v1/responses', { id: 'oa-model', text: '' }], { lh: 18 });
 
 // Browser tab internals
-node('sdk', 55, 360, 140, 240, '@sentdm/voice', ['Sent browser SDK', 'connect({ to })', '', { id: 'sdk-st', text: '' }, { id: 'sdk-id', text: '' }], { titleSize: 14 });
+node('sdk', 55, 360, 140, 240, '@sentdm/voice-client', ['Sent browser SDK', 'connect({ to })', '', { id: 'sdk-st', text: '' }, { id: 'sdk-id', text: '' }], { titleSize: 11 });
 node('remote', 225, 360, 160, 70, '<audio> muted', ['contact stream only'], { titleSize: 14 });
 node('mic', 225, 530, 160, 70, 'Software mic', ['Web Audio output', 'via getUserMedia()'], { titleSize: 14, lh: 15 });
 node('wk', 415, 360, 160, 130, 'AudioWorklet', ['24 kHz · 20 ms', 'Float32 ⇄ PCM16'], { titleSize: 14 });
@@ -519,12 +519,12 @@ const STEPS = [
     beats: [{ say: 'contact', text: 'Hello?' }, { wait: 1800 }, { say: 'agent', text: 'Hi, this is an AI assistant calling from Sent. Is now a good time?' }, { wait: 2600 }],
     body: `<p>This sample calls a phone number from an existing Sent number, and an OpenAI voice model talks to the person who answers. It has no hosted backend. A Node.js server and one Chrome or Edge tab on your computer do all the work.</p>
       <p>Four ideas make it work:</p>
-      <ul><li><b>The browser is the phone.</b> The <code>@sentdm/voice</code> SDK registers the tab as a Sent app user. The tab places the call with <code>connect({ to })</code>.</li>
+      <ul><li><b>The browser is the phone.</b> The <code>@sentdm/voice-client</code> SDK registers the tab as a Sent app user. The tab places the call with <code>connect({ to })</code>.</li>
       <li><b>The callback decides what rings.</b> Sent asks your number’s callback URL. The gateway answers <code>connectToNumber</code>, and only for the number that you just asked for.</li>
       <li><b>A software microphone.</b> When the SDK asks for a microphone, it gets the agent’s voice.</li>
       <li><b>Two servers, two doors.</b> A dashboard server for you only, and a small callback gateway for Sent only.</li></ul>
       <p>This is the complete loop. The next steps build it one part at a time.</p>`,
-    payload: 'you click Call → @sentdm/voice connect({ to }) → Sent\nSent → signed question → gateway → connectToNumber\ncontact ⇄ Sent ⇄ browser tab ⇄ local server ⇄ OpenAI Realtime / Live',
+    payload: 'you click Call → @sentdm/voice-client connect({ to }) → Sent\nSent → signed question → gateway → connectToNumber\ncontact ⇄ Sent ⇄ browser tab ⇄ local server ⇄ OpenAI Realtime / Live',
     refs: ['README.md', '_docs/architecture.md'],
   },
 
@@ -596,11 +596,11 @@ const STEPS = [
   {
     ch: 2, title: 'Register the browser as a Sent user',
     lit: ['sdk', 'sent'],
-    beats: [[h('ui', 'mgmt', 'POST /api/voice-token')], [h('mgmt', 'sent', 'POST /v3/channels/voice/tokens')], [h('sent', 'mgmt', '{ token } · ttl 600 s', 'ok')],
+    beats: [[h('ui', 'mgmt', 'POST /api/voice-token')], [h('mgmt', 'sent', 'POST /v3/voice/tokens')], [h('sent', 'mgmt', '{ token } · ttl 600 s', 'ok')],
       [h('mgmt', 'ui', 'token')], [{ flash: 'sdk' }], [h('sdk', 'sent', 'register(token)')], [{ set: { reg: true } }, { stamp: 'sdk', text: 'registered ✓' }]],
     body: `<p>The SDK’s <code>tokenProvider</code> asks the local server for a voice token. The server gets one from Sent for a <b>new random identity</b> (<code>sent-ai-</code> and 12 hex characters). The token lasts 10 minutes. The SDK gets a new one before it expires.</p>
       <p>The token also binds the identity to the selected number. Calls that this identity places go out from that number. The browser sees only this short-lived token, never your API keys.</p>`,
-    payload: 'POST /v3/channels/voice/tokens\n{ "identity": "sent-ai-3fa9c1e07b2d",\n  "number":   "+16285550199",       // caller ID for this identity\n  "ttl":      600 }\n\nnew SentVoice({ tokenProvider, logLevel: "warn",\n  logger: { warn: → event log, error: → event log } })',
+    payload: 'POST /v3/voice/tokens\n{ "identity": "sent-ai-3fa9c1e07b2d",\n  "number":   "+16285550199",       // caller ID for this identity\n  "ttl":      600 }\n\nnew SentVoice({ tokenProvider, logLevel: "warn",\n  logger: { warn: → event log, error: → event log } })',
     refs: ['client/app.ts:747', 'src/server.ts:218', 'src/sent.ts:25'],
   },
   {
@@ -664,7 +664,7 @@ const STEPS = [
     ch: 3, title: 'The tab asks Sent to call',
     lit: ['sdk', 'sent'],
     beats: [[h('sdk', 'sent', 'connect({ to })')], [{ stamp: 'sent', text: 'call record call_8f2…' }], [{ stamp: 'sent', text: 'what should ring?' }]],
-    body: `<p>The page calls <code>connect({ to })</code> on the SDK. Sent makes a call record with an ID that starts with <code>call_</code>. Later, you can read this record with <code>GET /v3/calls/{id}</code>.</p>
+    body: `<p>The page calls <code>connect({ to })</code> on the SDK. Sent makes a call record with an ID that starts with <code>call_</code>. Later, you can read this record with <code>GET /v3/voice/calls/{id}</code>.</p>
       <p>Sent has no REST endpoint that dials a phone for you. The SDK tells Sent who the user wants to reach, and <b>your callback decides what rings</b>. So Sent now asks the number’s callback URL.</p>`,
     payload: 'const call = await client.connect({ to: "+14155550123" });\n// to:   who the user wants to reach\n// what rings: decided by the callback answer',
     refs: ['client/app.ts:921'],

@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { SentVoiceProvider } from "@sentdm/voice/react";
+import { SentVoiceProvider } from "@sentdm/voice-client-react";
 import { Loading, NotSetUp } from "@/components/page-status";
 import { api } from "@/lib/client/api";
 import { useIdentity, useStoredJson } from "@/lib/client/identity";
@@ -49,7 +49,7 @@ function PhoneViewInner() {
   /**
    * The SDK calls this at register() and before every expiry. The token comes from this app's
    * backend, which holds the API key and asks Sent for a token bound to the configured number.
-   * The backend also sends the token's expiry and number in headers, so the token is not decoded.
+   * The backend also sends the token's expiry and number in headers.
    */
   const tokenProvider = useCallback(async () => {
     const response = await fetch("/api/voice/token", {
@@ -127,16 +127,13 @@ function PhoneViewInner() {
 
   if (!identity) return <IdentityPicker onPick={setIdentity} />;
 
-  // The relay is this app's own route: it records each batch for the Telemetry tab and forwards it.
-  const telemetry =
-    options.telemetry === "off"
-      ? { disabled: true }
-      : {
-          baseURL:
-            options.telemetry === "relay"
-              ? `${window.location.origin}/api/telemetry-relay`
-              : config.apiBaseUrl,
-        };
+  // The SDK sends its own requests to Sent under `baseURL`: the token exchange, then telemetry.
+  // The relay is this app's route in front of the API: it forwards them and records each
+  // telemetry batch for the Telemetry tab.
+  const baseURL =
+    options.sdkRequests === "relay"
+      ? `${window.location.origin}/api/sdk-relay`
+      : config.apiBaseUrl;
 
   const key = [
     identity,
@@ -148,13 +145,14 @@ function PhoneViewInner() {
   return (
     <SentVoiceProvider
       key={key}
+      baseURL={baseURL}
       tokenProvider={tokenProvider}
       autoRegister={false}
       logLevel={options.logLevel}
       logger={logger}
       registerRetries={options.registerRetries}
       serviceWorker={{ url: "/sw.js", scope: "/" }}
-      telemetry={telemetry}
+      telemetry={{ disabled: options.sdkRequests === "no-telemetry" }}
     >
       <PhoneInner
         identity={identity}

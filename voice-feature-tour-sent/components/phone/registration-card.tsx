@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import SentVoice from "@sentdm/voice";
-import { useSentVoice } from "@sentdm/voice/react";
+import SentVoice from "@sentdm/voice-client";
+import { useSentVoice } from "@sentdm/voice-client-react";
 import { Badge, type BadgeVariants } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -138,7 +138,7 @@ export function RegistrationCard({
           <dt className="text-muted-foreground">Token expires</dt>
           <dd>{remaining === null ? "no token yet" : `in ${remaining}s`}</dd>
           <dt className="text-muted-foreground">SDK</dt>
-          <dd>@sentdm/voice {SentVoice.version}</dd>
+          <dd>@sentdm/voice-client {SentVoice.version}</dd>
         </dl>
         <div className="flex flex-wrap gap-2">
           <Button

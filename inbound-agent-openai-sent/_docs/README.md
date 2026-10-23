@@ -47,4 +47,4 @@ These documents use each term with one meaning only.
 | Bridge | The WebSocket between the browser tab and the management server. It carries the call audio. |
 | Routing backup | The file `.sent-agent/routing-backup.json`. It keeps the old callback URL of your number. |
 | Event log | The **Local event log** panel in the dashboard. |
-| Call record | The record that Sent keeps for each call. You read it with `GET /v3/calls/{id}`. |
+| Call record | The record that Sent keeps for each call. You read it with `GET /v3/voice/calls/{id}`. |

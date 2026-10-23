@@ -18,8 +18,8 @@
   },
   "dependencies": {
     "@ngrok/ngrok": "1.7.0",
-    "@sentdm/sentdm": "0.44.0",
-    "@sentdm/voice": "0.1.1",
+    "@sentdm/sentdm": "0.46.0",
+    "@sentdm/voice-client": "0.2.0",
     "class-variance-authority": "0.7.1",
     "cloudflared": "0.7.3",
     "cn": "0.4.0",

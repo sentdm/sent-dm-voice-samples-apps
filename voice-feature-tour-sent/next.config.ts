@@ -25,6 +25,18 @@ const nextConfig: NextConfig = {
   // Both run from node_modules unbundled: cloudflared finds its binary next to its own files, and
   // the ngrok agent is a native addon that loads the build for this platform.
   serverExternalPackages: ["cloudflared", "@ngrok/ngrok"],
+
+  turbopack: {
+    rules: {
+      // The voice client's bundled calling library keeps AMD branches Turbopack cannot resolve.
+      // Temporary: remove this rule and scripts/voice-client-amd-loader.cjs once
+      // @sentdm/voice-client 0.2.1 is installed, which strips these branches at build.
+      "sinch-rtc.{js,mjs}": {
+        condition: { path: /@sentdm\/voice-client\/adapter\// },
+        loaders: ["./scripts/voice-client-amd-loader.cjs"],
+      },
+    },
+  },
 };
 
 export default nextConfig;

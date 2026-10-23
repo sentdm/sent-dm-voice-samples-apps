@@ -8,7 +8,7 @@
 # app data: the saved configuration holds your API key and signing secrets
 /.data/
 
-# copied from @sentdm/voice by scripts/copy-service-worker.mjs on dev and build
+# copied from @sentdm/voice-client by scripts/copy-service-worker.mjs on dev and build
 /public/sw.js
 
 # env files

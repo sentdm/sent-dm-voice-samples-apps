@@ -1,4 +1,4 @@
-import { SentVoice } from '@sentdm/voice';
+import { SentVoice } from '@sentdm/voice-client';
 
 type VoiceNumber = {
   number: string;
@@ -779,7 +779,7 @@ function onCallConnected(call: SentVoice.Call): void {
   // The software microphone depends on the SDK calling navigator.mediaDevices.getUserMedia, which this tab patches. An SDK
   // that stopped doing so would open the real microphone and send room audio to the caller, so refuse the call instead.
   if (audio && !audio.softwareMicrophoneUsed) {
-    const message = 'The Sent SDK did not take the software microphone and may be using this computer’s microphone. Ending the call; check the @sentdm/voice version.';
+    const message = 'The Sent SDK did not take the software microphone and may be using this computer’s microphone. Ending the call; check the @sentdm/voice-client version.';
     addEvent('audio', message);
     setStatus('error', message);
     bridge?.stop();

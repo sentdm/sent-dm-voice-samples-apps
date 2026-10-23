@@ -4,7 +4,7 @@ This document describes the parts of the inbound agent and how a call moves thro
 
 ## Three main ideas
 
-1. **The browser tab is the phone.** The `@sentdm/voice` SDK registers the tab as a Sent app user. Sent sends the call to that user, so the call rings in the tab.
+1. **The browser tab is the phone.** The `@sentdm/voice-client` SDK registers the tab as a Sent app user. Sent sends the call to that user, so the call rings in the tab.
 2. **A software microphone.** When the SDK asks for a microphone, the app gives it an audio stream that contains the agent's voice. The app never opens your real microphone.
 3. **Two servers, two doors.** The management server is for you only. The gateway is for Sent only. The internet can reach only the gateway, through the tunnel.
 
@@ -24,7 +24,7 @@ This document describes the parts of the inbound agent and how a call moves thro
  ┌─────────────────────────────────┐        ┌───────────────────────────────────┼────────┐
  │ Browser tab · localhost:3000    │        │ Node.js process · pnpm start      ▼        │
  │                                 │        │  ┌──────────────┐   ┌──────────────────┐   │
- │  @sentdm/voice SDK              │        │  │ ngrok agent  │──►│ Gateway          │   │
+ │  @sentdm/voice-client SDK       │        │  │ ngrok agent  │──►│ Gateway          │   │
  │   ▲ software mic  │ caller audio│        │  │ in process   │   │ 127.0.0.1:random │   │
  │   │               ▼             │        │  └──────────────┘   └──────────────────┘   │
  │  AudioWorklet · 24 kHz PCM16    │  /api  │  ┌────────────────────────┐                │
@@ -42,7 +42,7 @@ This document describes the parts of the inbound agent and how a call moves thro
 | --- | --- | --- | --- |
 | Dashboard and call client | Browser tab | `client/app.ts`, `public/index.html` | Shows the controls, registers with Sent, answers the call, and sends the heartbeat. |
 | Audio worklet | Browser audio thread | `public/audio-worklet.js` | Cuts caller audio into 20 ms frames. Plays the agent audio into the software microphone. |
-| Sent service worker | Browser | `dist/public/sw.js` (a copy of `@sentdm/voice/sw.js`) | Receives the push message for an incoming call and passes it to the tab. |
+| Sent service worker | Browser | `dist/public/sw.js` (a copy of `@sentdm/voice-client/sw.js`) | Receives the push message for an incoming call and passes it to the tab. |
 | Management server | Node.js, `127.0.0.1:3000` | `src/server.ts` | Serves the dashboard and `/api/*`. Holds the keys. Mints voice tokens. Runs the bridge. |
 | Gateway | Node.js, `127.0.0.1`, random port | `src/server.ts` | Receives the callback question from Sent, checks the signature, and gives the answer. |
 | Tunnel | ngrok agent in the Node.js process (`@ngrok/ngrok`), or a `cloudflared` child process | `src/tunnel.ts` | Gives the gateway a public HTTPS address. `TUNNEL_PROVIDER` selects ngrok (the default) or a Cloudflare quick tunnel. |

@@ -23,7 +23,7 @@ export class SentClient {
     return this.request('PATCH', `/v3/channels/voice/${encodeURIComponent(number)}`, { callback_url: callback });
   }
   async token(identity: string, number: string): Promise<string> {
-    const data = await this.request<{ token: string }>('POST', '/v3/channels/voice/tokens', { identity, number, ttl: 600 });
+    const data = await this.request<{ token: string }>('POST', '/v3/voice/tokens', { identity, number, ttl: 600 });
     if (!data.token) throw new Error('Sent did not return a voice token.');
     return data.token;
   }
