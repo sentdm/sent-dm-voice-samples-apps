@@ -176,7 +176,7 @@ await build({
   format: 'esm',
   platform: 'browser',
   target: 'es2022',
-  alias: { '@sentdm/voice': path.join(repo, 'tests/fixtures/fake-voice.ts') },
+  alias: { '@sentdm/voice-client': path.join(repo, 'tests/fixtures/fake-voice.ts') },
   logLevel: 'silent',
 });
 

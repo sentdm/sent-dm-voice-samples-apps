@@ -25,7 +25,7 @@ Sent does five jobs in each call:
 The app uses Sent through two paths:
 
 - The **Sent REST API**, from the Node.js server, with your Sent API key.
-- The **`@sentdm/voice` SDK**, in the browser tab, with a short-lived voice token. The browser never gets your API key.
+- The **`@sentdm/voice-client` SDK**, in the browser tab, with a short-lived voice token. The browser never gets your API key.
 
 ## The Sent API calls that the app makes
 
@@ -37,7 +37,7 @@ All requests go to `https://api.sent.dm`. Each request has the header `x-api-key
 | `GET /v3/channels/voice/{number}` | Start, Stop, recovery | Read the number's current `callback_url`. | `get()` |
 | `POST /v3/channels/voice` with `number` and `callback_url` | Start | Set the tunnel callback URL on the existing number. Sent returns the `callback_secret`. | `routeExisting()` |
 | `POST /v3/channels/voice/{number}/test` | Start | Ask Sent to send a signed test question to the callback URL. | `test()` |
-| `POST /v3/channels/voice/tokens` with `identity`, `number`, and `ttl: 600` | SDK registration, and each token refresh | Mint a voice token for the browser. | `token()` |
+| `POST /v3/voice/tokens` with `identity`, `number`, and `ttl: 600` | SDK registration, and each token refresh | Mint a voice token for the browser. | `token()` |
 | `PATCH /v3/channels/voice/{number}` with `callback_url` | Stop, recovery | Put the old callback URL back. | `restore()` |
 
 The app uses `POST /v3/channels/voice` with an existing number only. It never asks Sent for a new number.
@@ -48,7 +48,7 @@ If Sent returns an error, the dashboard shows it in this format:
 Sent 400: BUSINESS_024 — <message from Sent>
 ```
 
-The browser SDK also sends requests to Sent. It registers the tab, receives calls by browser push, and sends [telemetry](#sdk-telemetry).
+The browser SDK also sends requests to Sent, with the voice token instead of your API key. It exchanges the token with `POST /v3/voice/tokens/exchange`, registers the tab, receives calls by browser push, and sends [telemetry](#sdk-telemetry).
 
 ## The life of an inbound call
 
@@ -169,8 +169,8 @@ The callback answer names this identity. So only this browser tab gets the call.
 The SDK calls the token provider when it registers, and again before each token expires.
 
 1. The tab sends `POST /api/voice-token` to the management server.
-2. The server sends `POST /v3/channels/voice/tokens` to Sent, with the identity, the selected number, and `ttl: 600`.
-3. The server gives the token to the SDK.
+2. The server sends `POST /v3/voice/tokens` to Sent, with the identity, the selected number, and `ttl: 600`.
+3. The server gives the token to the SDK unchanged. The token is an opaque `vt_` string. The SDK exchanges it with Sent itself before it registers.
 
 The token lasts 10 minutes. The SDK gets a new token at 80% of its life, which is after about 8 minutes. The voice token also binds the identity to the selected number.
 
@@ -257,7 +257,7 @@ If the restore fails, the backup stays and the dashboard shows the error.
 | Terminal | The window where you ran `pnpm start` | Startup, environment key checks, and shutdown | Until you close it |
 | Messages file | `.sent-agent/messages.jsonl` | Messages that the agent took | Until you delete it |
 | Routing backup | `.sent-agent/routing-backup.json` | The routing that the app must restore | Until the app restores it |
-| Call records | Sent API, `GET /v3/calls` | Status, failure reason, duration, and price of each call | Kept by Sent |
+| Call records | Sent API, `GET /v3/voice/calls` | Status, failure reason, duration, and price of each call | Kept by Sent |
 | Call webhooks | Your webhook endpoint | `call.initiated`, `call.answered`, `call.completed`, `call.failed` | Kept by your endpoint |
 | Callback test result | Sent API, `POST /v3/channels/voice/{number}/test` | The exact request that the gateway got, and its answer | Not stored |
 | SDK telemetry | Sent | Registration and call quality data from the browser | Kept by Sent. You cannot read it. |
@@ -316,8 +316,8 @@ The event log does not show transcripts. The **Transcript** panel shows them.
 | `routing` | `The local service is offline; browser voice registration was cleaned up.` | The server stopped by itself, for example after the watchdog. |
 | `voice` | `Browser voice registration is ready.` | The SDK is `registered`. |
 | `voice` | `… Retrying automatically; new calls are declined until it reconnects.` | The SDK is `offline`. |
-| `sdk warn` | Text from the SDK | A warning from `@sentdm/voice`. The SDK removes tokens from its messages. |
-| `sdk error` | Text from the SDK | An error from `@sentdm/voice`. |
+| `sdk warn` | Text from the SDK | A warning from `@sentdm/voice-client`. The SDK removes tokens from its messages. |
+| `sdk error` | Text from the SDK | An error from `@sentdm/voice-client`. |
 | `call` | `Rejected a second or unavailable inbound invite.` | A second call came while the tab was busy. |
 | `call` | `Call media is reconnecting.` | The call network dropped for 2 s. |
 | `call` | `Call ended (completed).` | The SDK call ended. See [Call states in the SDK](#call-states-in-the-sdk). |
@@ -414,7 +414,7 @@ Sent keeps a record of each call. The record shows the final status, the failure
 4. Run this command:
 
    ```sh
-   curl -s "https://api.sent.dm/v3/calls/call_8f2…" \
+   curl -s "https://api.sent.dm/v3/voice/calls/call_8f2…" \
      -H "x-api-key: $SENT_DM_API_KEY" | jq .data
    ```
 
@@ -453,7 +453,7 @@ The response has this shape. Your values are different.
 ### List recent calls
 
 ```sh
-curl -s "https://api.sent.dm/v3/calls?direction=inbound&number=%2B16285550199&page_size=10" \
+curl -s "https://api.sent.dm/v3/voice/calls?direction=inbound&number=%2B16285550199&page_size=10" \
   -H "x-api-key: $SENT_DM_API_KEY" | jq .data
 ```
 
@@ -491,7 +491,7 @@ To watch call events:
 | `call.completed` | `duration_seconds`, and `price` when Sent has priced the call |
 | `call.failed` | `reason` |
 
-Each event has `payload.call_id`. This is the same `call_…` ID as in the event log. Sent does not guarantee the order of events. Remove duplicates with the `X-Webhook-Event-ID` header. `GET /v3/calls/{id}` is the source of truth.
+Each event has `payload.call_id`. This is the same `call_…` ID as in the event log. Sent does not guarantee the order of events. Remove duplicates with the `X-Webhook-Event-ID` header. `GET /v3/voice/calls/{id}` is the source of truth.
 
 ### Test the callback yourself
 
@@ -546,7 +546,7 @@ The hold on the agent stops after 20 s. Then the next call can connect.
 
 1. Look for `model` lines in the event log.
 2. If the text is `The local model bridge did not become ready in time.`, OpenAI was slow or failed. Look for `error` or `notice` lines from the server.
-3. If the text is about the software microphone, check the `@sentdm/voice` version. The app needs the SDK to call `getUserMedia`.
+3. If the text is about the software microphone, check the `@sentdm/voice-client` version. The app needs the SDK to call `getUserMedia`.
 
 ### The call connects, but the caller hears nothing
 

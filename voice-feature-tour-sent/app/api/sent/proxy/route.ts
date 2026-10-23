@@ -30,7 +30,7 @@ export async function POST(request: Request) {
     }
     // Calls that change configuration, such as webhooks and voice channels, need the setup
     // password. The call commands stay open.
-    if (input.method !== "GET" && !path.startsWith("/v3/calls/"))
+    if (input.method !== "GET" && !path.startsWith("/v3/voice/calls/"))
       assertSetupPassword(request);
 
     const config = await requireConfig();

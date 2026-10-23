@@ -50,8 +50,8 @@ export class SentApiError extends Error {
   }
 }
 
-const DEFAULT_TIMEOUT_MS = 15_000;
-const USER_AGENT = "voice-feature-tour-sent/0.1";
+export const DEFAULT_TIMEOUT_MS = 15_000;
+export const USER_AGENT = "voice-feature-tour-sent/0.1";
 
 export function buildUrl(
   baseUrl: string,
@@ -189,6 +189,11 @@ export function routeVoiceNumber(
   });
 }
 
+/**
+ * Mints a voice token for an app user, bound to the configured number. `token` is an opaque
+ * `vt_` string the SDK exchanges with Sent itself; read the identity, number and expiry from
+ * this response, never from the token.
+ */
 export function mintVoiceToken(
   config: AppConfig,
   identity: string,
@@ -196,7 +201,7 @@ export function mintVoiceToken(
 ): Promise<VoiceTokenResponse> {
   return sentData(config, {
     method: "POST",
-    path: "/v3/channels/voice/tokens",
+    path: "/v3/voice/tokens",
     body: {
       identity,
       number: config.phoneNumber,
@@ -213,7 +218,7 @@ export function addParticipant(
 ): Promise<VoiceCallRecord> {
   return sentData(config, {
     method: "POST",
-    path: `/v3/calls/${encodeURIComponent(callId)}/participants`,
+    path: `/v3/voice/calls/${encodeURIComponent(callId)}/participants`,
     body: {
       to: target,
       ...(callerId ? { caller_id: callerId } : {}),
@@ -227,7 +232,7 @@ export function listParticipants(
 ): Promise<VoiceParticipantResponse[]> {
   return sentData(config, {
     method: "GET",
-    path: `/v3/calls/${encodeURIComponent(callId)}/participants`,
+    path: `/v3/voice/calls/${encodeURIComponent(callId)}/participants`,
   });
 }
 
@@ -238,7 +243,7 @@ export function removeParticipant(
 ): Promise<void> {
   return sentNoContent(config, {
     method: "DELETE",
-    path: `/v3/calls/${encodeURIComponent(callId)}/participants/${encodeURIComponent(participantId)}`,
+    path: `/v3/voice/calls/${encodeURIComponent(callId)}/participants/${encodeURIComponent(participantId)}`,
   });
 }
 

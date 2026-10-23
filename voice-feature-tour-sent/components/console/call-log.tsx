@@ -62,7 +62,7 @@ interface Filters {
   page_size: number;
 }
 
-/** Browses GET /v3/calls with every filter, and runs the call commands on one call. */
+/** Browses GET /v3/voice/calls with every filter, and runs the call commands on one call. */
 export function CallLog({ config }: { config: PublicConfig }) {
   const [filters, setFilters] = useState<Filters>({
     direction: "",
@@ -99,7 +99,7 @@ export function CallLog({ config }: { config: PublicConfig }) {
       setList(
         await api.sent<VoiceCallsListResponse>({
           method: "GET",
-          path: "/v3/calls",
+          path: "/v3/voice/calls",
           query,
         })
       );
@@ -134,7 +134,7 @@ export function CallLog({ config }: { config: PublicConfig }) {
       setSelected(
         await api.sent<VoiceCallRecord>({
           method: "GET",
-          path: `/v3/calls/${id}`,
+          path: `/v3/voice/calls/${id}`,
         })
       );
     } catch (error) {
@@ -153,7 +153,7 @@ export function CallLog({ config }: { config: PublicConfig }) {
     try {
       const response = await api.proxy({
         method,
-        path: `/v3/calls/${selected.id}${path}`,
+        path: `/v3/voice/calls/${selected.id}${path}`,
         body,
       });
       const result = unwrapProxy<unknown>(response);
@@ -187,7 +187,7 @@ export function CallLog({ config }: { config: PublicConfig }) {
         <CardHeader>
           <CardTitle>Calls</CardTitle>
           <CardDescription>
-            GET /v3/calls on {config.apiBaseUrl}, most recent first.
+            GET /v3/voice/calls on {config.apiBaseUrl}, most recent first.
           </CardDescription>
         </CardHeader>
         <CardContent className="gap-4">
@@ -366,7 +366,7 @@ export function CallLog({ config }: { config: PublicConfig }) {
         <CardHeader>
           <CardTitle>Call detail</CardTitle>
           <CardDescription>
-            GET /v3/calls/{"{id}"} with the status timeline, and the call
+            GET /v3/voice/calls/{"{id}"} with the status timeline, and the call
             commands.
           </CardDescription>
         </CardHeader>

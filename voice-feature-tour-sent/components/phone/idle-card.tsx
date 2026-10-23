@@ -1,6 +1,6 @@
 "use client";
 
-import type SentVoice from "@sentdm/voice";
+import type SentVoice from "@sentdm/voice-client";
 import {
   Card,
   CardContent,

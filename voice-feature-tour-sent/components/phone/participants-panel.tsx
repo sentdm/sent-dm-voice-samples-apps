@@ -55,7 +55,7 @@ export function ParticipantsPanel({
       setRoster(
         await api.sent<VoiceParticipantResponse[]>({
           method: "GET",
-          path: `/v3/calls/${roomCallId}/participants`,
+          path: `/v3/voice/calls/${roomCallId}/participants`,
         })
       );
       setNotInRoom(null);
@@ -102,7 +102,7 @@ export function ParticipantsPanel({
     run(`Add ${value}`, async () => {
       const leg = await api.sent<VoiceCallRecord>({
         method: "POST",
-        path: `/v3/calls/${roomCallId}/participants`,
+        path: `/v3/voice/calls/${roomCallId}/participants`,
         body: {
           to: { kind, value: value.trim() },
           ...(kind === "number" && callerId.trim()
@@ -120,7 +120,7 @@ export function ParticipantsPanel({
       async () => {
         return api.sent({
           method: "PATCH",
-          path: `/v3/calls/${roomCallId}/participants/${participant.id}`,
+          path: `/v3/voice/calls/${roomCallId}/participants/${participant.id}`,
           body: { muted },
         });
       }
@@ -130,7 +130,7 @@ export function ParticipantsPanel({
     run(`Remove ${participant.value ?? participant.kind}`, async () => {
       return api.sent({
         method: "DELETE",
-        path: `/v3/calls/${roomCallId}/participants/${participant.id}`,
+        path: `/v3/voice/calls/${roomCallId}/participants/${participant.id}`,
       });
     });
 
@@ -138,7 +138,7 @@ export function ParticipantsPanel({
     run("Remove every participant", async () => {
       return api.sent({
         method: "DELETE",
-        path: `/v3/calls/${roomCallId}/participants`,
+        path: `/v3/voice/calls/${roomCallId}/participants`,
       });
     });
 

@@ -140,7 +140,7 @@ class FakeSentApi {
       return this.ok(res, { outcome: 'ok' });
     }
 
-    if (req.method === 'POST' && url.pathname === '/v3/channels/voice/tokens') {
+    if (req.method === 'POST' && url.pathname === '/v3/voice/tokens') {
       const body = JSON.parse((await readBody(req)).toString() || '{}') as Record<string, unknown>;
       this.tokenBodies.push(body);
       return this.ok(res, { token: 'fake-voice-token' });

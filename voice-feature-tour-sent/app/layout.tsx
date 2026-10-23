@@ -6,7 +6,7 @@ import { Toaster } from "@/components/ui/sonner";
 export const metadata: Metadata = {
   title: "Sent voice feature tour",
   description:
-    "A browser phone on @sentdm/voice and the customer backend that mints tokens, answers call questions and receives call webhooks.",
+    "A browser phone on @sentdm/voice-client and the customer backend that mints tokens, answers call questions and receives call webhooks.",
 };
 
 export default function RootLayout({ children }: PropsWithChildren) {

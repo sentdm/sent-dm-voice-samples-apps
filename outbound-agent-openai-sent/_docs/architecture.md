@@ -4,7 +4,7 @@ This document describes the parts of the outbound agent and how a call moves thr
 
 ## Four main ideas
 
-1. **The browser tab is the phone.** The `@sentdm/voice` SDK registers the tab as a Sent app user. The tab places the call with `connect({ to })`.
+1. **The browser tab is the phone.** The `@sentdm/voice-client` SDK registers the tab as a Sent app user. The tab places the call with `connect({ to })`.
 2. **The callback decides what rings.** Sent has no REST endpoint that dials a phone. When the tab places a call, Sent asks your number's callback URL what to do. The gateway answers `connectToNumber`, and only for the number that you asked for.
 3. **A software microphone.** When the SDK asks for a microphone, the app gives it an audio stream that contains the agent's voice. The app never opens your real microphone.
 4. **Two servers, two doors.** The management server is for you only. The gateway is for Sent only. The internet can reach only the gateway, through the tunnel.
@@ -25,7 +25,7 @@ This document describes the parts of the outbound agent and how a call moves thr
  ┌─────────────────────────────────┐        ┌───────────────────────────────────┼────────┐
  │ Browser tab · localhost:3000    │        │ Node.js process · pnpm start      ▼        │
  │                                 │        │  ┌──────────────┐   ┌──────────────────┐   │
- │  @sentdm/voice SDK              │        │  │ ngrok agent  │──►│ Gateway          │   │
+ │  @sentdm/voice-client SDK       │        │  │ ngrok agent  │──►│ Gateway          │   │
  │   ▲ software mic  │ contact     │        │  │ in process   │   │ 127.0.0.1:random │   │
  │   │               ▼ audio       │        │  └──────────────┘   └──────────────────┘   │
  │  AudioWorklet · 24 kHz PCM16    │  /api  │  ┌────────────────────────┐   pending dial │
@@ -44,7 +44,7 @@ This document describes the parts of the outbound agent and how a call moves thr
 | Dashboard and call client | Browser tab | `client/app.ts`, `public/index.html` | Shows the controls, registers with Sent, places the call, and sends the heartbeat. |
 | Number check | Browser and Node.js | `src/phone.ts` | Accepts a number in international format only, and removes spaces and other separators. |
 | Audio worklet | Browser audio thread | `public/audio-worklet.js` | Cuts contact audio into 20 ms frames. Plays the agent audio into the software microphone. |
-| Sent service worker | Browser | `dist/public/sw.js` (a copy of `@sentdm/voice/sw.js`) | Lets the SDK register the tab. |
+| Sent service worker | Browser | `dist/public/sw.js` (a copy of `@sentdm/voice-client/sw.js`) | Lets the SDK register the tab. |
 | Management server | Node.js, `127.0.0.1:3000` | `src/server.ts` | Serves the dashboard and `/api/*`. Holds the keys. Mints voice tokens. Runs the bridge. Keeps the pending dial. |
 | Gateway | Node.js, `127.0.0.1`, random port | `src/server.ts` | Receives the callback question from Sent, checks the signature, and gives the answer. |
 | Tunnel | ngrok agent in the Node.js process (`@ngrok/ngrok`), or a `cloudflared` child process | `src/tunnel.ts` | Gives the gateway a public HTTPS address. `TUNNEL_PROVIDER` selects ngrok (the default) or a Cloudflare quick tunnel. |

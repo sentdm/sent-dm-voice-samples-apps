@@ -2,7 +2,7 @@
 
 This document lists every Sent API call that the app makes, and shows how to find a message or a call in Sent. It ends with fixes for common problems.
 
-The server calls Sent through the official TypeScript SDK, `@sentdm/sentdm` (`server/sent.ts`). The phone tab uses the Sent voice SDK, `@sentdm/voice` (`lib/live/phone.ts`).
+The server calls Sent through the official TypeScript SDK, `@sentdm/sentdm` (`server/sent.ts`). The phone tab uses the Sent voice SDK, `@sentdm/voice-client` (`lib/live/phone.ts`).
 
 ## The Sent API calls that the app makes
 
@@ -15,7 +15,7 @@ The server calls Sent through the official TypeScript SDK, `@sentdm/sentdm` (`se
 | Start | `channels.voice.create` | `POST /v3/channels/voice` | Points the number's callback URL at the tunnel. Returns the callback secret. |
 | Start | `webhooks.create` | `POST /v3/webhooks` | Subscribes to message events and call failures. Returns the webhook's signing secret. |
 | Start | `channels.voice.test` | `POST /v3/channels/voice/{number}/test` | Sends a signed test question through the tunnel. |
-| Start, then each time the voice SDK asks for one | `channels.voice.createToken` | `POST /v3/channels/voice/tokens` | A voice token for the phone tab's identity, valid for 600 s. |
+| Start, then each time the voice SDK asks for one | `voice.tokens.create` | `POST /v3/voice/tokens` | A voice token for the phone tab's identity, valid for 600 s. |
 | Each text or template | `messages.send` | `POST /v3/messages` | Sends to one contact, with an `Idempotency-Key`. |
 | Stop | `webhooks.delete` | `DELETE /v3/webhooks/{id}` | Deletes the webhook. |
 | Stop | `channels.voice.update` | `PATCH /v3/channels/voice/{number}` | Restores the old callback URL. |
@@ -122,8 +122,8 @@ Set your key in the shell first: `export SENT_DM_API_KEY=…`.
 | --- | --- |
 | A message | `curl -s https://api.sent.dm/v3/messages/MESSAGE_ID -H "x-api-key: $SENT_DM_API_KEY"` |
 | Each step of a message, and the sender used (`from`) | `curl -s https://api.sent.dm/v3/messages/MESSAGE_ID/activities -H "x-api-key: $SENT_DM_API_KEY"` |
-| Your recent calls | `curl -s "https://api.sent.dm/v3/calls?page_size=10" -H "x-api-key: $SENT_DM_API_KEY"` |
-| One call, with its timeline | `curl -s https://api.sent.dm/v3/calls/CALL_ID -H "x-api-key: $SENT_DM_API_KEY"` |
+| Your recent calls | `curl -s "https://api.sent.dm/v3/voice/calls?page_size=10" -H "x-api-key: $SENT_DM_API_KEY"` |
+| One call, with its timeline | `curl -s https://api.sent.dm/v3/voice/calls/CALL_ID -H "x-api-key: $SENT_DM_API_KEY"` |
 | Your senders, by channel and country | `curl -s https://api.sent.dm/v3/channels -H "x-api-key: $SENT_DM_API_KEY"` |
 | What Sent posted to the webhook, and what the app answered | `curl -s https://api.sent.dm/v3/webhooks/WEBHOOK_ID/events -H "x-api-key: $SENT_DM_API_KEY"` |
 

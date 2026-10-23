@@ -1,4 +1,4 @@
-import { SentVoiceError } from "@sentdm/voice";
+import { SentVoiceError } from "@sentdm/voice-client";
 import { toast } from "sonner";
 import { describeError } from "@/lib/client/format";
 import type { PhoneLog } from "./phone-log";

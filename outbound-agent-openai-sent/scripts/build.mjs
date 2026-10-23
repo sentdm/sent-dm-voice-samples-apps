@@ -5,7 +5,7 @@ const require = createRequire(import.meta.url);
 await mkdir('dist/public', { recursive: true });
 await cp('public', 'dist/public', { recursive: true });
 const { metafile } = await build({ entryPoints: ['client/app.ts'], bundle: true, outfile: 'dist/public/app.js', platform: 'browser', format: 'esm', target: 'chrome120', sourcemap: true, metafile: true });
-await copyFile(require.resolve('@sentdm/voice/sw.js'), 'dist/public/sw.js');
+await copyFile(require.resolve('@sentdm/voice-client/sw.js'), 'dist/public/sw.js');
 await writeFile('THIRD_PARTY_NOTICES.md', await thirdPartyNotices(metafile));
 console.log('Built portable server, dashboard, audio worker, Sent service worker, and third-party notices.');
 
@@ -16,12 +16,16 @@ async function thirdPartyNotices(metafile) {
     const match = input.match(/.*node_modules\/((?:@[^/]+\/)?[^/]+)\//);
     if (match) dirs.set(match[1], match[0]);
   }
+  const read = async (file) => (await readFile(file, 'utf8')).replace(/\r\n/g, '\n').trim();
   const packages = [];
   for (const [name, dir] of [...dirs].sort(([a], [b]) => a.localeCompare(b))) {
     const { version, license } = JSON.parse(await readFile(`${dir}package.json`, 'utf8'));
-    const file = (await readdir(dir)).find((f) => /^licen[cs]e/i.test(f));
-    const text = file ? (await readFile(dir + file, 'utf8')).replace(/\r\n/g, '\n').trim() : null;
-    packages.push({ name, version, license, text });
+    const files = await readdir(dir);
+    const licenseFile = files.find((f) => /^licen[cs]e/i.test(f));
+    const text = licenseFile ? await read(dir + licenseFile) : null;
+    // A package that bundles code of its own, like @sentdm/voice-client, ships that code's notices.
+    const bundled = files.includes('THIRD_PARTY_NOTICES.md') ? await read(`${dir}THIRD_PARTY_NOTICES.md`) : null;
+    packages.push({ name, version, license, text, bundled });
   }
   return [
     '# Third-party notices',
@@ -33,14 +37,13 @@ async function thirdPartyNotices(metafile) {
     '| Package | Version | License |',
     '| --- | --- | --- |',
     ...packages.map((p) => `| ${p.name} | ${p.version} | ${p.license.startsWith('SEE LICENSE') ? 'Custom, see below' : p.license} |`),
-    ...packages.flatMap((p) => [
-      '',
-      `## ${p.name} ${p.version}`,
-      '',
-      ...(p.text
-        ? ['```text', p.text, '```']
-        : [`This package declares the ${p.license} license in its package.json but ships no license file or copyright notice.`]),
-    ]),
+    ...packages.flatMap((p) => {
+      const section = ['', `## ${p.name} ${p.version}`, ''];
+      if (p.text) section.push('```text', p.text, '```');
+      else section.push(`This package declares the ${p.license} license in its package.json but ships no license file or copyright notice.`);
+      if (p.bundled) section.push('', `${p.name} bundles more packages. Its own notices for them:`, '', '````markdown', p.bundled, '````');
+      return section;
+    }),
     '',
   ].join('\n');
 }

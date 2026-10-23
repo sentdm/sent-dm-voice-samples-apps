@@ -25,7 +25,7 @@ interface RuntimeState {
   /** The presence list last sent to the browsers, to skip heartbeats that change nothing. */
   publishedPresence: string;
   calls: Map<string, TrackedCall>;
-  /** Voice tokens this server minted, so the telemetry relay can name the identity. */
+  /** Voice tokens this server minted, so the SDK relay can name the identity. */
   tokens: Map<string, { identity: string; expiresAt: number }>;
   callbackLog: CallbackLogEntry[];
   webhookInbox: WebhookInboxEntry[];

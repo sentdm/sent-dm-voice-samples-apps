@@ -53,7 +53,7 @@ export function createSentApi(apiKey: string, baseURL?: string) {
     },
 
     async voiceToken(identity: string, number: string) {
-      const data = required((await client.channels.voice.createToken({ identity, number, ttl: 600 })).data, "voice token")
+      const data = required((await client.voice.tokens.create({ identity, number, ttl: 600 })).data, "voice token")
       return required(data.token, "voice token")
     },
 

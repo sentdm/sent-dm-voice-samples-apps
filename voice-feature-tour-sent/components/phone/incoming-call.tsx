@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
-import type SentVoice from "@sentdm/voice";
+import type SentVoice from "@sentdm/voice-client";
 import { PhoneIncomingIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";

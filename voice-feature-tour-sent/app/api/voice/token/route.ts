@@ -18,9 +18,10 @@ const bodySchema = z.object({
 });
 
 /**
- * The SDK's `tokenProvider` calls this. The backend holds the API key, asks Sent for a
- * token bound to the configured number and returns the token as plain text, which is what
- * the SDK expects. Called at register() and again before every expiry.
+ * The SDK's `tokenProvider` calls this. The backend holds the API key, asks Sent for a token
+ * bound to the configured number and returns the token as plain text, which is what the SDK
+ * expects, with its expiry and number in headers. Called at register() and again before every
+ * expiry.
  */
 export async function POST(request: Request) {
   try {

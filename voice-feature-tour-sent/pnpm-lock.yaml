@@ -14,9 +14,12 @@ importers:
       '@ngrok/ngrok':
         specifier: 1.7.0
         version: 1.7.0
-      '@sentdm/voice':
-        specifier: ^0.1.1
-        version: 0.1.1(react@19.2.8)
+      '@sentdm/voice-client':
+        specifier: ^0.2.0
+        version: 0.2.0
+      '@sentdm/voice-client-react':
+        specifier: ^0.2.0
+        version: 0.2.0(@sentdm/voice-client@0.2.0)(react@19.2.8)
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -708,13 +711,17 @@ packages:
   '@sec-ant/readable-stream@0.4.1':
     resolution: {integrity: sha512-831qok9r2t8AlxLko40y2ebgSDhenenCatLVeW/uBtnHPyhHOvG0C7TvfgecV+wHzIm5KUICgzmVpWS+IMEAeg==}
 
-  '@sentdm/voice@0.1.1':
-    resolution: {integrity: sha512-fvkRj3JHuLBVMsysjr1yPi2cXdWalWcXIjOW5SYKScnSANn3nM5HAEDELcBuRu8ObYBDJPv6AeRoV5IGNFrk5g==}
+  '@sentdm/voice-client-core@0.2.0':
+    resolution: {integrity: sha512-7vCRnfSZRtamf9ZDqvp0+jUzx5oHOtPQwZoEsM/fMJNP9KZRityY9iv8GuMhHqrTYcsi7XNlkIcLcOxALAHI5A==}
+
+  '@sentdm/voice-client-react@0.2.0':
+    resolution: {integrity: sha512-hlJbdpR1SigxupZFsmNbKN9a7YkCQOaKIaRGYLrYEm7E4p/eQ0yJAY/jaueNs0Y4/Sa2Rmqo9Jp/yLSz8f+HaQ==}
     peerDependencies:
+      '@sentdm/voice-client': 0.2.0
       react: ^18.0.0 || ^19.0.0
-    peerDependenciesMeta:
-      react:
-        optional: true
+
+  '@sentdm/voice-client@0.2.0':
+    resolution: {integrity: sha512-tbvGWeYMQLoWsohrvESApuR5vI9xlklNDzaaYIEFPfQlU2AaeylV9fnbXziIC5+9OSM7M+JbG7jeKGmo8iNqsw==}
 
   '@sindresorhus/merge-streams@4.0.0':
     resolution: {integrity: sha512-tlqY9xq5ukxTUZBmoOp+m61cqwQD5pHJtFY3Mn8CA8ps6yghLH/Hw8UPdqg4OLmFW3IFlcXnQNmo/dh8HzXYIQ==}
@@ -1341,10 +1348,6 @@ packages:
     resolution: {integrity: sha512-uV2QOWP2nWzsy2aMp8aRibhi9dlzF5Hgh5SHaB9OiTGEyDTiJJyx0uy51QXdyWbtAHNua4XJzUKca3OzKUd3vA==}
     engines: {node: '>= 8'}
 
-  crypto-js@4.2.0:
-    resolution: {integrity: sha512-KALDyEYgpY+Rlob/iriUtjV6d5Eq+Y191A5g4UqLAi8CyGP9N1+FdVbkc1SxKc2r4YAYqG8JzO2KGL+AizD70Q==}
-    deprecated: Active development of CryptoJS has been discontinued. This library is no longer maintained.
-
   cssesc@3.0.0:
     resolution: {integrity: sha512-/Tb/JcjK111nNScGob5MNtsntNM1aCNUDipB/TkwZFhyDrrE47SOx/18wF2bbjgc3ZzCSKW1T5nt5EbFoAz/Vg==}
     engines: {node: '>=4'}
@@ -1813,9 +1816,6 @@ packages:
   forwarded@0.2.0:
     resolution: {integrity: sha512-buRG0fpBtRHSTCOASe6hD258tEubFoRLb4ZNA6NxMVHNw2gOcwHo9wyablzMzOA5z9xA9L1KNjk/Nt6MT9aYow==}
     engines: {node: '>= 0.6'}
-
-  fp-ts@2.16.11:
-    resolution: {integrity: sha512-LaI+KaX2NFkfn1ZGHoKCmcfv7yrZsC3b8NtWsTVQeHkq4F27vI5igUuO53sxqDEa2gNQMHFPmpojDw/1zmUK7w==}
 
   fresh@2.0.0:
     resolution: {integrity: sha512-Rx/WycZ60HOaqLKAi6cHRKKI7zxWbJ31MhntmtwMoaTeF7XFH9hhBp8vITaMidfljRQ6eYWCKkaTK+ykVJHP2A==}
@@ -2614,9 +2614,6 @@ packages:
     resolution: {integrity: sha512-5NPgf87AT2STgwa2ntRMr45jTKrYBGkVU36yT0ig/n/GMAa3oPqhZfIQ2kMEimReg0+t9kZViDVZ83qfVUlckg==}
     engines: {node: '>= 14'}
 
-  pako@2.2.0:
-    resolution: {integrity: sha512-zJq6RP/5q+TO2OpFV3FHzlPnFjmkb7Nc99a5SNjJE+uu/PkpChs+NIZSSzbBoD+6kjiISXjfYdwj1ZRQ81dz/w==}
-
   parent-module@1.0.1:
     resolution: {integrity: sha512-GQ2EWRpQV8/o+Aw8YqtfZZPfNRWZYkbidE9k5rpl/hC3vtHHBfGm2Ifi6qWV+coDGkrUKZAxE3Lot5kcsRlh+g==}
     engines: {node: '>=6'}
@@ -2868,10 +2865,6 @@ packages:
     resolution: {integrity: sha512-nLTrUKm2UyiL7rlhapu/Zl45FwNgkZGaCpZbIHajDYgwlJCOzLSk+cIPAnsEqV955GjILJnKbdQC1nVPz+gAYQ==}
     engines: {node: '>= 18'}
 
-  rtcpeerconnection-shim@1.2.15:
-    resolution: {integrity: sha512-C6DxhXt7bssQ1nHb154lqeL0SXz5Dx4RczXZu2Aa/L1NJFnEVDxFwCBo3fqtuljhHIGceg5JKBV4XJ0gW5JKyw==}
-    engines: {node: '>=6.0.0', npm: '>=3.10.0'}
-
   run-applescript@7.1.0:
     resolution: {integrity: sha512-DPe5pVFaAsinSaV6QjQ6gdiedWDcRCbUuiQfQa2wmWV7+xC9bGulGI8+TdRmoFkAPaBXk8CrAbnlY2ISniJ47Q==}
     engines: {node: '>=18'}
@@ -2896,13 +2889,6 @@ packages:
 
   scheduler@0.27.0:
     resolution: {integrity: sha512-eNv+WrVbKu1f3vbYJT/xtiF5syA5HPIMtf9IgY/nKg0sWqzAUEvqY/xm7OcZc/qafLx/iO9FgOmeSAp4v5ti/Q==}
-
-  sdp-transform@2.15.0:
-    resolution: {integrity: sha512-KrOH82c/W+GYQ0LHqtr3caRpM3ITglq3ljGUIb8LTki7ByacJZ9z+piSGiwZDsRyhQbYBOBJgr2k6X4BZXi3Kw==}
-    hasBin: true
-
-  sdp@2.12.0:
-    resolution: {integrity: sha512-jhXqQAQVM+8Xj5EjJGVweuEzgtGWb3tmEEpl3CLP3cStInSbVHSg0QWOGQzNq8pSID4JkpeV2mPqlMDLrm0/Vw==}
 
   semver@6.3.1:
     resolution: {integrity: sha512-BR7VvDCVHO+q2xBEWskxS6DJE1qRnb7DxzUrogb71CWoSficBxYsiAGd+Kl0mmq/MprG9yArRkyrQxTO6XjMzA==}
@@ -2980,10 +2966,6 @@ packages:
   signal-exit@4.1.0:
     resolution: {integrity: sha512-bzyZ1e88w9O1iNJbKnOlvYTrWPDl46O1bG0D3XInv+9tkPrxrN8jUUTiFlDkkmKWgn1M6CfIA13SuGqOa9Korw==}
     engines: {node: '>=14'}
-
-  sinch-rtc@2.49.11:
-    resolution: {integrity: sha512-c9k5RayTSNKejjUYuFfz4J9ly/KLk7lE7CUvdPA/gKCMaa9uUaInnXOitNyKVZi00VEFwVF+HCi5G7/9hV7/Sg==}
-    engines: {node: '>=16.0.0', npm: '>=8.0.0'}
 
   sisteransi@1.0.5:
     resolution: {integrity: sha512-bLGGlR1QxBcynn2d5YmDX4MGjlZvy2MRBDRNHLJ8VI6l6+9FUiyTFNJ0IveOSP0bcXgVDPRcfGqA0pjaqUpfVg==}
@@ -3204,10 +3186,6 @@ packages:
     engines: {node: '>=14.17'}
     hasBin: true
 
-  ulid@2.4.0:
-    resolution: {integrity: sha512-fIRiVTJNcSRmXKPZtGzFQv9WRrZ3M9eoptl/teFJvjOzmpU+/K/JH6HZ8deBfb5vMEpicJcLn7JmvdknlMq7Zg==}
-    hasBin: true
-
   unbox-primitive@1.1.0:
     resolution: {integrity: sha512-nWJ91DjeOkej/TA8pXQ3myruKpKEYgqvpw9lz4OPHj/NWFNluYrjbz9j01CJ8yKQd2g4jFoOkINCTW2I5LEEyw==}
     engines: {node: '>= 0.4'}
@@ -3258,10 +3236,6 @@ packages:
   vary@1.1.2:
     resolution: {integrity: sha512-BNGbWLfd0eUPabhkXUVm0j8uuvREyTh5ovRa/dyow/BqAbZJyC+5fU+IzQOzmAKzYqYRAISoRhdQr3eIZ/PXqg==}
     engines: {node: '>= 0.8'}
-
-  webrtc-adapter@7.2.3:
-    resolution: {integrity: sha512-n3K+0qTlb59mTpgVTiXcT1ute+oIpLij24CfEMr3BL1OqXYR96NGNJEm8XN7O5WliOPTHcoAJsbT8DGAEN5pGQ==}
-    engines: {node: '>=6.0.0', npm: '>=3.10.0'}
 
   which-boxed-primitive@1.1.1:
     resolution: {integrity: sha512-TbX3mj8n0odCBFVlY8AxkqcHASw3L60jIuF8jFP78az3C2YhmGvqbHBpAjTRH2/xqYunrJ9g1jSyjCjpoWzIAA==}
@@ -3946,12 +3920,19 @@ snapshots:
 
   '@sec-ant/readable-stream@0.4.1': {}
 
-  '@sentdm/voice@0.1.1(react@19.2.8)':
+  '@sentdm/voice-client-core@0.2.0':
     dependencies:
       bowser: 2.14.1
-      sinch-rtc: 2.49.11
-    optionalDependencies:
+
+  '@sentdm/voice-client-react@0.2.0(@sentdm/voice-client@0.2.0)(react@19.2.8)':
+    dependencies:
+      '@sentdm/voice-client': 0.2.0
       react: 19.2.8
+
+  '@sentdm/voice-client@0.2.0':
+    dependencies:
+      '@sentdm/voice-client-core': 0.2.0
+      pubnub: 7.6.3
     transitivePeerDependencies:
       - supports-color
 
@@ -4546,8 +4527,6 @@ snapshots:
       path-key: 3.1.1
       shebang-command: 2.0.0
       which: 2.0.2
-
-  crypto-js@4.2.0: {}
 
   cssesc@3.0.0: {}
 
@@ -5193,8 +5172,6 @@ snapshots:
       qs: 6.16.0
 
   forwarded@0.2.0: {}
-
-  fp-ts@2.16.11: {}
 
   fresh@2.0.0: {}
 
@@ -5948,8 +5925,6 @@ snapshots:
       degenerator: 5.0.1
       netmask: 2.1.1
 
-  pako@2.2.0: {}
-
   parent-module@1.0.1:
     dependencies:
       callsites: 3.1.0
@@ -6162,10 +6137,6 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  rtcpeerconnection-shim@1.2.15:
-    dependencies:
-      sdp: 2.12.0
-
   run-applescript@7.1.0: {}
 
   run-parallel@1.2.0:
@@ -6194,10 +6165,6 @@ snapshots:
   safer-buffer@2.1.2: {}
 
   scheduler@0.27.0: {}
-
-  sdp-transform@2.15.0: {}
-
-  sdp@2.12.0: {}
 
   semver@6.3.1: {}
 
@@ -6364,18 +6331,6 @@ snapshots:
   signal-exit@3.0.7: {}
 
   signal-exit@4.1.0: {}
-
-  sinch-rtc@2.49.11:
-    dependencies:
-      crypto-js: 4.2.0
-      fp-ts: 2.16.11
-      pako: 2.2.0
-      pubnub: 7.6.3
-      sdp-transform: 2.15.0
-      ulid: 2.4.0
-      webrtc-adapter: 7.2.3
-    transitivePeerDependencies:
-      - supports-color
 
   sisteransi@1.0.5: {}
 
@@ -6627,8 +6582,6 @@ snapshots:
 
   typescript@5.9.3: {}
 
-  ulid@2.4.0: {}
-
   unbox-primitive@1.1.0:
     dependencies:
       call-bound: 1.0.4
@@ -6692,11 +6645,6 @@ snapshots:
   validate-npm-package-name@7.0.2: {}
 
   vary@1.1.2: {}
-
-  webrtc-adapter@7.2.3:
-    dependencies:
-      rtcpeerconnection-shim: 1.2.15
-      sdp: 2.12.0
 
   which-boxed-primitive@1.1.1:
     dependencies:

@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import type SentVoice from "@sentdm/voice";
-import { useSentVoice } from "@sentdm/voice/react";
+import type SentVoice from "@sentdm/voice-client";
+import { useSentVoice } from "@sentdm/voice-client-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,

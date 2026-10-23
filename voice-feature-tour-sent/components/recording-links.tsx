@@ -1,7 +1,7 @@
 import { formatTime } from "@/lib/client/format";
 import type { VoiceRecordingResponse } from "@/lib/shared/types";
 
-/** The download links `GET /v3/calls/{id}/recordings` issued, oldest first. */
+/** The download links `GET /v3/voice/calls/{id}/recordings` issued, oldest first. */
 export function RecordingLinks({
   recordings,
 }: {

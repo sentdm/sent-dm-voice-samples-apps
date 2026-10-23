@@ -1,6 +1,6 @@
 "use client";
 
-import { useAudioDevices } from "@sentdm/voice/react";
+import { useAudioDevices } from "@sentdm/voice-client-react";
 import {
   Card,
   CardContent,
