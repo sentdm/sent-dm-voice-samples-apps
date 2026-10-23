@@ -1,5 +1,6 @@
 import Sent, { APIError } from "@sentdm/sentdm"
 import type { Channel, TemplateSummary } from "@/lib/types"
+import { certificateHint } from "./http"
 
 /** Message events the app follows: replies from contacts, and what happened to each text it sent. */
 export const MESSAGE_EVENTS = ["received", "sent", "delivered", "read", "failed", "blocked", "filtered"]
@@ -10,7 +11,9 @@ export function sentErrorMessage(error: unknown): string {
     const body = error.error as { error?: { code?: string; message?: string }; message?: string } | undefined
     const code = body?.error?.code
     const message = body?.error?.message ?? body?.message ?? error.message
-    return `Sent${error.status ? ` ${error.status}` : ""}: ${code ? `${code}. ` : ""}${message}`
+    // Connection errors keep the TLS reason in their cause chain.
+    const hint = certificateHint(error)
+    return `Sent${error.status ? ` ${error.status}` : ""}: ${code ? `${code}. ` : ""}${message}${hint ? ` ${hint}` : ""}`
   }
   return error instanceof Error ? error.message : String(error)
 }

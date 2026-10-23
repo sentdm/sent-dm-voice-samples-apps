@@ -11,6 +11,7 @@ import { checkNumberToCall } from './phone.js';
 import { OpenAIVoice, MODELS, checkKey, preflight, type CallOutcome, type Emit, type VoiceModel } from './openai.js';
 import { BACKEND_MODELS, TRANSCRIPTION_MODELS, DEFAULT_VOICE_MODEL, DEFAULT_BACKEND_MODEL, DEFAULT_TRANSCRIPTION_MODEL, isLiveModel, type BackendModel, type TranscriptionModel } from './models.js';
 import { describeTunnel, openTunnel, tunnelConfigFromEnv, type TunnelConfig, type TunnelHandle } from './tunnel.js';
+import { trustSystemCertificates } from './http.js';
 
 export interface AppOptions {
   port?: number; gatewayPort?: number; dataDir?: string; sentBase?: string; openaiHttpBase?: string; openaiWsBase?: string;
@@ -367,6 +368,7 @@ async function applyEnvironmentKeys(runtime: Awaited<ReturnType<typeof createApp
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  trustSystemCertificates();
   // Optional ./.env; variables already set in the shell take precedence over the file.
   try { process.loadEnvFile(); } catch (e) { if ((e as NodeJS.ErrnoException).code !== 'ENOENT') throw e; }
   const requestedPort = Number(process.env.PORT ?? 3000);

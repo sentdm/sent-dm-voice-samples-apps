@@ -10,6 +10,7 @@ import { decideInbound, equalSecret, verifySentSignature } from './security.js';
 import { OpenAIVoice, MODELS, checkKey, preflight } from './openai.js';
 import { BACKEND_MODELS, TRANSCRIPTION_MODELS, DEFAULT_VOICE_MODEL, DEFAULT_BACKEND_MODEL, DEFAULT_TRANSCRIPTION_MODEL } from './models.js';
 import { describeTunnel, openTunnel, tunnelConfigFromEnv } from './tunnel.js';
+import { trustSystemCertificates } from './http.js';
 export async function createApplication(options = {}) {
     const csrf = randomBytes(32).toString('hex');
     const tunnelConfig = options.tunnel ?? tunnelConfigFromEnv();
@@ -510,6 +511,7 @@ async function applyEnvironmentKeys(runtime, sentKey, openaiKey) {
     }
 }
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+    trustSystemCertificates();
     // Optional ./.env; variables already set in the shell take precedence over the file.
     try {
         process.loadEnvFile();

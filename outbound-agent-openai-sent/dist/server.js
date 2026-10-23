@@ -11,6 +11,7 @@ import { checkNumberToCall } from './phone.js';
 import { OpenAIVoice, MODELS, checkKey, preflight } from './openai.js';
 import { BACKEND_MODELS, TRANSCRIPTION_MODELS, DEFAULT_VOICE_MODEL, DEFAULT_BACKEND_MODEL, DEFAULT_TRANSCRIPTION_MODEL, isLiveModel } from './models.js';
 import { describeTunnel, openTunnel, tunnelConfigFromEnv } from './tunnel.js';
+import { trustSystemCertificates } from './http.js';
 // Counted from the answer, so ringing does not use up the conversation.
 const MAX_CALL_MS = 5 * 60_000;
 // From Call to the answer: up to 45 s for the model session (15 s at most) and Sent's call setup, then the ring time.
@@ -500,6 +501,7 @@ async function applyEnvironmentKeys(runtime, sentKey, openaiKey) {
     }
 }
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+    trustSystemCertificates();
     // Optional ./.env; variables already set in the shell take precedence over the file.
     try {
         process.loadEnvFile();

@@ -12,6 +12,7 @@ import type {
   VoiceTokenResponse,
 } from "@/lib/shared/types";
 import { parseJsonOrText } from "@/lib/utils";
+import { certificateHint } from "./certificates";
 
 /**
  * The only place this app talks to the Sent API. Every call adds the API key and the
@@ -244,7 +245,10 @@ export function removeParticipant(
 function describe(error: unknown): string {
   if (error instanceof Error) {
     const cause = (error as Error & { cause?: { code?: string } }).cause;
-    return cause?.code ? `${error.message} (${cause.code})` : error.message;
+    const hint = certificateHint(error);
+    return cause?.code
+      ? `${error.message} (${cause.code})${hint ? `. ${hint}` : ""}`
+      : error.message;
   }
   return String(error);
 }

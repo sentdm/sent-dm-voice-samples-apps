@@ -11,10 +11,12 @@ import { Campaigns } from "./campaigns"
 import { createGateway } from "./gateway"
 import { createApi, isLocalHost } from "./api"
 import { equalSecret } from "./security"
+import { trustSystemCertificates } from "./http"
 import { sentErrorMessage } from "./sent"
 import { describeTunnel, tunnelConfigFromEnv } from "./tunnel"
 
 async function main() {
+  trustSystemCertificates()
   // Optional ./.env; variables already set in the shell win.
   try {
     process.loadEnvFile()

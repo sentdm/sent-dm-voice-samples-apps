@@ -152,6 +152,11 @@ one. That is a rule of the platform, and the app says so where it applies.
   authtoken: set `NGROK_AUTHTOKEN` and restart. A free ngrok account allows 3 agent sessions at a time,
   so stop other ngrok agents or apps. If the network blocks one provider, set `TUNNEL_PROVIDER` to the
   other, or set `PUBLIC_BASE_URL` to a tunnel of your own, and restart.
+- **A request fails with `UNABLE_TO_GET_ISSUER_CERT_LOCALLY` or another certificate error.** Antivirus
+  HTTPS scanning or a company proxy replaces HTTPS certificates. The app trusts the system certificate
+  store on Node.js 22.19 or later, so update Node.js. If the error continues, export the root certificate
+  of the scanner or proxy as a Base-64 (PEM) file. Set `NODE_EXTRA_CA_CERTS` to its path in your shell,
+  not in `.env`, and restart.
 - **A browser shows an ngrok warning page.** Free ngrok accounts show it to browsers on each new
   domain. Press **Visit Site**. Sent's questions and webhooks do not get this page.
 - **The first call fails with `callback_timeout`.** The development server compiles a route on its first

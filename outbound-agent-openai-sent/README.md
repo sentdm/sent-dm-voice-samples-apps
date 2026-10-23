@@ -169,6 +169,7 @@ Transcripts and events remain in memory and are discarded when the server exits.
 | "Enter the number in international format" | Start with `+` and the country code, for example `+14155551234` |
 | No active voice numbers | Enable voice on an existing number/account in Sent first; use an appropriately scoped API key |
 | OpenAI key check or session rejected | Check direct OpenAI key, project access, and chosen model |
+| `fetch failed (UNABLE_TO_GET_ISSUER_CERT_LOCALLY)` or another certificate error | Antivirus HTTPS scanning or a company proxy replaces HTTPS certificates. The app trusts the system certificate store on Node.js 22.19 or later, so update Node.js. If the error continues, export the root certificate of the scanner or proxy as a Base-64 (PEM) file. Set `NODE_EXTRA_CA_CERTS` to its path in your shell, not in `.env`, then start again |
 | Registration/notification failure | Use current Chrome/Edge on localhost and allow notifications; private browsing can block service workers/push |
 | "ngrok needs an authtoken" | Set `NGROK_AUTHTOKEN` in your shell or `.env` ([free account](https://dashboard.ngrok.com/signup)), or set `TUNNEL_PROVIDER=cloudflare`, then start the server again |
 | "ngrok rejected the authtoken" (`ERR_NGROK_105`/`ERR_NGROK_107`) | Copy the token again from the [ngrok dashboard](https://dashboard.ngrok.com/get-started/your-authtoken); check `NGROK_AUTHTOKEN` and any token saved with `ngrok config add-authtoken` |

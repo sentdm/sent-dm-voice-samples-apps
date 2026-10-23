@@ -174,6 +174,7 @@ Transcripts and events remain in memory and are discarded when the server exits.
 | --- | --- |
 | No active voice numbers | Enable voice on an existing number/account in Sent first; use an appropriately scoped API key |
 | OpenAI key check or session rejected | Check direct OpenAI key, project access, permissions, and chosen model; a Chat Completions-only proxy is insufficient |
+| `fetch failed (UNABLE_TO_GET_ISSUER_CERT_LOCALLY)` or another certificate error | Antivirus HTTPS scanning or a company proxy replaces HTTPS certificates. The app trusts the system certificate store on Node.js 22.19 or later, so update Node.js. If the error continues, export the root certificate of the scanner or proxy as a Base-64 (PEM) file. Set `NODE_EXTRA_CA_CERTS` to its path in your shell, not in `.env`, then start again |
 | GPT-Live unavailable | Select the explicit Realtime alternative if your OpenAI account supports it |
 | Registration/notification failure | Use current Chrome/Edge on localhost and allow notifications; private browsing/browser policies can block service workers/push |
 | "ngrok needs an authtoken" | Set `NGROK_AUTHTOKEN` in your shell or `.env` ([free account](https://dashboard.ngrok.com/signup)), or set `TUNNEL_PROVIDER=cloudflare`, then start the server again |

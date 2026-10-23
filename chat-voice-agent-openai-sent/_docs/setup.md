@@ -233,6 +233,7 @@ Set `PORT` in `.env` or in your shell, for example `PORT=3100 pnpm dev`. The val
 | --- | --- |
 | The page says the server isn't answering. | Start the app with `pnpm dev`, not `next dev`. |
 | **Connect** says that no voice number is active. | Turn on voice for an existing number in Sent. A number without a callback URL is `INACTIVE` until you set one. |
+| **Connect** fails with `UNABLE_TO_GET_ISSUER_CERT_LOCALLY` or another certificate error. | Antivirus HTTPS scanning or a company proxy replaces HTTPS certificates. The app trusts the system certificate store on Node.js 22.19 or later, so update Node.js. If the error continues, export the root certificate of the scanner or proxy as a Base-64 (PEM) file. Set `NODE_EXTRA_CA_CERTS` to its path in your shell, not in `.env`. Then restart the app. |
 | **Start agent** asks for the business name. | Enter it in **Agent settings**. |
 | Start stops at "Allow notifications". | Allow notifications for `localhost:3000` in the browser's site settings, then start again. |
 | Start stops at the model check. | Your OpenAI project can't use the voice model. Choose another one, or ask OpenAI for access. |
