@@ -8,3 +8,20 @@ allowBuilds:
   # Not needed: Next.js image optimization is unused, and the resolver works without its native build.
   sharp: false
   unrs-resolver: false
+# Exact versions installed before pnpm's one-day release age passed. Each is inert once a day old: delete after 2026-10-25.
+minimumReleaseAgeExclude:
+  - '@next/env@16.4.3'
+  - '@next/eslint-plugin-next@16.4.3'
+  - '@next/swc-darwin-arm64@16.4.3'
+  - '@next/swc-darwin-x64@16.4.3'
+  - '@next/swc-linux-arm64-gnu@16.4.3'
+  - '@next/swc-linux-arm64-musl@16.4.3'
+  - '@next/swc-linux-x64-gnu@16.4.3'
+  - '@next/swc-linux-x64-musl@16.4.3'
+  - '@next/swc-win32-arm64-msvc@16.4.3'
+  - '@next/swc-win32-x64-msvc@16.4.3'
+  - '@sentdm/sentdm@0.46.0'
+  - '@sentdm/voice-client-core@0.2.1'
+  - '@sentdm/voice-client@0.2.1'
+  - eslint-config-next@16.4.3
+  - next@16.4.3
