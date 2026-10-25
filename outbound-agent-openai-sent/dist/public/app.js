@@ -6638,7 +6638,7 @@ var require_pubnub_min = __commonJS({
   }
 });
 
-// node_modules/.pnpm/@sentdm+voice-client@0.2.0/node_modules/@sentdm/voice-client/adapter/sinch-rtc.mjs
+// node_modules/.pnpm/@sentdm+voice-client@0.2.1/node_modules/@sentdm/voice-client/adapter/sinch-rtc.mjs
 var sinch_rtc_exports = {};
 __export(sinch_rtc_exports, {
   CallEndCause: () => export_CallEndCause,
@@ -6648,7 +6648,7 @@ __export(sinch_rtc_exports, {
 });
 var import_pubnub, XT, Lv, jT, eA, tA, nA, Uv, p, rA, iA, Lt, ct, un, Kv, dt, Ce, dn, Qv, Yv, Xv, G0, em, X, ba, im, om, fn, cm, hn, Z0, Js, pm, Q0, gm, xm, ym, zs, bm, Ut, ye, wm, Dm, Fm, Nm, Bm, km, Lm, Wm, Vm, zm, Zm, Ym, Xm, eg, ng, ig, og, Gn, $0, ft, ws, cg, dg, lg, Y, vg, gg, xg, yg, Eg, Tg, wg, Dg, Pg, Bg, Jg, Wg, Vg, zg, Yg, Xg, n_, a_, s_, l_, p_, g_, x_, b_, A_, O_, R_, P_, M_, k_, W_, V_, G_, Y_, ex, rx, ox, ux, dx, fx, vx, _x, yx, bx, Ax, Ox, Rx, Nx, qx, Lx, Wx, Kx, Gx, Yx, Xx, t1, r1, o1, u1, d1, f1, v1, g1, x1, C1, I1, O1, R1, P1, G, B1, k1, L1, W1, V1, z1, G1, Z1, El, qe, Q1, ht, Y1, yo, wl, j1, Ae, _r, ku, Eo, Pl, Lu, oS, Ml, ql, kl, xS, _n, Ro, bS, IS, TS, $l, AS, wS, DS, RS, PS, NS, MS, BS, qS, kS, JS, ue, xi, US, HS, cf, nc, KS, zS, yi, ZS, vf, sc, mf, cc, lc, jS, ey, Cr, Qt, It, Yt, oy, Cf, Er, cy, bc, If, ly, fy, hy, my, gy, _y, yy, Pf, Cy, by, Iy, Ay, Dy, Ry, Py, Ny, By, Wy, qo, Vy, Qc, Zy, Qy, Oi, ko, eC, nC, rC, aC, oC, mt, Jo, sC, uC, cC, dC, pC, vC, CC, mh, _h, xh, IC, TC, Ch, RC, yd, BC, kC, JC, Dh, Rh, Id, Td, qi, Nh, Bh, XC, tE, nE, iE, aE, oE, Gh, mE, _E, SE, Xh, IE, AE, wE, np, RE, FE, PE, ME, qE, kE, JE, LE, WE, HE, KE, Yd, lp, GE, hp, pp, mp, ZE, QE, _p, d0, f0, jE, eb, Cp, tb, nb, bp, ib, ab, ob, sb, cb, db, fb, Pb, Jp, Lp, C0, kn, Gb, jp, ev, tv, jb, tI, rI, kI, LI, zI, GI, ZI, gv, QI, XI, nT, aT, oT, sT, uT, cT, lT, hT, vT, gT, xT, yT, ET, IT, AT, OT, RT, PT, MT, qT, kT, k0, export_CallEndCause, export_CallQualityWarningEventType, export_ErrorType, export_Sinch;
 var init_sinch_rtc = __esm({
-  "node_modules/.pnpm/@sentdm+voice-client@0.2.0/node_modules/@sentdm/voice-client/adapter/sinch-rtc.mjs"() {
+  "node_modules/.pnpm/@sentdm+voice-client@0.2.1/node_modules/@sentdm/voice-client/adapter/sinch-rtc.mjs"() {
     import_pubnub = __toESM(require_pubnub_min(), 1);
     XT = Object.create;
     Lv = Object.defineProperty;
@@ -6867,7 +6867,7 @@ var init_sinch_rtc = __esm({
     });
     X = p((Ds, tm) => {
       (function(e, t) {
-        typeof Ds == "object" ? tm.exports = Ds = t() : typeof define == "function" && define.amd ? define([], t) : e.CryptoJS = t();
+        typeof Ds == "object" ? tm.exports = Ds = t() : e.CryptoJS = t();
       })(Ds, function() {
         var e = e || (function(t, n) {
           var r;
@@ -6999,7 +6999,7 @@ var init_sinch_rtc = __esm({
     });
     ba = p((Rs, nm) => {
       (function(e, t) {
-        typeof Rs == "object" ? nm.exports = Rs = t(X()) : typeof define == "function" && define.amd ? define(["./core"], t) : t(e.CryptoJS);
+        typeof Rs == "object" ? nm.exports = Rs = t(X()) : t(e.CryptoJS);
       })(Rs, function(e) {
         return (function(t) {
           var n = e, r = n.lib, i = r.Base, a = r.WordArray, s = n.x64 = {}, u = s.Word = i.extend({ init: function(c, o) {
@@ -7021,7 +7021,7 @@ var init_sinch_rtc = __esm({
     });
     im = p((Fs, rm) => {
       (function(e, t) {
-        typeof Fs == "object" ? rm.exports = Fs = t(X()) : typeof define == "function" && define.amd ? define(["./core"], t) : t(e.CryptoJS);
+        typeof Fs == "object" ? rm.exports = Fs = t(X()) : t(e.CryptoJS);
       })(Fs, function(e) {
         return (function() {
           if (typeof ArrayBuffer == "function") {
@@ -7038,7 +7038,7 @@ var init_sinch_rtc = __esm({
     });
     om = p((Ps, am) => {
       (function(e, t) {
-        typeof Ps == "object" ? am.exports = Ps = t(X()) : typeof define == "function" && define.amd ? define(["./core"], t) : t(e.CryptoJS);
+        typeof Ps == "object" ? am.exports = Ps = t(X()) : t(e.CryptoJS);
       })(Ps, function(e) {
         return (function() {
           var t = e, n = t.lib, r = n.WordArray, i = t.enc, a = i.Utf16 = i.Utf16BE = { stringify: function(u) {
@@ -7069,7 +7069,7 @@ var init_sinch_rtc = __esm({
     });
     fn = p((Ns, sm) => {
       (function(e, t) {
-        typeof Ns == "object" ? sm.exports = Ns = t(X()) : typeof define == "function" && define.amd ? define(["./core"], t) : t(e.CryptoJS);
+        typeof Ns == "object" ? sm.exports = Ns = t(X()) : t(e.CryptoJS);
       })(Ns, function(e) {
         return (function() {
           var t = e, n = t.lib, r = n.WordArray, i = t.enc, a = i.Base64 = { stringify: function(u) {
@@ -7104,7 +7104,7 @@ var init_sinch_rtc = __esm({
     });
     cm = p((Ms, um) => {
       (function(e, t) {
-        typeof Ms == "object" ? um.exports = Ms = t(X()) : typeof define == "function" && define.amd ? define(["./core"], t) : t(e.CryptoJS);
+        typeof Ms == "object" ? um.exports = Ms = t(X()) : t(e.CryptoJS);
       })(Ms, function(e) {
         return (function() {
           var t = e, n = t.lib, r = n.WordArray, i = t.enc, a = i.Base64url = { stringify: function(u, d) {
@@ -7141,7 +7141,7 @@ var init_sinch_rtc = __esm({
     });
     hn = p((Bs, dm) => {
       (function(e, t) {
-        typeof Bs == "object" ? dm.exports = Bs = t(X()) : typeof define == "function" && define.amd ? define(["./core"], t) : t(e.CryptoJS);
+        typeof Bs == "object" ? dm.exports = Bs = t(X()) : t(e.CryptoJS);
       })(Bs, function(e) {
         return (function(t) {
           var n = e, r = n.lib, i = r.WordArray, a = r.Hasher, s = n.algo, u = [];
@@ -7193,7 +7193,7 @@ var init_sinch_rtc = __esm({
     });
     Z0 = p((qs, lm) => {
       (function(e, t) {
-        typeof qs == "object" ? lm.exports = qs = t(X()) : typeof define == "function" && define.amd ? define(["./core"], t) : t(e.CryptoJS);
+        typeof qs == "object" ? lm.exports = qs = t(X()) : t(e.CryptoJS);
       })(qs, function(e) {
         return (function() {
           var t = e, n = t.lib, r = n.WordArray, i = n.Hasher, a = t.algo, s = [], u = a.SHA1 = i.extend({ _doReset: function() {
@@ -7222,7 +7222,7 @@ var init_sinch_rtc = __esm({
     });
     Js = p((ks, fm) => {
       (function(e, t) {
-        typeof ks == "object" ? fm.exports = ks = t(X()) : typeof define == "function" && define.amd ? define(["./core"], t) : t(e.CryptoJS);
+        typeof ks == "object" ? fm.exports = ks = t(X()) : t(e.CryptoJS);
       })(ks, function(e) {
         return (function(t) {
           var n = e, r = n.lib, i = r.WordArray, a = r.Hasher, s = n.algo, u = [], d = [];
@@ -7262,7 +7262,7 @@ var init_sinch_rtc = __esm({
     });
     pm = p((Ls, hm) => {
       (function(e, t, n) {
-        typeof Ls == "object" ? hm.exports = Ls = t(X(), Js()) : typeof define == "function" && define.amd ? define(["./core", "./sha256"], t) : t(e.CryptoJS);
+        typeof Ls == "object" ? hm.exports = Ls = t(X(), Js()) : t(e.CryptoJS);
       })(Ls, function(e) {
         return (function() {
           var t = e, n = t.lib, r = n.WordArray, i = t.algo, a = i.SHA256, s = i.SHA224 = a.extend({ _doReset: function() {
@@ -7277,7 +7277,7 @@ var init_sinch_rtc = __esm({
     });
     Q0 = p((Us, vm) => {
       (function(e, t, n) {
-        typeof Us == "object" ? vm.exports = Us = t(X(), ba()) : typeof define == "function" && define.amd ? define(["./core", "./x64-core"], t) : t(e.CryptoJS);
+        typeof Us == "object" ? vm.exports = Us = t(X(), ba()) : t(e.CryptoJS);
       })(Us, function(e) {
         return (function() {
           var t = e, n = t.lib, r = n.Hasher, i = t.x64, a = i.Word, s = i.WordArray, u = t.algo;
@@ -7317,7 +7317,7 @@ var init_sinch_rtc = __esm({
     });
     gm = p((Ws, mm) => {
       (function(e, t, n) {
-        typeof Ws == "object" ? mm.exports = Ws = t(X(), ba(), Q0()) : typeof define == "function" && define.amd ? define(["./core", "./x64-core", "./sha512"], t) : t(e.CryptoJS);
+        typeof Ws == "object" ? mm.exports = Ws = t(X(), ba(), Q0()) : t(e.CryptoJS);
       })(Ws, function(e) {
         return (function() {
           var t = e, n = t.x64, r = n.Word, i = n.WordArray, a = t.algo, s = a.SHA512, u = a.SHA384 = s.extend({ _doReset: function() {
@@ -7332,7 +7332,7 @@ var init_sinch_rtc = __esm({
     });
     xm = p((Hs, _m) => {
       (function(e, t, n) {
-        typeof Hs == "object" ? _m.exports = Hs = t(X(), ba()) : typeof define == "function" && define.amd ? define(["./core", "./x64-core"], t) : t(e.CryptoJS);
+        typeof Hs == "object" ? _m.exports = Hs = t(X(), ba()) : t(e.CryptoJS);
       })(Hs, function(e) {
         return (function(t) {
           var n = e, r = n.lib, i = r.WordArray, a = r.Hasher, s = n.x64, u = s.Word, d = n.algo, c = [], o = [], f = [];
@@ -7414,7 +7414,7 @@ var init_sinch_rtc = __esm({
     });
     ym = p((Vs, Sm) => {
       (function(e, t) {
-        typeof Vs == "object" ? Sm.exports = Vs = t(X()) : typeof define == "function" && define.amd ? define(["./core"], t) : t(e.CryptoJS);
+        typeof Vs == "object" ? Sm.exports = Vs = t(X()) : t(e.CryptoJS);
       })(Vs, function(e) {
         return (function(t) {
           var n = e, r = n.lib, i = r.WordArray, a = r.Hasher, s = n.algo, u = i.create([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 7, 4, 13, 1, 10, 6, 15, 3, 12, 0, 9, 5, 2, 14, 11, 8, 3, 10, 14, 4, 9, 15, 8, 1, 2, 7, 0, 6, 13, 11, 5, 12, 1, 9, 11, 10, 0, 8, 12, 4, 13, 3, 7, 15, 14, 5, 6, 2, 4, 0, 5, 9, 7, 12, 2, 10, 14, 1, 3, 8, 11, 6, 15, 13]), d = i.create([5, 14, 7, 0, 9, 2, 11, 4, 13, 6, 15, 8, 1, 10, 3, 12, 6, 11, 3, 7, 0, 13, 5, 10, 14, 15, 8, 12, 4, 9, 1, 2, 15, 5, 1, 3, 7, 14, 6, 9, 11, 8, 12, 2, 10, 0, 4, 13, 8, 6, 4, 1, 3, 11, 15, 0, 5, 12, 2, 13, 9, 7, 10, 14, 12, 15, 10, 4, 1, 5, 8, 7, 6, 2, 13, 14, 0, 3, 9, 11]), c = i.create([11, 14, 15, 12, 5, 8, 7, 9, 11, 13, 14, 15, 6, 7, 9, 8, 7, 6, 8, 13, 11, 9, 7, 15, 7, 12, 15, 9, 11, 7, 13, 12, 11, 13, 6, 7, 14, 9, 13, 15, 14, 8, 13, 6, 5, 12, 7, 5, 11, 12, 14, 15, 14, 15, 9, 8, 9, 14, 5, 6, 8, 6, 5, 12, 9, 15, 5, 11, 6, 8, 13, 12, 5, 12, 13, 14, 11, 8, 5, 6]), o = i.create([8, 9, 9, 11, 13, 15, 15, 5, 7, 7, 8, 11, 14, 14, 12, 6, 9, 13, 15, 7, 12, 8, 9, 11, 7, 7, 12, 7, 6, 15, 13, 11, 9, 7, 15, 11, 8, 6, 6, 14, 12, 13, 5, 14, 13, 13, 7, 5, 15, 5, 8, 11, 14, 14, 6, 14, 6, 9, 12, 9, 12, 5, 15, 8, 8, 5, 12, 9, 12, 5, 14, 6, 8, 13, 6, 5, 15, 13, 11, 11]), f = i.create([0, 1518500249, 1859775393, 2400959708, 2840853838]), m = i.create([1352829926, 1548603684, 1836072691, 2053994217, 0]), _ = s.RIPEMD160 = a.extend({ _doReset: function() {
@@ -7464,7 +7464,7 @@ var init_sinch_rtc = __esm({
     });
     zs = p((Ks, Cm) => {
       (function(e, t) {
-        typeof Ks == "object" ? Cm.exports = Ks = t(X()) : typeof define == "function" && define.amd ? define(["./core"], t) : t(e.CryptoJS);
+        typeof Ks == "object" ? Cm.exports = Ks = t(X()) : t(e.CryptoJS);
       })(Ks, function(e) {
         (function() {
           var t = e, n = t.lib, r = n.Base, i = t.enc, a = i.Utf8, s = t.algo, u = s.HMAC = r.extend({ init: function(d, c) {
@@ -7489,7 +7489,7 @@ var init_sinch_rtc = __esm({
     });
     bm = p((Gs, Em) => {
       (function(e, t, n) {
-        typeof Gs == "object" ? Em.exports = Gs = t(X(), Js(), zs()) : typeof define == "function" && define.amd ? define(["./core", "./sha256", "./hmac"], t) : t(e.CryptoJS);
+        typeof Gs == "object" ? Em.exports = Gs = t(X(), Js(), zs()) : t(e.CryptoJS);
       })(Gs, function(e) {
         return (function() {
           var t = e, n = t.lib, r = n.Base, i = n.WordArray, a = t.algo, s = a.SHA256, u = a.HMAC, d = a.PBKDF2 = r.extend({ cfg: r.extend({ keySize: 128 / 32, hasher: s, iterations: 25e4 }), init: function(c) {
@@ -7514,7 +7514,7 @@ var init_sinch_rtc = __esm({
     });
     Ut = p((Zs, Im) => {
       (function(e, t, n) {
-        typeof Zs == "object" ? Im.exports = Zs = t(X(), Z0(), zs()) : typeof define == "function" && define.amd ? define(["./core", "./sha1", "./hmac"], t) : t(e.CryptoJS);
+        typeof Zs == "object" ? Im.exports = Zs = t(X(), Z0(), zs()) : t(e.CryptoJS);
       })(Zs, function(e) {
         return (function() {
           var t = e, n = t.lib, r = n.Base, i = n.WordArray, a = t.algo, s = a.MD5, u = a.EvpKDF = r.extend({ cfg: r.extend({ keySize: 128 / 32, hasher: s, iterations: 1 }), init: function(d) {
@@ -7535,7 +7535,7 @@ var init_sinch_rtc = __esm({
     });
     ye = p((Qs, Tm) => {
       (function(e, t, n) {
-        typeof Qs == "object" ? Tm.exports = Qs = t(X(), Ut()) : typeof define == "function" && define.amd ? define(["./core", "./evpkdf"], t) : t(e.CryptoJS);
+        typeof Qs == "object" ? Tm.exports = Qs = t(X(), Ut()) : t(e.CryptoJS);
       })(Qs, function(e) {
         e.lib.Cipher || (function(t) {
           var n = e, r = n.lib, i = r.Base, a = r.WordArray, s = r.BufferedBlockAlgorithm, u = n.enc, d = u.Utf8, c = u.Base64, o = n.algo, f = o.EvpKDF, m = r.Cipher = s.extend({ cfg: i.extend(), createEncryptor: function(T, N) {
@@ -7647,7 +7647,7 @@ var init_sinch_rtc = __esm({
     });
     wm = p((Ys, Am) => {
       (function(e, t, n) {
-        typeof Ys == "object" ? Am.exports = Ys = t(X(), ye()) : typeof define == "function" && define.amd ? define(["./core", "./cipher-core"], t) : t(e.CryptoJS);
+        typeof Ys == "object" ? Am.exports = Ys = t(X(), ye()) : t(e.CryptoJS);
       })(Ys, function(e) {
         return e.mode.CFB = (function() {
           var t = e.lib.BlockCipherMode.extend();
@@ -7669,7 +7669,7 @@ var init_sinch_rtc = __esm({
     });
     Dm = p(($s, Om) => {
       (function(e, t, n) {
-        typeof $s == "object" ? Om.exports = $s = t(X(), ye()) : typeof define == "function" && define.amd ? define(["./core", "./cipher-core"], t) : t(e.CryptoJS);
+        typeof $s == "object" ? Om.exports = $s = t(X(), ye()) : t(e.CryptoJS);
       })($s, function(e) {
         return e.mode.CTR = (function() {
           var t = e.lib.BlockCipherMode.extend(), n = t.Encryptor = t.extend({ processBlock: function(r, i) {
@@ -7685,7 +7685,7 @@ var init_sinch_rtc = __esm({
     });
     Fm = p((Xs, Rm) => {
       (function(e, t, n) {
-        typeof Xs == "object" ? Rm.exports = Xs = t(X(), ye()) : typeof define == "function" && define.amd ? define(["./core", "./cipher-core"], t) : t(e.CryptoJS);
+        typeof Xs == "object" ? Rm.exports = Xs = t(X(), ye()) : t(e.CryptoJS);
       })(Xs, function(e) {
         return e.mode.CTRGladman = (function() {
           var t = e.lib.BlockCipherMode.extend();
@@ -7712,7 +7712,7 @@ var init_sinch_rtc = __esm({
     });
     Nm = p((js, Pm) => {
       (function(e, t, n) {
-        typeof js == "object" ? Pm.exports = js = t(X(), ye()) : typeof define == "function" && define.amd ? define(["./core", "./cipher-core"], t) : t(e.CryptoJS);
+        typeof js == "object" ? Pm.exports = js = t(X(), ye()) : t(e.CryptoJS);
       })(js, function(e) {
         return e.mode.OFB = (function() {
           var t = e.lib.BlockCipherMode.extend(), n = t.Encryptor = t.extend({ processBlock: function(r, i) {
@@ -7726,7 +7726,7 @@ var init_sinch_rtc = __esm({
     });
     Bm = p((eu, Mm) => {
       (function(e, t, n) {
-        typeof eu == "object" ? Mm.exports = eu = t(X(), ye()) : typeof define == "function" && define.amd ? define(["./core", "./cipher-core"], t) : t(e.CryptoJS);
+        typeof eu == "object" ? Mm.exports = eu = t(X(), ye()) : t(e.CryptoJS);
       })(eu, function(e) {
         return e.mode.ECB = (function() {
           var t = e.lib.BlockCipherMode.extend();
@@ -7740,7 +7740,7 @@ var init_sinch_rtc = __esm({
     });
     km = p((tu, qm) => {
       (function(e, t, n) {
-        typeof tu == "object" ? qm.exports = tu = t(X(), ye()) : typeof define == "function" && define.amd ? define(["./core", "./cipher-core"], t) : t(e.CryptoJS);
+        typeof tu == "object" ? qm.exports = tu = t(X(), ye()) : t(e.CryptoJS);
       })(tu, function(e) {
         return e.pad.AnsiX923 = { pad: function(t, n) {
           var r = t.sigBytes, i = n * 4, a = i - r % i, s = r + a - 1;
@@ -7753,7 +7753,7 @@ var init_sinch_rtc = __esm({
     });
     Lm = p((nu, Jm) => {
       (function(e, t, n) {
-        typeof nu == "object" ? Jm.exports = nu = t(X(), ye()) : typeof define == "function" && define.amd ? define(["./core", "./cipher-core"], t) : t(e.CryptoJS);
+        typeof nu == "object" ? Jm.exports = nu = t(X(), ye()) : t(e.CryptoJS);
       })(nu, function(e) {
         return e.pad.Iso10126 = { pad: function(t, n) {
           var r = n * 4, i = r - t.sigBytes % r;
@@ -7766,7 +7766,7 @@ var init_sinch_rtc = __esm({
     });
     Wm = p((ru, Um) => {
       (function(e, t, n) {
-        typeof ru == "object" ? Um.exports = ru = t(X(), ye()) : typeof define == "function" && define.amd ? define(["./core", "./cipher-core"], t) : t(e.CryptoJS);
+        typeof ru == "object" ? Um.exports = ru = t(X(), ye()) : t(e.CryptoJS);
       })(ru, function(e) {
         return e.pad.Iso97971 = { pad: function(t, n) {
           t.concat(e.lib.WordArray.create([2147483648], 1)), e.pad.ZeroPadding.pad(t, n);
@@ -7777,7 +7777,7 @@ var init_sinch_rtc = __esm({
     });
     Vm = p((iu, Hm) => {
       (function(e, t, n) {
-        typeof iu == "object" ? Hm.exports = iu = t(X(), ye()) : typeof define == "function" && define.amd ? define(["./core", "./cipher-core"], t) : t(e.CryptoJS);
+        typeof iu == "object" ? Hm.exports = iu = t(X(), ye()) : t(e.CryptoJS);
       })(iu, function(e) {
         return e.pad.ZeroPadding = { pad: function(t, n) {
           var r = n * 4;
@@ -7792,7 +7792,7 @@ var init_sinch_rtc = __esm({
     });
     zm = p((au, Km) => {
       (function(e, t, n) {
-        typeof au == "object" ? Km.exports = au = t(X(), ye()) : typeof define == "function" && define.amd ? define(["./core", "./cipher-core"], t) : t(e.CryptoJS);
+        typeof au == "object" ? Km.exports = au = t(X(), ye()) : t(e.CryptoJS);
       })(au, function(e) {
         return e.pad.NoPadding = { pad: function() {
         }, unpad: function() {
@@ -7801,7 +7801,7 @@ var init_sinch_rtc = __esm({
     });
     Zm = p((ou, Gm) => {
       (function(e, t, n) {
-        typeof ou == "object" ? Gm.exports = ou = t(X(), ye()) : typeof define == "function" && define.amd ? define(["./core", "./cipher-core"], t) : t(e.CryptoJS);
+        typeof ou == "object" ? Gm.exports = ou = t(X(), ye()) : t(e.CryptoJS);
       })(ou, function(e) {
         return (function(t) {
           var n = e, r = n.lib, i = r.CipherParams, a = n.enc, s = a.Hex, u = n.format, d = u.Hex = { stringify: function(c) {
@@ -7815,7 +7815,7 @@ var init_sinch_rtc = __esm({
     });
     Ym = p((su, Qm) => {
       (function(e, t, n) {
-        typeof su == "object" ? Qm.exports = su = t(X(), fn(), hn(), Ut(), ye()) : typeof define == "function" && define.amd ? define(["./core", "./enc-base64", "./md5", "./evpkdf", "./cipher-core"], t) : t(e.CryptoJS);
+        typeof su == "object" ? Qm.exports = su = t(X(), fn(), hn(), Ut(), ye()) : t(e.CryptoJS);
       })(su, function(e) {
         return (function() {
           var t = e, n = t.lib, r = n.BlockCipher, i = t.algo, a = [], s = [], u = [], d = [], c = [], o = [], f = [], m = [], _ = [], x = [];
@@ -7862,7 +7862,7 @@ var init_sinch_rtc = __esm({
     });
     Xm = p((uu, $m) => {
       (function(e, t, n) {
-        typeof uu == "object" ? $m.exports = uu = t(X(), fn(), hn(), Ut(), ye()) : typeof define == "function" && define.amd ? define(["./core", "./enc-base64", "./md5", "./evpkdf", "./cipher-core"], t) : t(e.CryptoJS);
+        typeof uu == "object" ? $m.exports = uu = t(X(), fn(), hn(), Ut(), ye()) : t(e.CryptoJS);
       })(uu, function(e) {
         return (function() {
           var t = e, n = t.lib, r = n.WordArray, i = n.BlockCipher, a = t.algo, s = [57, 49, 41, 33, 25, 17, 9, 1, 58, 50, 42, 34, 26, 18, 10, 2, 59, 51, 43, 35, 27, 19, 11, 3, 60, 52, 44, 36, 63, 55, 47, 39, 31, 23, 15, 7, 62, 54, 46, 38, 30, 22, 14, 6, 61, 53, 45, 37, 29, 21, 13, 5, 28, 20, 12, 4], u = [14, 17, 11, 24, 1, 5, 3, 28, 15, 6, 21, 10, 23, 19, 12, 4, 26, 8, 16, 7, 27, 20, 13, 2, 41, 52, 31, 37, 47, 55, 30, 40, 51, 45, 33, 48, 44, 49, 39, 56, 34, 53, 46, 42, 50, 36, 29, 32], d = [1, 2, 4, 6, 8, 10, 12, 14, 15, 17, 19, 21, 23, 25, 27, 28], c = [{ 0: 8421888, 268435456: 32768, 536870912: 8421378, 805306368: 2, 1073741824: 512, 1342177280: 8421890, 1610612736: 8389122, 1879048192: 8388608, 2147483648: 514, 2415919104: 8389120, 2684354560: 33280, 2952790016: 8421376, 3221225472: 32770, 3489660928: 8388610, 3758096384: 0, 4026531840: 33282, 134217728: 0, 402653184: 8421890, 671088640: 33282, 939524096: 32768, 1207959552: 8421888, 1476395008: 512, 1744830464: 8421378, 2013265920: 2, 2281701376: 8389120, 2550136832: 33280, 2818572288: 8421376, 3087007744: 8389122, 3355443200: 8388610, 3623878656: 32770, 3892314112: 514, 4160749568: 8388608, 1: 32768, 268435457: 2, 536870913: 8421888, 805306369: 8388608, 1073741825: 8421378, 1342177281: 33280, 1610612737: 512, 1879048193: 8389122, 2147483649: 8421890, 2415919105: 8421376, 2684354561: 8388610, 2952790017: 33282, 3221225473: 514, 3489660929: 8389120, 3758096385: 32770, 4026531841: 0, 134217729: 8421890, 402653185: 8421376, 671088641: 8388608, 939524097: 512, 1207959553: 32768, 1476395009: 8388610, 1744830465: 2, 2013265921: 33282, 2281701377: 32770, 2550136833: 8389122, 2818572289: 514, 3087007745: 8421888, 3355443201: 8389120, 3623878657: 0, 3892314113: 33280, 4160749569: 8421378 }, { 0: 1074282512, 16777216: 16384, 33554432: 524288, 50331648: 1074266128, 67108864: 1073741840, 83886080: 1074282496, 100663296: 1073758208, 117440512: 16, 134217728: 540672, 150994944: 1073758224, 167772160: 1073741824, 184549376: 540688, 201326592: 524304, 218103808: 0, 234881024: 16400, 251658240: 1074266112, 8388608: 1073758208, 25165824: 540688, 41943040: 16, 58720256: 1073758224, 75497472: 1074282512, 92274688: 1073741824, 109051904: 524288, 125829120: 1074266128, 142606336: 524304, 159383552: 0, 176160768: 16384, 192937984: 1074266112, 209715200: 1073741840, 226492416: 540672, 243269632: 1074282496, 260046848: 16400, 268435456: 0, 285212672: 1074266128, 301989888: 1073758224, 318767104: 1074282496, 335544320: 1074266112, 352321536: 16, 369098752: 540688, 385875968: 16384, 402653184: 16400, 419430400: 524288, 436207616: 524304, 452984832: 1073741840, 469762048: 540672, 486539264: 1073758208, 503316480: 1073741824, 520093696: 1074282512, 276824064: 540688, 293601280: 524288, 310378496: 1074266112, 327155712: 16384, 343932928: 1073758208, 360710144: 1074282512, 377487360: 16, 394264576: 1073741824, 411041792: 1074282496, 427819008: 1073741840, 444596224: 1073758224, 461373440: 524304, 478150656: 0, 494927872: 16400, 511705088: 1074266128, 528482304: 540672 }, { 0: 260, 1048576: 0, 2097152: 67109120, 3145728: 65796, 4194304: 65540, 5242880: 67108868, 6291456: 67174660, 7340032: 67174400, 8388608: 67108864, 9437184: 67174656, 10485760: 65792, 11534336: 67174404, 12582912: 67109124, 13631488: 65536, 14680064: 4, 15728640: 256, 524288: 67174656, 1572864: 67174404, 2621440: 0, 3670016: 67109120, 4718592: 67108868, 5767168: 65536, 6815744: 65540, 7864320: 260, 8912896: 4, 9961472: 256, 11010048: 67174400, 12058624: 65796, 13107200: 65792, 14155776: 67109124, 15204352: 67174660, 16252928: 67108864, 16777216: 67174656, 17825792: 65540, 18874368: 65536, 19922944: 67109120, 20971520: 256, 22020096: 67174660, 23068672: 67108868, 24117248: 0, 25165824: 67109124, 26214400: 67108864, 27262976: 4, 28311552: 65792, 29360128: 67174400, 30408704: 260, 31457280: 65796, 32505856: 67174404, 17301504: 67108864, 18350080: 260, 19398656: 67174656, 20447232: 0, 21495808: 65540, 22544384: 67109120, 23592960: 256, 24641536: 67174404, 25690112: 65536, 26738688: 67174660, 27787264: 65796, 28835840: 67108868, 29884416: 67109124, 30932992: 67174400, 31981568: 4, 33030144: 65792 }, { 0: 2151682048, 65536: 2147487808, 131072: 4198464, 196608: 2151677952, 262144: 0, 327680: 4198400, 393216: 2147483712, 458752: 4194368, 524288: 2147483648, 589824: 4194304, 655360: 64, 720896: 2147487744, 786432: 2151678016, 851968: 4160, 917504: 4096, 983040: 2151682112, 32768: 2147487808, 98304: 64, 163840: 2151678016, 229376: 2147487744, 294912: 4198400, 360448: 2151682112, 425984: 0, 491520: 2151677952, 557056: 4096, 622592: 2151682048, 688128: 4194304, 753664: 4160, 819200: 2147483648, 884736: 4194368, 950272: 4198464, 1015808: 2147483712, 1048576: 4194368, 1114112: 4198400, 1179648: 2147483712, 1245184: 0, 1310720: 4160, 1376256: 2151678016, 1441792: 2151682048, 1507328: 2147487808, 1572864: 2151682112, 1638400: 2147483648, 1703936: 2151677952, 1769472: 4198464, 1835008: 2147487744, 1900544: 4194304, 1966080: 64, 2031616: 4096, 1081344: 2151677952, 1146880: 2151682112, 1212416: 0, 1277952: 4198400, 1343488: 4194368, 1409024: 2147483648, 1474560: 2147487808, 1540096: 64, 1605632: 2147483712, 1671168: 4096, 1736704: 2147487744, 1802240: 2151678016, 1867776: 4160, 1933312: 2151682048, 1998848: 4194304, 2064384: 4198464 }, { 0: 128, 4096: 17039360, 8192: 262144, 12288: 536870912, 16384: 537133184, 20480: 16777344, 24576: 553648256, 28672: 262272, 32768: 16777216, 36864: 537133056, 40960: 536871040, 45056: 553910400, 49152: 553910272, 53248: 0, 57344: 17039488, 61440: 553648128, 2048: 17039488, 6144: 553648256, 10240: 128, 14336: 17039360, 18432: 262144, 22528: 537133184, 26624: 553910272, 30720: 536870912, 34816: 537133056, 38912: 0, 43008: 553910400, 47104: 16777344, 51200: 536871040, 55296: 553648128, 59392: 16777216, 63488: 262272, 65536: 262144, 69632: 128, 73728: 536870912, 77824: 553648256, 81920: 16777344, 86016: 553910272, 90112: 537133184, 94208: 16777216, 98304: 553910400, 102400: 553648128, 106496: 17039360, 110592: 537133056, 114688: 262272, 118784: 536871040, 122880: 0, 126976: 17039488, 67584: 553648256, 71680: 16777216, 75776: 17039360, 79872: 537133184, 83968: 536870912, 88064: 17039488, 92160: 128, 96256: 553910272, 100352: 262272, 104448: 553910400, 108544: 0, 112640: 553648128, 116736: 16777344, 120832: 262144, 124928: 537133056, 129024: 536871040 }, { 0: 268435464, 256: 8192, 512: 270532608, 768: 270540808, 1024: 268443648, 1280: 2097152, 1536: 2097160, 1792: 268435456, 2048: 0, 2304: 268443656, 2560: 2105344, 2816: 8, 3072: 270532616, 3328: 2105352, 3584: 8200, 3840: 270540800, 128: 270532608, 384: 270540808, 640: 8, 896: 2097152, 1152: 2105352, 1408: 268435464, 1664: 268443648, 1920: 8200, 2176: 2097160, 2432: 8192, 2688: 268443656, 2944: 270532616, 3200: 0, 3456: 270540800, 3712: 2105344, 3968: 268435456, 4096: 268443648, 4352: 270532616, 4608: 270540808, 4864: 8200, 5120: 2097152, 5376: 268435456, 5632: 268435464, 5888: 2105344, 6144: 2105352, 6400: 0, 6656: 8, 6912: 270532608, 7168: 8192, 7424: 268443656, 7680: 270540800, 7936: 2097160, 4224: 8, 4480: 2105344, 4736: 2097152, 4992: 268435464, 5248: 268443648, 5504: 8200, 5760: 270540808, 6016: 270532608, 6272: 270540800, 6528: 270532616, 6784: 8192, 7040: 2105352, 7296: 2097160, 7552: 0, 7808: 268435456, 8064: 268443656 }, { 0: 1048576, 16: 33555457, 32: 1024, 48: 1049601, 64: 34604033, 80: 0, 96: 1, 112: 34603009, 128: 33555456, 144: 1048577, 160: 33554433, 176: 34604032, 192: 34603008, 208: 1025, 224: 1049600, 240: 33554432, 8: 34603009, 24: 0, 40: 33555457, 56: 34604032, 72: 1048576, 88: 33554433, 104: 33554432, 120: 1025, 136: 1049601, 152: 33555456, 168: 34603008, 184: 1048577, 200: 1024, 216: 34604033, 232: 1, 248: 1049600, 256: 33554432, 272: 1048576, 288: 33555457, 304: 34603009, 320: 1048577, 336: 33555456, 352: 34604032, 368: 1049601, 384: 1025, 400: 34604033, 416: 1049600, 432: 1, 448: 0, 464: 34603008, 480: 33554433, 496: 1024, 264: 1049600, 280: 33555457, 296: 34603009, 312: 1, 328: 33554432, 344: 1048576, 360: 1025, 376: 34604032, 392: 33554433, 408: 34603008, 424: 0, 440: 34604033, 456: 1049601, 472: 1024, 488: 33555456, 504: 1048577 }, { 0: 134219808, 1: 131072, 2: 134217728, 3: 32, 4: 131104, 5: 134350880, 6: 134350848, 7: 2048, 8: 134348800, 9: 134219776, 10: 133120, 11: 134348832, 12: 2080, 13: 0, 14: 134217760, 15: 133152, 2147483648: 2048, 2147483649: 134350880, 2147483650: 134219808, 2147483651: 134217728, 2147483652: 134348800, 2147483653: 133120, 2147483654: 133152, 2147483655: 32, 2147483656: 134217760, 2147483657: 2080, 2147483658: 131104, 2147483659: 134350848, 2147483660: 0, 2147483661: 134348832, 2147483662: 134219776, 2147483663: 131072, 16: 133152, 17: 134350848, 18: 32, 19: 2048, 20: 134219776, 21: 134217760, 22: 134348832, 23: 131072, 24: 0, 25: 131104, 26: 134348800, 27: 134219808, 28: 134350880, 29: 133120, 30: 2080, 31: 134217728, 2147483664: 131072, 2147483665: 2048, 2147483666: 134348832, 2147483667: 133152, 2147483668: 32, 2147483669: 134348800, 2147483670: 134217728, 2147483671: 134219808, 2147483672: 134350880, 2147483673: 134217760, 2147483674: 134219776, 2147483675: 0, 2147483676: 133120, 2147483677: 2080, 2147483678: 131104, 2147483679: 134350848 }], o = [4160749569, 528482304, 33030144, 2064384, 129024, 8064, 504, 2147483679], f = a.DES = i.extend({ _doReset: function() {
@@ -7915,7 +7915,7 @@ var init_sinch_rtc = __esm({
     });
     eg = p((cu, jm) => {
       (function(e, t, n) {
-        typeof cu == "object" ? jm.exports = cu = t(X(), fn(), hn(), Ut(), ye()) : typeof define == "function" && define.amd ? define(["./core", "./enc-base64", "./md5", "./evpkdf", "./cipher-core"], t) : t(e.CryptoJS);
+        typeof cu == "object" ? jm.exports = cu = t(X(), fn(), hn(), Ut(), ye()) : t(e.CryptoJS);
       })(cu, function(e) {
         return (function() {
           var t = e, n = t.lib, r = n.StreamCipher, i = t.algo, a = i.RC4 = r.extend({ _doReset: function() {
@@ -7949,7 +7949,7 @@ var init_sinch_rtc = __esm({
     });
     ng = p((du, tg) => {
       (function(e, t, n) {
-        typeof du == "object" ? tg.exports = du = t(X(), fn(), hn(), Ut(), ye()) : typeof define == "function" && define.amd ? define(["./core", "./enc-base64", "./md5", "./evpkdf", "./cipher-core"], t) : t(e.CryptoJS);
+        typeof du == "object" ? tg.exports = du = t(X(), fn(), hn(), Ut(), ye()) : t(e.CryptoJS);
       })(du, function(e) {
         return (function() {
           var t = e, n = t.lib, r = n.StreamCipher, i = t.algo, a = [], s = [], u = [], d = i.Rabbit = r.extend({ _doReset: function() {
@@ -7983,7 +7983,7 @@ var init_sinch_rtc = __esm({
     });
     ig = p((lu, rg) => {
       (function(e, t, n) {
-        typeof lu == "object" ? rg.exports = lu = t(X(), fn(), hn(), Ut(), ye()) : typeof define == "function" && define.amd ? define(["./core", "./enc-base64", "./md5", "./evpkdf", "./cipher-core"], t) : t(e.CryptoJS);
+        typeof lu == "object" ? rg.exports = lu = t(X(), fn(), hn(), Ut(), ye()) : t(e.CryptoJS);
       })(lu, function(e) {
         return (function() {
           var t = e, n = t.lib, r = n.StreamCipher, i = t.algo, a = [], s = [], u = [], d = i.RabbitLegacy = r.extend({ _doReset: function() {
@@ -8016,7 +8016,7 @@ var init_sinch_rtc = __esm({
     });
     og = p((fu, ag) => {
       (function(e, t, n) {
-        typeof fu == "object" ? ag.exports = fu = t(X(), fn(), hn(), Ut(), ye()) : typeof define == "function" && define.amd ? define(["./core", "./enc-base64", "./md5", "./evpkdf", "./cipher-core"], t) : t(e.CryptoJS);
+        typeof fu == "object" ? ag.exports = fu = t(X(), fn(), hn(), Ut(), ye()) : t(e.CryptoJS);
       })(fu, function(e) {
         return (function() {
           var t = e, n = t.lib, r = n.BlockCipher, i = t.algo;
@@ -8066,7 +8066,7 @@ var init_sinch_rtc = __esm({
     });
     Gn = p((hu, sg) => {
       (function(e, t, n) {
-        typeof hu == "object" ? sg.exports = hu = t(X(), ba(), im(), om(), fn(), cm(), hn(), Z0(), Js(), pm(), Q0(), gm(), xm(), ym(), zs(), bm(), Ut(), ye(), wm(), Dm(), Fm(), Nm(), Bm(), km(), Lm(), Wm(), Vm(), zm(), Zm(), Ym(), Xm(), eg(), ng(), ig(), og()) : typeof define == "function" && define.amd ? define(["./core", "./x64-core", "./lib-typedarrays", "./enc-utf16", "./enc-base64", "./enc-base64url", "./md5", "./sha1", "./sha256", "./sha224", "./sha512", "./sha384", "./sha3", "./ripemd160", "./hmac", "./pbkdf2", "./evpkdf", "./cipher-core", "./mode-cfb", "./mode-ctr", "./mode-ctr-gladman", "./mode-ofb", "./mode-ecb", "./pad-ansix923", "./pad-iso10126", "./pad-iso97971", "./pad-zeropadding", "./pad-nopadding", "./format-hex", "./aes", "./tripledes", "./rc4", "./rabbit", "./rabbit-legacy", "./blowfish"], t) : e.CryptoJS = t(e.CryptoJS);
+        typeof hu == "object" ? sg.exports = hu = t(X(), ba(), im(), om(), fn(), cm(), hn(), Z0(), Js(), pm(), Q0(), gm(), xm(), ym(), zs(), bm(), Ut(), ye(), wm(), Dm(), Fm(), Nm(), Bm(), km(), Lm(), Wm(), Vm(), zm(), Zm(), Ym(), Xm(), eg(), ng(), ig(), og()) : e.CryptoJS = t(e.CryptoJS);
       })(hu, function(e) {
         return e;
       });
@@ -12715,7 +12715,7 @@ var init_sinch_rtc = __esm({
     });
     PS = p((Gu, FS) => {
       (function(e, t) {
-        typeof Gu == "object" && typeof FS < "u" ? t(Gu) : typeof define == "function" && define.amd ? define(["exports"], t) : (e = typeof globalThis < "u" ? globalThis : e || self, t(e.ULID = {}));
+        typeof Gu == "object" && typeof FS < "u" ? t(Gu) : (e = typeof globalThis < "u" ? globalThis : e || self, t(e.ULID = {}));
       })(Gu, (function(e) {
         "use strict";
         function t(v) {
@@ -20243,7 +20243,7 @@ var init_sinch_rtc = __esm({
   }
 });
 
-// node_modules/.pnpm/@sentdm+voice-client@0.2.0/node_modules/@sentdm/voice-client/internal/tslib.mjs
+// node_modules/.pnpm/@sentdm+voice-client@0.2.1/node_modules/@sentdm/voice-client/internal/tslib.mjs
 function __classPrivateFieldSet(receiver, state, value, kind, f) {
   if (kind === "m")
     throw new TypeError("Private method is not writable");
@@ -20261,7 +20261,7 @@ function __classPrivateFieldGet(receiver, state, kind, f) {
   return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
 }
 
-// node_modules/.pnpm/@sentdm+voice-client-core@0.2.0/node_modules/@sentdm/voice-client-core/provider-detail.mjs
+// node_modules/.pnpm/@sentdm+voice-client-core@0.2.1/node_modules/@sentdm/voice-client-core/provider-detail.mjs
 var details = /* @__PURE__ */ new WeakMap();
 var attachProviderDetail = (error, detail) => {
   if (detail !== void 0)
@@ -20269,7 +20269,7 @@ var attachProviderDetail = (error, detail) => {
 };
 var providerDetailOf = (error) => details.get(error);
 
-// node_modules/.pnpm/@sentdm+voice-client-core@0.2.0/node_modules/@sentdm/voice-client-core/errors.mjs
+// node_modules/.pnpm/@sentdm+voice-client-core@0.2.1/node_modules/@sentdm/voice-client-core/errors.mjs
 var SentVoiceError = class extends Error {
   constructor({ code, category, retriable, message, providerDetail }) {
     super(message);
@@ -20357,7 +20357,7 @@ var CapabilityUnsupportedError = class extends SentVoiceError {
   }
 };
 
-// node_modules/.pnpm/@sentdm+voice-client-core@0.2.0/node_modules/@sentdm/voice-client-core/internal/tslib.mjs
+// node_modules/.pnpm/@sentdm+voice-client-core@0.2.1/node_modules/@sentdm/voice-client-core/internal/tslib.mjs
 function __classPrivateFieldGet2(receiver, state, kind, f) {
   if (kind === "a" && !f)
     throw new TypeError("Private accessor was defined without a getter");
@@ -20375,7 +20375,7 @@ function __classPrivateFieldSet2(receiver, state, value, kind, f) {
   return kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value), value;
 }
 
-// node_modules/.pnpm/@sentdm+voice-client-core@0.2.0/node_modules/@sentdm/voice-client-core/events.mjs
+// node_modules/.pnpm/@sentdm+voice-client-core@0.2.1/node_modules/@sentdm/voice-client-core/events.mjs
 var _TypedEmitter_instances;
 var _TypedEmitter_listeners;
 var _TypedEmitter_add;
@@ -20423,7 +20423,7 @@ _TypedEmitter_listeners = /* @__PURE__ */ new WeakMap(), _TypedEmitter_instances
   return this;
 };
 
-// node_modules/.pnpm/@sentdm+voice-client-core@0.2.0/node_modules/@sentdm/voice-client-core/log.mjs
+// node_modules/.pnpm/@sentdm+voice-client-core@0.2.1/node_modules/@sentdm/voice-client-core/log.mjs
 var levelNumbers = {
   off: 0,
   error: 200,
@@ -20460,14 +20460,14 @@ function createLog(logger, logLevel) {
   };
 }
 
-// node_modules/.pnpm/@sentdm+voice-client-core@0.2.0/node_modules/@sentdm/voice-client-core/api.mjs
+// node_modules/.pnpm/@sentdm+voice-client-core@0.2.1/node_modules/@sentdm/voice-client-core/api.mjs
 var defaultBaseURL = "https://api.sent.dm";
 function apiURL(baseURL, path2) {
   const base = baseURL || defaultBaseURL;
   return base + (base.endsWith("/") ? path2.slice(1) : path2);
 }
 
-// node_modules/.pnpm/@sentdm+voice-client-core@0.2.0/node_modules/@sentdm/voice-client-core/token.mjs
+// node_modules/.pnpm/@sentdm+voice-client-core@0.2.1/node_modules/@sentdm/voice-client-core/token.mjs
 var qualify = (prefix, name) => prefix + name;
 function unqualify(prefix, qualified) {
   return qualified.length > prefix.length && qualified.startsWith(prefix) ? qualified.slice(prefix.length) : void 0;
@@ -20536,7 +20536,7 @@ function jitter() {
   return 1 - Math.random() * 0.25;
 }
 
-// node_modules/.pnpm/@sentdm+voice-client-core@0.2.0/node_modules/@sentdm/voice-client-core/telemetry.mjs
+// node_modules/.pnpm/@sentdm+voice-client-core@0.2.1/node_modules/@sentdm/voice-client-core/telemetry.mjs
 var import_bowser = __toESM(require_es5(), 1);
 var _Telemetry_instances;
 var _Telemetry_url;
@@ -20800,11 +20800,11 @@ _Telemetry_url = /* @__PURE__ */ new WeakMap(), _Telemetry_log = /* @__PURE__ */
   __classPrivateFieldSet2(this, _Telemetry_queue, [...retries, ...__classPrivateFieldGet2(this, _Telemetry_queue, "f")].slice(-maxEvents), "f");
 };
 
-// node_modules/.pnpm/@sentdm+voice-client-core@0.2.0/node_modules/@sentdm/voice-client-core/e164.mjs
+// node_modules/.pnpm/@sentdm+voice-client-core@0.2.1/node_modules/@sentdm/voice-client-core/e164.mjs
 var e164 = /^\+[1-9]\d{1,14}$/;
 var isE164 = (value) => e164.test(value);
 
-// node_modules/.pnpm/@sentdm+voice-client@0.2.0/node_modules/@sentdm/voice-client/adapter/sinch.mjs
+// node_modules/.pnpm/@sentdm+voice-client@0.2.1/node_modules/@sentdm/voice-client/adapter/sinch.mjs
 var _SinchAdapter_instances;
 var _SinchAdapter_sinch;
 var _SinchAdapter_options;
@@ -21100,10 +21100,10 @@ _SinchAdapter_sinch = /* @__PURE__ */ new WeakMap(), _SinchAdapter_options = /* 
     listener(event);
 };
 
-// node_modules/.pnpm/@sentdm+voice-client@0.2.0/node_modules/@sentdm/voice-client/adapter/loader.mjs
+// node_modules/.pnpm/@sentdm+voice-client@0.2.1/node_modules/@sentdm/voice-client/adapter/loader.mjs
 var loadAdapter = loadSinchAdapter;
 
-// node_modules/.pnpm/@sentdm+voice-client@0.2.0/node_modules/@sentdm/voice-client/audio.mjs
+// node_modules/.pnpm/@sentdm+voice-client@0.2.1/node_modules/@sentdm/voice-client/audio.mjs
 var _AudioController_instances;
 var _AudioController_log;
 var _AudioController_provider;
@@ -21232,7 +21232,7 @@ _AudioController_log = /* @__PURE__ */ new WeakMap(), _AudioController_provider 
     navigator.mediaDevices.removeEventListener("devicechange", __classPrivateFieldGet(this, _AudioController_deviceChanged, "f"));
 };
 
-// node_modules/.pnpm/@sentdm+voice-client@0.2.0/node_modules/@sentdm/voice-client/call.mjs
+// node_modules/.pnpm/@sentdm+voice-client@0.2.1/node_modules/@sentdm/voice-client/call.mjs
 var _Call_instances;
 var _Call_provider;
 var _Call_state;
@@ -21310,7 +21310,7 @@ _Call_provider = /* @__PURE__ */ new WeakMap(), _Call_state = /* @__PURE__ */ ne
   }
 };
 
-// node_modules/.pnpm/@sentdm+voice-client@0.2.0/node_modules/@sentdm/voice-client/invite.mjs
+// node_modules/.pnpm/@sentdm+voice-client@0.2.1/node_modules/@sentdm/voice-client/invite.mjs
 var _CallInvite_instances;
 var _CallInvite_call;
 var _CallInvite_provider;
@@ -21373,10 +21373,10 @@ _CallInvite_call = /* @__PURE__ */ new WeakMap(), _CallInvite_provider = /* @__P
   return __classPrivateFieldGet(this, _CallInvite_call, "f");
 };
 
-// node_modules/.pnpm/@sentdm+voice-client@0.2.0/node_modules/@sentdm/voice-client/version.mjs
-var VERSION = "0.2.0";
+// node_modules/.pnpm/@sentdm+voice-client@0.2.1/node_modules/@sentdm/voice-client/version.mjs
+var VERSION = "0.2.1";
 
-// node_modules/.pnpm/@sentdm+voice-client@0.2.0/node_modules/@sentdm/voice-client/client.mjs
+// node_modules/.pnpm/@sentdm+voice-client@0.2.1/node_modules/@sentdm/voice-client/client.mjs
 var _SentVoice_instances;
 var _SentVoice_tokenProvider;
 var _SentVoice_baseURL;
