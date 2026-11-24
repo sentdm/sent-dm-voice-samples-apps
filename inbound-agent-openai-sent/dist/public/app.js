@@ -6638,7 +6638,7 @@ var require_pubnub_min = __commonJS({
   }
 });
 
-// node_modules/.pnpm/@sentdm+voice-client@0.2.1/node_modules/@sentdm/voice-client/adapter/sinch-rtc.mjs
+// node_modules/.pnpm/@sentdm+voice-client@0.3.0/node_modules/@sentdm/voice-client/adapter/sinch-rtc.mjs
 var sinch_rtc_exports = {};
 __export(sinch_rtc_exports, {
   CallEndCause: () => export_CallEndCause,
@@ -6648,7 +6648,7 @@ __export(sinch_rtc_exports, {
 });
 var import_pubnub, XT, Lv, jT, eA, tA, nA, Uv, p, rA, iA, Lt, ct, un, Kv, dt, Ce, dn, Qv, Yv, Xv, G0, em, X, ba, im, om, fn, cm, hn, Z0, Js, pm, Q0, gm, xm, ym, zs, bm, Ut, ye, wm, Dm, Fm, Nm, Bm, km, Lm, Wm, Vm, zm, Zm, Ym, Xm, eg, ng, ig, og, Gn, $0, ft, ws, cg, dg, lg, Y, vg, gg, xg, yg, Eg, Tg, wg, Dg, Pg, Bg, Jg, Wg, Vg, zg, Yg, Xg, n_, a_, s_, l_, p_, g_, x_, b_, A_, O_, R_, P_, M_, k_, W_, V_, G_, Y_, ex, rx, ox, ux, dx, fx, vx, _x, yx, bx, Ax, Ox, Rx, Nx, qx, Lx, Wx, Kx, Gx, Yx, Xx, t1, r1, o1, u1, d1, f1, v1, g1, x1, C1, I1, O1, R1, P1, G, B1, k1, L1, W1, V1, z1, G1, Z1, El, qe, Q1, ht, Y1, yo, wl, j1, Ae, _r, ku, Eo, Pl, Lu, oS, Ml, ql, kl, xS, _n, Ro, bS, IS, TS, $l, AS, wS, DS, RS, PS, NS, MS, BS, qS, kS, JS, ue, xi, US, HS, cf, nc, KS, zS, yi, ZS, vf, sc, mf, cc, lc, jS, ey, Cr, Qt, It, Yt, oy, Cf, Er, cy, bc, If, ly, fy, hy, my, gy, _y, yy, Pf, Cy, by, Iy, Ay, Dy, Ry, Py, Ny, By, Wy, qo, Vy, Qc, Zy, Qy, Oi, ko, eC, nC, rC, aC, oC, mt, Jo, sC, uC, cC, dC, pC, vC, CC, mh, _h, xh, IC, TC, Ch, RC, yd, BC, kC, JC, Dh, Rh, Id, Td, qi, Nh, Bh, XC, tE, nE, iE, aE, oE, Gh, mE, _E, SE, Xh, IE, AE, wE, np, RE, FE, PE, ME, qE, kE, JE, LE, WE, HE, KE, Yd, lp, GE, hp, pp, mp, ZE, QE, _p, d0, f0, jE, eb, Cp, tb, nb, bp, ib, ab, ob, sb, cb, db, fb, Pb, Jp, Lp, C0, kn, Gb, jp, ev, tv, jb, tI, rI, kI, LI, zI, GI, ZI, gv, QI, XI, nT, aT, oT, sT, uT, cT, lT, hT, vT, gT, xT, yT, ET, IT, AT, OT, RT, PT, MT, qT, kT, k0, export_CallEndCause, export_CallQualityWarningEventType, export_ErrorType, export_Sinch;
 var init_sinch_rtc = __esm({
-  "node_modules/.pnpm/@sentdm+voice-client@0.2.1/node_modules/@sentdm/voice-client/adapter/sinch-rtc.mjs"() {
+  "node_modules/.pnpm/@sentdm+voice-client@0.3.0/node_modules/@sentdm/voice-client/adapter/sinch-rtc.mjs"() {
     import_pubnub = __toESM(require_pubnub_min(), 1);
     XT = Object.create;
     Lv = Object.defineProperty;
@@ -20243,7 +20243,7 @@ var init_sinch_rtc = __esm({
   }
 });
 
-// node_modules/.pnpm/@sentdm+voice-client@0.2.1/node_modules/@sentdm/voice-client/internal/tslib.mjs
+// node_modules/.pnpm/@sentdm+voice-client@0.3.0/node_modules/@sentdm/voice-client/internal/tslib.mjs
 function __classPrivateFieldSet(receiver, state, value, kind, f) {
   if (kind === "m")
     throw new TypeError("Private method is not writable");
@@ -20261,7 +20261,7 @@ function __classPrivateFieldGet(receiver, state, kind, f) {
   return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
 }
 
-// node_modules/.pnpm/@sentdm+voice-client-core@0.2.1/node_modules/@sentdm/voice-client-core/provider-detail.mjs
+// node_modules/.pnpm/@sentdm+voice-client-core@0.3.0/node_modules/@sentdm/voice-client-core/provider-detail.mjs
 var details = /* @__PURE__ */ new WeakMap();
 var attachProviderDetail = (error, detail) => {
   if (detail !== void 0)
@@ -20269,7 +20269,7 @@ var attachProviderDetail = (error, detail) => {
 };
 var providerDetailOf = (error) => details.get(error);
 
-// node_modules/.pnpm/@sentdm+voice-client-core@0.2.1/node_modules/@sentdm/voice-client-core/errors.mjs
+// node_modules/.pnpm/@sentdm+voice-client-core@0.3.0/node_modules/@sentdm/voice-client-core/errors.mjs
 var SentVoiceError = class extends Error {
   constructor({ code, category, retriable, message, providerDetail }) {
     super(message);
@@ -20357,7 +20357,7 @@ var CapabilityUnsupportedError = class extends SentVoiceError {
   }
 };
 
-// node_modules/.pnpm/@sentdm+voice-client-core@0.2.1/node_modules/@sentdm/voice-client-core/internal/tslib.mjs
+// node_modules/.pnpm/@sentdm+voice-client-core@0.3.0/node_modules/@sentdm/voice-client-core/internal/tslib.mjs
 function __classPrivateFieldGet2(receiver, state, kind, f) {
   if (kind === "a" && !f)
     throw new TypeError("Private accessor was defined without a getter");
@@ -20375,7 +20375,7 @@ function __classPrivateFieldSet2(receiver, state, value, kind, f) {
   return kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value), value;
 }
 
-// node_modules/.pnpm/@sentdm+voice-client-core@0.2.1/node_modules/@sentdm/voice-client-core/events.mjs
+// node_modules/.pnpm/@sentdm+voice-client-core@0.3.0/node_modules/@sentdm/voice-client-core/events.mjs
 var _TypedEmitter_instances;
 var _TypedEmitter_listeners;
 var _TypedEmitter_add;
@@ -20423,7 +20423,7 @@ _TypedEmitter_listeners = /* @__PURE__ */ new WeakMap(), _TypedEmitter_instances
   return this;
 };
 
-// node_modules/.pnpm/@sentdm+voice-client-core@0.2.1/node_modules/@sentdm/voice-client-core/log.mjs
+// node_modules/.pnpm/@sentdm+voice-client-core@0.3.0/node_modules/@sentdm/voice-client-core/log.mjs
 var levelNumbers = {
   off: 0,
   error: 200,
@@ -20460,14 +20460,14 @@ function createLog(logger, logLevel) {
   };
 }
 
-// node_modules/.pnpm/@sentdm+voice-client-core@0.2.1/node_modules/@sentdm/voice-client-core/api.mjs
+// node_modules/.pnpm/@sentdm+voice-client-core@0.3.0/node_modules/@sentdm/voice-client-core/api.mjs
 var defaultBaseURL = "https://api.sent.dm";
 function apiURL(baseURL, path2) {
   const base = baseURL || defaultBaseURL;
   return base + (base.endsWith("/") ? path2.slice(1) : path2);
 }
 
-// node_modules/.pnpm/@sentdm+voice-client-core@0.2.1/node_modules/@sentdm/voice-client-core/token.mjs
+// node_modules/.pnpm/@sentdm+voice-client-core@0.3.0/node_modules/@sentdm/voice-client-core/token.mjs
 var qualify = (prefix, name) => prefix + name;
 function unqualify(prefix, qualified) {
   return qualified.length > prefix.length && qualified.startsWith(prefix) ? qualified.slice(prefix.length) : void 0;
@@ -20536,7 +20536,7 @@ function jitter() {
   return 1 - Math.random() * 0.25;
 }
 
-// node_modules/.pnpm/@sentdm+voice-client-core@0.2.1/node_modules/@sentdm/voice-client-core/telemetry.mjs
+// node_modules/.pnpm/@sentdm+voice-client-core@0.3.0/node_modules/@sentdm/voice-client-core/telemetry.mjs
 var import_bowser = __toESM(require_es5(), 1);
 var _Telemetry_instances;
 var _Telemetry_url;
@@ -20800,11 +20800,11 @@ _Telemetry_url = /* @__PURE__ */ new WeakMap(), _Telemetry_log = /* @__PURE__ */
   __classPrivateFieldSet2(this, _Telemetry_queue, [...retries, ...__classPrivateFieldGet2(this, _Telemetry_queue, "f")].slice(-maxEvents), "f");
 };
 
-// node_modules/.pnpm/@sentdm+voice-client-core@0.2.1/node_modules/@sentdm/voice-client-core/e164.mjs
+// node_modules/.pnpm/@sentdm+voice-client-core@0.3.0/node_modules/@sentdm/voice-client-core/e164.mjs
 var e164 = /^\+[1-9]\d{1,14}$/;
 var isE164 = (value) => e164.test(value);
 
-// node_modules/.pnpm/@sentdm+voice-client@0.2.1/node_modules/@sentdm/voice-client/adapter/sinch.mjs
+// node_modules/.pnpm/@sentdm+voice-client@0.3.0/node_modules/@sentdm/voice-client/adapter/sinch.mjs
 var _SinchAdapter_instances;
 var _SinchAdapter_sinch;
 var _SinchAdapter_options;
@@ -20814,11 +20814,14 @@ var _SinchAdapter_inputDeviceId;
 var _SinchAdapter_audio;
 var _SinchAdapter_calls;
 var _SinchAdapter_answerRetryAt;
+var _SinchAdapter_dialing;
 var _SinchAdapter_incomingListeners;
 var _SinchAdapter_callEventListeners;
 var _SinchAdapter_start;
 var _SinchAdapter_stop;
 var _SinchAdapter_started;
+var _SinchAdapter_endDialingCallOnInvite;
+var _SinchAdapter_endDialing;
 var _SinchAdapter_useInput;
 var _SinchAdapter_playback;
 var _SinchAdapter_placed;
@@ -20879,6 +20882,11 @@ var guard = (action) => {
 var loadSinchAdapter = async (options) => new SinchAdapter(await Promise.resolve().then(() => (init_sinch_rtc(), sinch_rtc_exports)).catch((error) => {
   throw new NetworkError({ message: "The calling provider could not be loaded.", providerDetail: error });
 }), options);
+function addressedHere(invite, instanceId) {
+  const message = invite?.message;
+  return typeof message?.isAddressedToInstance === "function" && message.isAddressedToInstance(instanceId) === true;
+}
+var endDialingTimeout = 2e3;
 var SinchAdapter = class {
   constructor(sinch, options) {
     _SinchAdapter_instances.add(this);
@@ -20890,6 +20898,7 @@ var SinchAdapter = class {
     _SinchAdapter_audio.set(this, void 0);
     _SinchAdapter_calls.set(this, /* @__PURE__ */ new Map());
     _SinchAdapter_answerRetryAt.set(this, /* @__PURE__ */ new Map());
+    _SinchAdapter_dialing.set(this, /* @__PURE__ */ new Map());
     _SinchAdapter_incomingListeners.set(this, []);
     _SinchAdapter_callEventListeners.set(this, []);
     __classPrivateFieldSet(this, _SinchAdapter_sinch, sinch, "f");
@@ -20978,7 +20987,7 @@ var SinchAdapter = class {
     await audio2.setSinkId(deviceId).catch(rethrow);
   }
 };
-_SinchAdapter_sinch = /* @__PURE__ */ new WeakMap(), _SinchAdapter_options = /* @__PURE__ */ new WeakMap(), _SinchAdapter_client = /* @__PURE__ */ new WeakMap(), _SinchAdapter_credential = /* @__PURE__ */ new WeakMap(), _SinchAdapter_inputDeviceId = /* @__PURE__ */ new WeakMap(), _SinchAdapter_audio = /* @__PURE__ */ new WeakMap(), _SinchAdapter_calls = /* @__PURE__ */ new WeakMap(), _SinchAdapter_answerRetryAt = /* @__PURE__ */ new WeakMap(), _SinchAdapter_incomingListeners = /* @__PURE__ */ new WeakMap(), _SinchAdapter_callEventListeners = /* @__PURE__ */ new WeakMap(), _SinchAdapter_instances = /* @__PURE__ */ new WeakSet(), _SinchAdapter_start = async function _SinchAdapter_start2(credential) {
+_SinchAdapter_sinch = /* @__PURE__ */ new WeakMap(), _SinchAdapter_options = /* @__PURE__ */ new WeakMap(), _SinchAdapter_client = /* @__PURE__ */ new WeakMap(), _SinchAdapter_credential = /* @__PURE__ */ new WeakMap(), _SinchAdapter_inputDeviceId = /* @__PURE__ */ new WeakMap(), _SinchAdapter_audio = /* @__PURE__ */ new WeakMap(), _SinchAdapter_calls = /* @__PURE__ */ new WeakMap(), _SinchAdapter_answerRetryAt = /* @__PURE__ */ new WeakMap(), _SinchAdapter_dialing = /* @__PURE__ */ new WeakMap(), _SinchAdapter_incomingListeners = /* @__PURE__ */ new WeakMap(), _SinchAdapter_callEventListeners = /* @__PURE__ */ new WeakMap(), _SinchAdapter_instances = /* @__PURE__ */ new WeakSet(), _SinchAdapter_start = async function _SinchAdapter_start2(credential) {
   const { applicationKey, userId } = credentialSubject(credential);
   const client = __classPrivateFieldGet(this, _SinchAdapter_sinch, "f").Sinch.getSinchClientBuilder().applicationKey(applicationKey).userId(userId).environmentHost(environmentHost).build();
   const { url, scope } = __classPrivateFieldGet(this, _SinchAdapter_options, "f").serviceWorker ?? {};
@@ -20988,6 +20997,8 @@ _SinchAdapter_sinch = /* @__PURE__ */ new WeakMap(), _SinchAdapter_options = /* 
         onCredentialsRequired: (_, registration) => void registration.register(__classPrivateFieldGet(this, _SinchAdapter_credential, "f")),
         onClientStarted: ({ callClient }) => {
           callClient.addListener({ onIncomingCall: (_, call) => __classPrivateFieldGet(this, _SinchAdapter_instances, "m", _SinchAdapter_receive).call(this, call) });
+          if (__classPrivateFieldGet(this, _SinchAdapter_options, "f").endDialingCallOnIncoming)
+            __classPrivateFieldGet(this, _SinchAdapter_instances, "m", _SinchAdapter_endDialingCallOnInvite).call(this, callClient);
           if (__classPrivateFieldGet(this, _SinchAdapter_inputDeviceId, "f") !== void 0)
             __classPrivateFieldGet(this, _SinchAdapter_instances, "m", _SinchAdapter_useInput).call(this, callClient, __classPrivateFieldGet(this, _SinchAdapter_inputDeviceId, "f"));
           resolve();
@@ -21012,6 +21023,32 @@ _SinchAdapter_sinch = /* @__PURE__ */ new WeakMap(), _SinchAdapter_options = /* 
   if (!__classPrivateFieldGet(this, _SinchAdapter_client, "f"))
     throw new NotRegisteredError();
   return __classPrivateFieldGet(this, _SinchAdapter_client, "f");
+}, _SinchAdapter_endDialingCallOnInvite = function _SinchAdapter_endDialingCallOnInvite2(callClient) {
+  const instance = callClient.getInstance?.();
+  const onInvite = instance?.onInvite;
+  if (!instance || typeof onInvite !== "function")
+    return;
+  instance.onInvite = async (invite) => {
+    if (addressedHere(invite, instance.instanceId))
+      await __classPrivateFieldGet(this, _SinchAdapter_instances, "m", _SinchAdapter_endDialing).call(this);
+    return onInvite.call(instance, invite);
+  };
+}, _SinchAdapter_endDialing = async function _SinchAdapter_endDialing2() {
+  if (__classPrivateFieldGet(this, _SinchAdapter_calls, "f").size === 0 || [...__classPrivateFieldGet(this, _SinchAdapter_calls, "f").keys()].some((callId) => !__classPrivateFieldGet(this, _SinchAdapter_dialing, "f").has(callId)))
+    return;
+  const ended = [...__classPrivateFieldGet(this, _SinchAdapter_dialing, "f")].map(([callId, resume]) => new Promise((resolve) => {
+    resume.push(resolve);
+    try {
+      __classPrivateFieldGet(this, _SinchAdapter_calls, "f").get(callId)?.hangup();
+    } catch {
+    }
+  }));
+  let timer;
+  await Promise.race([
+    Promise.all(ended),
+    new Promise((resolve) => timer = setTimeout(resolve, endDialingTimeout))
+  ]);
+  clearTimeout(timer);
 }, _SinchAdapter_useInput = function _SinchAdapter_useInput2(callClient, deviceId) {
   callClient.setAudioTrackConstraints({ deviceId });
 }, _SinchAdapter_playback = function _SinchAdapter_playback2() {
@@ -21023,6 +21060,7 @@ _SinchAdapter_sinch = /* @__PURE__ */ new WeakMap(), _SinchAdapter_options = /* 
     throw new MediaPermissionError();
   }
   __classPrivateFieldGet(this, _SinchAdapter_instances, "m", _SinchAdapter_play).call(this, call);
+  __classPrivateFieldGet(this, _SinchAdapter_dialing, "f").set(call.id, []);
   return __classPrivateFieldGet(this, _SinchAdapter_instances, "m", _SinchAdapter_track).call(this, call);
 }, _SinchAdapter_play = function _SinchAdapter_play2(call) {
   const audio2 = __classPrivateFieldGet(this, _SinchAdapter_instances, "m", _SinchAdapter_playback).call(this);
@@ -21036,7 +21074,10 @@ _SinchAdapter_sinch = /* @__PURE__ */ new WeakMap(), _SinchAdapter_options = /* 
   const listener = {
     onCallProgressing: () => __classPrivateFieldGet(this, _SinchAdapter_instances, "m", _SinchAdapter_emit).call(this, { callId: call.id, type: "ringing" }),
     onCallAnswered: () => __classPrivateFieldGet(this, _SinchAdapter_instances, "m", _SinchAdapter_emit).call(this, { callId: call.id, type: "answered" }),
-    onCallEstablished: () => __classPrivateFieldGet(this, _SinchAdapter_instances, "m", _SinchAdapter_emit).call(this, { callId: call.id, type: "connected" }),
+    onCallEstablished: () => {
+      __classPrivateFieldGet(this, _SinchAdapter_dialing, "f").delete(call.id);
+      __classPrivateFieldGet(this, _SinchAdapter_instances, "m", _SinchAdapter_emit).call(this, { callId: call.id, type: "connected" });
+    },
     onCallQualityWarningEvent: (_, warning) => {
       const event = __classPrivateFieldGet(this, _SinchAdapter_instances, "m", _SinchAdapter_warning).call(this, call.id, warning);
       if (event)
@@ -21049,6 +21090,9 @@ _SinchAdapter_sinch = /* @__PURE__ */ new WeakMap(), _SinchAdapter_options = /* 
       if (__classPrivateFieldGet(this, _SinchAdapter_audio, "f") && __classPrivateFieldGet(this, _SinchAdapter_audio, "f").srcObject === call.incomingStream)
         __classPrivateFieldGet(this, _SinchAdapter_audio, "f").srcObject = null;
       __classPrivateFieldGet(this, _SinchAdapter_instances, "m", _SinchAdapter_emit).call(this, __classPrivateFieldGet(this, _SinchAdapter_instances, "m", _SinchAdapter_ended).call(this, call));
+      const ended = __classPrivateFieldGet(this, _SinchAdapter_dialing, "f").get(call.id);
+      __classPrivateFieldGet(this, _SinchAdapter_dialing, "f").delete(call.id);
+      ended?.forEach((resume) => resume());
     }
   };
   call.addListener(listener);
@@ -21100,10 +21144,10 @@ _SinchAdapter_sinch = /* @__PURE__ */ new WeakMap(), _SinchAdapter_options = /* 
     listener(event);
 };
 
-// node_modules/.pnpm/@sentdm+voice-client@0.2.1/node_modules/@sentdm/voice-client/adapter/loader.mjs
+// node_modules/.pnpm/@sentdm+voice-client@0.3.0/node_modules/@sentdm/voice-client/adapter/loader.mjs
 var loadAdapter = loadSinchAdapter;
 
-// node_modules/.pnpm/@sentdm+voice-client@0.2.1/node_modules/@sentdm/voice-client/audio.mjs
+// node_modules/.pnpm/@sentdm+voice-client@0.3.0/node_modules/@sentdm/voice-client/audio.mjs
 var _AudioController_instances;
 var _AudioController_log;
 var _AudioController_provider;
@@ -21232,7 +21276,7 @@ _AudioController_log = /* @__PURE__ */ new WeakMap(), _AudioController_provider 
     navigator.mediaDevices.removeEventListener("devicechange", __classPrivateFieldGet(this, _AudioController_deviceChanged, "f"));
 };
 
-// node_modules/.pnpm/@sentdm+voice-client@0.2.1/node_modules/@sentdm/voice-client/call.mjs
+// node_modules/.pnpm/@sentdm+voice-client@0.3.0/node_modules/@sentdm/voice-client/call.mjs
 var _Call_instances;
 var _Call_provider;
 var _Call_state;
@@ -21310,7 +21354,7 @@ _Call_provider = /* @__PURE__ */ new WeakMap(), _Call_state = /* @__PURE__ */ ne
   }
 };
 
-// node_modules/.pnpm/@sentdm+voice-client@0.2.1/node_modules/@sentdm/voice-client/invite.mjs
+// node_modules/.pnpm/@sentdm+voice-client@0.3.0/node_modules/@sentdm/voice-client/invite.mjs
 var _CallInvite_instances;
 var _CallInvite_call;
 var _CallInvite_provider;
@@ -21373,10 +21417,10 @@ _CallInvite_call = /* @__PURE__ */ new WeakMap(), _CallInvite_provider = /* @__P
   return __classPrivateFieldGet(this, _CallInvite_call, "f");
 };
 
-// node_modules/.pnpm/@sentdm+voice-client@0.2.1/node_modules/@sentdm/voice-client/version.mjs
-var VERSION = "0.2.1";
+// node_modules/.pnpm/@sentdm+voice-client@0.3.0/node_modules/@sentdm/voice-client/version.mjs
+var VERSION = "0.3.0";
 
-// node_modules/.pnpm/@sentdm+voice-client@0.2.1/node_modules/@sentdm/voice-client/client.mjs
+// node_modules/.pnpm/@sentdm+voice-client@0.3.0/node_modules/@sentdm/voice-client/client.mjs
 var _SentVoice_instances;
 var _SentVoice_tokenProvider;
 var _SentVoice_baseURL;
@@ -21435,7 +21479,7 @@ var identityMaxLength = 200;
 var roomMaxLength = 27;
 var isName = (value, maxLength) => value.length <= maxLength && namePattern.test(value);
 var SentVoice = class extends TypedEmitter {
-  constructor({ tokenProvider, baseURL, registerRetries = 2, logLevel, logger = console, serviceWorker, audio: audio2, telemetry }) {
+  constructor({ tokenProvider, baseURL, registerRetries = 2, logLevel, logger = console, serviceWorker, audio: audio2, incomingCalls, telemetry }) {
     super();
     _SentVoice_instances.add(this);
     _SentVoice_tokenProvider.set(this, void 0);
@@ -21463,7 +21507,11 @@ var SentVoice = class extends TypedEmitter {
     __classPrivateFieldSet(this, _SentVoice_baseURL, baseURL, "f");
     __classPrivateFieldSet(this, _SentVoice_registerRetries, registerRetries, "f");
     __classPrivateFieldSet(this, _SentVoice_log, createLog(logger, parseLogLevel(logLevel, "SentVoiceOptions.logLevel", createLog(logger, "warn")) ?? "warn"), "f");
-    __classPrivateFieldSet(this, _SentVoice_adapterOptions, { serviceWorker, audioElement: audio2?.element }, "f");
+    __classPrivateFieldSet(this, _SentVoice_adapterOptions, {
+      serviceWorker,
+      audioElement: audio2?.element,
+      endDialingCallOnIncoming: incomingCalls?.endDialingCall
+    }, "f");
     this.audio = new AudioController(__classPrivateFieldGet(this, _SentVoice_log, "f"), audio2?.inputDeviceId, audio2?.outputDeviceId, {
       check: () => {
         if (__classPrivateFieldGet(this, _SentVoice_state, "f") === "destroyed")
