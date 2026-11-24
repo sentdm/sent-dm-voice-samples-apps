@@ -1,7 +1,7 @@
 # Security patch for an advisory in the Sent SDK's unused Node proxy dependency chain
 # (previously npm "overrides" in package.json, which pnpm does not read).
 overrides:
-  basic-ftp: 6.2.2
+  basic-ftp: 6.2.6
 
 # pnpm only runs dependency install scripts that are allowed here.
 allowBuilds:

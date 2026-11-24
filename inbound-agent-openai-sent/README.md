@@ -208,7 +208,7 @@ Server tests use local fake Sent/OpenAI services and test actual request/event s
 
 The project uses the published `@sentdm/voice-client` package (Sent's browser voice SDK), Express, `ws`, `@ngrok/ngrok`, and `cloudflared`. They are version-pinned in `pnpm-lock.yaml`; review third-party advisories before production use.
 
-The direct `ws` transport is patched to 8.22.0. A `basic-ftp` override to 6.2.2, in `pnpm-workspace.yaml`, patches an inherited advisory in the SDK's unused Node proxy dependency chain; it does not change the Sent browser voice SDK. `pnpm-workspace.yaml` also limits install scripts to esbuild; cloudflared's binary is fetched on the first Cloudflare Start instead. `@ngrok/ngrok` needs no install script: its native build comes as a package for each platform. `pnpm audit --prod` reports no known vulnerabilities.
+The direct `ws` transport is patched to 8.22.0. A `basic-ftp` override to 6.2.6, in `pnpm-workspace.yaml`, patches an inherited advisory in the SDK's unused Node proxy dependency chain; it does not change the Sent browser voice SDK. `pnpm-workspace.yaml` also limits install scripts to esbuild; cloudflared's binary is fetched on the first Cloudflare Start instead. `@ngrok/ngrok` needs no install script: its native build comes as a package for each platform. `pnpm audit --prod` reports no known vulnerabilities.
 
 The committed browser bundle includes `@sentdm/voice-client` and its dependencies. Their licenses are listed in [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md), which `pnpm run build` regenerates.
 
